@@ -1,0 +1,17 @@
+---
+import Main from "../../layouts/Main.astro";
+import { ssoState } from "../../stores/general";
+
+ssoState.set(null);
+---
+
+<Main title="Logging out" hideSessionIcon={true}>
+  <h2 class="text-center text-2xl pt-6">Logging out ...</h2>
+</Main>
+
+<script>
+  localStorage.removeItem("sso-access-token");
+  setTimeout(() => {
+    window.location.href = "/";
+  }, 1000);
+</script>

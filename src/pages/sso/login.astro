@@ -1,0 +1,21 @@
+---
+import Main from "../../layouts/Main.astro";
+import { getAuthorizationUrl } from "../../util/zdv_sso";
+import { ssoState } from "../../stores/general";
+
+const authUrl = getAuthorizationUrl();
+ssoState.set(authUrl.state);
+---
+
+<Main title="Redirecting" hideSessionIcon={true}>
+  <h2 class="text-center text-2xl pt-6">Redirecting ...</h2>
+  <input class="hidden" id="sso-url" value={authUrl.url} />
+</Main>
+
+<script>
+  setTimeout(() => {
+    window.location.href = (
+      document.getElementById("sso-url") as HTMLInputElement
+    ).value;
+  }, 1000);
+</script>

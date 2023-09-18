@@ -1,0 +1,72 @@
+---
+import Main from "../../layouts/Main.astro";
+import { getAccessToken, getUserInfo } from "../../util/zdv_sso";
+import { ssoState } from "../../stores/general";
+
+let loginError = null;
+let token = null;
+let userInfo = null;
+
+const searchParams = new URL(Astro.request.url).searchParams;
+const code = searchParams.get("code");
+if (!code) {
+  loginError = 'missing "code" parameter in URL';
+}
+const urlState = searchParams.get("state");
+if (urlState !== ssoState.value) {
+  loginError = 'the given "state" parameter does not match the expected value';
+}
+
+if (loginError === null) {
+  ssoState.set(null);
+  token = await getAccessToken(code!);
+  userInfo = await getUserInfo(token.accessToken);
+}
+---
+
+<Main title="OAuth callback" hideSessionIcon={true} showBackButton={true}>
+  {
+    loginError === null ? (
+      <>
+        <h2 class="text-center text-2xl pt-4">Log in successful</h2>
+        <h3 class="text-center text-xl pt-10">Redirecting ...</h3>
+        <span class="hidden" id="sso-access-token">
+          {token?.accessToken}
+        </span>
+        <span class="hidden" id="sso-oi">
+          {userInfo?.user?.oi}
+        </span>
+      </>
+    ) : (
+      <>
+        <p class="text-center text-2xl pt-6 text-red-500">
+          Something went wrong: {loginError}
+        </p>
+        <p class="text-center text-xl pt-10">
+          You can try again, but you'll probably need to notify the WM in
+          Discord or{" "}
+          <a href="mailto:wm@zdvartcc.org" class="underline text-blue-300">
+            email
+          </a>
+          .
+        </p>
+      </>
+    )
+  }
+</Main>
+
+<script>
+  const accessToken = document.getElementById("sso-access-token")?.innerHTML;
+  if (accessToken) {
+    localStorage.setItem("sso-access-token", accessToken);
+  }
+  const oi = document.getElementById("sso-oi")?.innerHTML;
+  if (oi) {
+    localStorage.setItem("sso-oi", oi);
+  }
+  if (accessToken && oi) {
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 100);
+  }
+</script>
