@@ -1,16 +1,7 @@
 import { useState } from "react";
 import Calendar from "react-calendar";
+import type { TileArgs, Value } from "../util/calendarTypes.ts";
 import "react-calendar/dist/Calendar.css";
-
-type Range<T> = [T, T];
-type ValuePiece = Date | null;
-type Value = ValuePiece | Range<ValuePiece>;
-type View = "century" | "decade" | "year" | "month";
-type TileArgs = {
-  activeStartDate: Date;
-  date: Date;
-  view: View;
-};
 
 const yesterday = new Date();
 yesterday.setDate(yesterday.getDate() - 1);
