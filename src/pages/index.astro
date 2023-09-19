@@ -1,7 +1,23 @@
 ---
 import Main from "../layouts/Main.astro";
+import { IndexPageLoginPrompt } from "../components/IndexPageLoginPrompt.tsx";
 ---
 
 <Main title="Home">
-  <h1 class="text-2xl">Training scheduler</h1>
+  <div class="mx-auto max-w-3xl">
+    <h1 class="text-2xl pt-5 pb-5">What is this?</h1>
+    <p class="text-lg">
+      This site serves as <a
+        href="https://zdvartcc.org/"
+        target="_blank"
+        class="underline text-accent">VATSIM Denver ARTCC's</a
+      > training scheduler, where controllers can schedule time with trainers to
+      learn, review, and test as they rise through VATSIM's ATC ranks with ZDV.
+    </p>
+    <p class="text-lg pt-5">
+      For controllers who have trained in ZDV before, this site replaces
+      Picktime.
+    </p>
+    <IndexPageLoginPrompt client:only />
+  </div>
 </Main>

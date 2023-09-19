@@ -1,38 +1,37 @@
-import { useState, useEffect } from "react";
-
 export function NavbarEntries() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const valid = localStorage.getItem("sso-access-token") !== null;
-    setIsLoggedIn(valid);
-    (window as Record<string, any>).sso_valid = valid;
-  });
+  const isLoggedIn = localStorage.getItem("sso-access-token") !== null;
 
   return (
     <ul className="flex flex-row space-x-8">
       <li>
-        <a href="#" className="block p-0 rounded hover:text-blue-500">
+        <a href="/" className="block p-0 rounded hover:text-blue-500">
           Home
         </a>
       </li>
-      <li>
-        {isLoggedIn ? (
-          <a
-            href="/sso/logout"
-            className="block p-0 rounded hover:text-blue-500"
-          >
-            Log out
-          </a>
-        ) : (
-          <a
-            href="/sso/login"
-            className="block p-0 rounded hover:text-blue-500"
-          >
-            Log in
-          </a>
-        )}
-      </li>
+      {isLoggedIn ? (
+        <>
+          <li>
+            <a
+              href="/scheduling"
+              className="block p-0 rounded hover:text-blue-500"
+            >
+              Scheduling
+            </a>
+          </li>
+          <li>
+            <a
+              href="/sso/logout"
+              className="block p-0 rounded hover:text-blue-500"
+            >
+              Log out
+            </a>
+          </li>
+        </>
+      ) : (
+        <a href="/sso/login" className="block p-0 rounded hover:text-blue-500">
+          Log in
+        </a>
+      )}
     </ul>
   );
 }
