@@ -22,6 +22,7 @@
     "nanostores": "^0.9.3",
     "oauth": "^0.10.0",
     "react": "^18.2.0",
+    "react-calendar": "^4.6.0",
     "react-dom": "^18.2.0",
     "tailwindcss": "^3.3.3"
   },
