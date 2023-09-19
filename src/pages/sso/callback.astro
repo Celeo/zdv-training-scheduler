@@ -21,6 +21,9 @@ if (loginError === null) {
   ssoState.set(null);
   token = await getAccessToken(code!);
   userInfo = await getUserInfo(token.accessToken);
+  console.log(
+    `${userInfo.user.firstname} ${userInfo.user.lastname} (${userInfo.user.oi}, ${userInfo.user.cid}) has logged in`,
+  );
 }
 ---
 
