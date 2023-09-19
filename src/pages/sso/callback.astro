@@ -24,7 +24,7 @@ if (loginError === null) {
 }
 ---
 
-<Main title="OAuth callback" hideSessionIcon={true} showBackButton={true}>
+<Main title="OAuth callback">
   {
     loginError === null ? (
       <>
@@ -67,6 +67,6 @@ if (loginError === null) {
   if (accessToken && oi) {
     setTimeout(() => {
       window.location.href = "/";
-    }, 100);
+    }, 1000);
   }
 </script>

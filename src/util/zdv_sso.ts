@@ -76,3 +76,7 @@ export async function getUserInfo(access_token: string): Promise<ZdvUserInfo> {
   );
   return data;
 }
+
+export function isLoggedIn(): boolean {
+  return localStorage.getItem("sso-access-token") !== null;
+}

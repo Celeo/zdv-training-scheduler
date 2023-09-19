@@ -7,7 +7,7 @@ const authUrl = getAuthorizationUrl();
 ssoState.set(authUrl.state);
 ---
 
-<Main title="Redirecting" hideSessionIcon={true}>
+<Main title="Redirecting">
   <h2 class="text-center text-2xl pt-6">Redirecting ...</h2>
   <input class="hidden" id="sso-url" value={authUrl.url} />
 </Main>
