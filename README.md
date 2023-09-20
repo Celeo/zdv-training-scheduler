@@ -20,11 +20,9 @@ This is first and foremost an Astro project, allowing the site to utilize [SSR](
 1. Clone the repo
 1. Run `npm ci` to install dependencies
 1. Populate the environment variables (you can store them in a `.env` file at the project level):
-
     - ZDV_OAUTH_CLIENT_ID - the OAuth client ID (from ZDV DB)
     - ZDV_OAUTH_CLIENT_SECRET - the OAuth client ID (from ZDB DB)
     - ZDV_OAUTH_REDIRECT_URI - your site URL then "/sso/callback"
-
 1. Run `npm run dev` to run the dev server
 
 ## Contribution
