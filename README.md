@@ -14,7 +14,7 @@ A simple website for scheduling training sessions for the [VATSIM](https://vatsi
 - [TypeScript](https://www.typescriptlang.org/)
 - [Node](https://nodejs.org/en)
 
-This is first and foremost an Astro project, allowing the site to utilize [SSR](https://docs.astro.build/en/guides/server-side-rendering/) to build a [MPA](https://docs.astro.build/en/concepts/why-astro/#server-first) site (rather than SPA from just React) with backend included. React is used for client-side functionality. Prisma and SQLite provide storage. OAuth with ZDV's OAuth provides authentication and authorization. Once [Bun](https://bun.sh/) in Astro stabilizes, this project will likely it in over Node.
+This is first and foremost an Astro project, allowing the site to utilize [SSR](https://docs.astro.build/en/guides/server-side-rendering/) to build a [MPA](https://docs.astro.build/en/concepts/why-astro/#server-first) site (rather than SPA from just React) with backend included. React is used for client-side functionality. Prisma and SQLite provide storage. OAuth via ZDV provides authentication and authorization. Once [Bun](https://bun.sh/) in Astro stabilizes, this project will likely uptake it to replace Node.
 
 ## Building
 
