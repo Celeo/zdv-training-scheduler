@@ -1,7 +1,7 @@
 ---
 import Main from "../../layouts/Main.astro";
 import { getAuthorizationUrl } from "../../util/zdv_sso";
-import { ssoState } from "../../stores/general";
+import { ssoState } from "../../data/stores";
 
 const authUrl = getAuthorizationUrl();
 ssoState.set(authUrl.state);
