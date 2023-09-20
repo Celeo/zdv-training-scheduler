@@ -2,6 +2,7 @@ import axios from "axios";
 import { nanoid } from "nanoid";
 import liboauth from "oauth";
 import * as jose from "jose";
+import { isCidBlocked } from "../data/db";
 
 export type ZdvAccessData = {
   accessToken: string;
@@ -53,12 +54,12 @@ export async function getAccessToken(code: string): Promise<ZdvAccessData> {
           redirect_uri: import.meta.env.ZDV_OAUTH_REDIRECT_URI,
           grant_type: "authorization_code",
         },
-        (_, accessToken, refreshToken) => {
+        (_: unknown, accessToken, refreshToken) => {
           resolve({ accessToken, refreshToken });
         },
       );
     } catch (err) {
-      console.error(`Error getting OAuth token: ${err}`);
+      console.log(`Error getting OAuth token: ${err}`);
       reject(err);
     }
   });
@@ -67,11 +68,22 @@ export async function getAccessToken(code: string): Promise<ZdvAccessData> {
 /**
  * Get the information for the user of the access token.
  */
-export async function getUserInfo(access_token: string): Promise<ZdvUserInfo> {
+export async function getUserInfo(
+  access_token: string,
+): Promise<ZdvUserInfo | null> {
   const { data } = await axios.get<any>(
     import.meta.env.ZDV_OAUTH_USER_INFO_URI,
     { headers: { Authorization: `Bearer ${access_token}` } },
   );
+
+  const block = await isCidBlocked(data.user.cid);
+  if (block !== null) {
+    console.log(
+      `${data.user.firstname} ${data.user.lastname} (${data.user.oi.oi}, ${data.user.cid.cid}) has been prevented from logging in: ${block.reason}`,
+    );
+    return null;
+  }
+
   return {
     cid: data.user.cid,
     email: data.user.email,
@@ -99,6 +111,7 @@ export async function createJwt(
   return await new jose.SignJWT({
     access_token,
     info,
+    login_at: new Date().toLocaleString("en-US"),
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuer("urn:zdv:training-scheduler")

@@ -3,6 +3,7 @@ import {
   type TeacherRating,
   type TrainingSession,
   type TrainingSchedule,
+  type UserBlocklist,
 } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -36,4 +37,15 @@ export async function getAllSessions(
     });
   }
   return await prisma.trainingSession.findMany();
+}
+
+/**
+ * Return a CID block model, if present.
+ *
+ * Since JWTs live on the user's browser, there needs to be some way to
+ * prevent their access of the site if needed, like for dismissals,
+ * abuse, or mandate of the ATM/DATM/TA.
+ */
+export async function isCidBlocked(cid: number): Promise<UserBlocklist | null> {
+  return await prisma.userBlocklist.findFirst({ where: { cid } });
 }

@@ -20,10 +20,14 @@ if (loginError === null) {
   ssoState.set(null);
   const token = await getAccessToken(code!);
   const userInfo = await getUserInfo(token.accessToken);
-  console.log(
-    `${userInfo.first_name} ${userInfo.last_name} (${userInfo.oi}, ${userInfo.cid}) has logged in`,
-  );
-  jwt = await createJwt(token.accessToken, userInfo);
+  if (userInfo) {
+    console.log(
+      `${userInfo.first_name} ${userInfo.last_name} (${userInfo.oi}, ${userInfo.cid}) has logged in`,
+    );
+    jwt = await createJwt(token.accessToken, userInfo);
+  } else {
+    loginError = "Your login to the site was blocked.";
+  }
 }
 ---
 
