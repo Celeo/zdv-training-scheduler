@@ -10,7 +10,7 @@ ssoState.set(null);
 </Main>
 
 <script>
-  localStorage.removeItem("sso-access-token");
+  localStorage.removeItem("jwt");
   setTimeout(() => {
     window.location.href = "/";
   }, 1000);

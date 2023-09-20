@@ -8,7 +8,7 @@ import { Scheduling as Component } from "../components/Scheduling.tsx";
 </Main>
 
 <script>
-  if (localStorage.getItem("sso-access-token") === null) {
+  if (localStorage.getItem("jwt") === null) {
     window.location.href = "/";
   }
 </script>

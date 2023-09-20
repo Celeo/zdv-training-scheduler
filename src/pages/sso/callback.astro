@@ -1,11 +1,10 @@
 ---
 import Main from "../../layouts/Main.astro";
-import { getAccessToken, getUserInfo } from "../../util/zdv_sso";
+import { createJwt, getAccessToken, getUserInfo } from "../../util/zdv_sso";
 import { ssoState } from "../../data/stores";
 
 let loginError = null;
-let token = null;
-let userInfo = null;
+let jwt = null;
 
 const searchParams = new URL(Astro.request.url).searchParams;
 const code = searchParams.get("code");
@@ -19,11 +18,12 @@ if (urlState !== ssoState.value) {
 
 if (loginError === null) {
   ssoState.set(null);
-  token = await getAccessToken(code!);
-  userInfo = await getUserInfo(token.accessToken);
+  const token = await getAccessToken(code!);
+  const userInfo = await getUserInfo(token.accessToken);
   console.log(
-    `${userInfo.user.firstname} ${userInfo.user.lastname} (${userInfo.user.oi}, ${userInfo.user.cid}) has logged in`,
+    `${userInfo.first_name} ${userInfo.last_name} (${userInfo.oi}, ${userInfo.cid}) has logged in`,
   );
+  jwt = await createJwt(token.accessToken, userInfo);
 }
 ---
 
@@ -33,12 +33,7 @@ if (loginError === null) {
       <>
         <h2 class="text-center text-2xl pt-4">Log in successful</h2>
         <h3 class="text-center text-xl pt-10">Redirecting ...</h3>
-        <span class="hidden" id="sso-access-token">
-          {token?.accessToken}
-        </span>
-        <span class="hidden" id="sso-oi">
-          {userInfo?.user?.oi}
-        </span>
+        <input class="hidden" type="text" id="jwt" value={jwt} />
       </>
     ) : (
       <>
@@ -59,15 +54,9 @@ if (loginError === null) {
 </Main>
 
 <script>
-  const accessToken = document.getElementById("sso-access-token")?.innerHTML;
-  if (accessToken) {
-    localStorage.setItem("sso-access-token", accessToken);
-  }
-  const oi = document.getElementById("sso-oi")?.innerHTML;
-  if (oi) {
-    localStorage.setItem("sso-oi", oi);
-  }
-  if (accessToken && oi) {
+  const jwt = (document.getElementById("jwt") as HTMLInputElement).value;
+  if (jwt) {
+    localStorage.setItem("jwt", jwt);
     setTimeout(() => {
       window.location.href = "/";
     }, 1000);

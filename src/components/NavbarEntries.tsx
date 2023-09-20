@@ -1,5 +1,5 @@
 export function NavbarEntries() {
-  const isLoggedIn = localStorage.getItem("sso-access-token") !== null;
+  const isLoggedIn = localStorage.getItem("jwt") !== null;
 
   return (
     <ul className="flex flex-row space-x-8">

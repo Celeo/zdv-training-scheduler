@@ -4,7 +4,7 @@ export function IndexPageLoginPrompt() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    setIsLoggedIn(localStorage.getItem("sso-access-token") !== null);
+    setIsLoggedIn(localStorage.getItem("jwt") !== null);
   });
 
   if (isLoggedIn) {

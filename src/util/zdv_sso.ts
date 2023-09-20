@@ -1,6 +1,7 @@
 import axios from "axios";
 import { nanoid } from "nanoid";
 import liboauth from "oauth";
+import * as jose from "jose";
 
 export type ZdvAccessData = {
   accessToken: string;
@@ -9,15 +10,12 @@ export type ZdvAccessData = {
 
 // this is a subset of the available information
 export type ZdvUserInfo = {
-  message: string;
-  user: {
-    cid: number;
-    email: string;
-    firstname: string;
-    lastname: string;
-    oi: string;
-    roles: Array<{ name: string }>;
-  };
+  cid: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  oi: string;
+  roles: Array<{ name: string }>;
 };
 
 const ZDV_OAUTH = new liboauth.OAuth2(
@@ -70,13 +68,53 @@ export async function getAccessToken(code: string): Promise<ZdvAccessData> {
  * Get the information for the user of the access token.
  */
 export async function getUserInfo(access_token: string): Promise<ZdvUserInfo> {
-  const { data } = await axios.get<ZdvUserInfo>(
+  const { data } = await axios.get<any>(
     import.meta.env.ZDV_OAUTH_USER_INFO_URI,
     { headers: { Authorization: `Bearer ${access_token}` } },
   );
-  return data;
+  return {
+    cid: data.user.cid,
+    email: data.user.email,
+    first_name: data.user.firstname,
+    last_name: data.user.lastname,
+    oi: data.user.oi,
+    roles: data.user.roles.map((role: Record<string, unknown>) => ({
+      name: role.name,
+    })),
+  };
 }
 
-export function isLoggedIn(): boolean {
-  return localStorage.getItem("sso-access-token") !== null;
+/**
+ * Create a JWT for the user, based on their ZDV OAuth access token
+ * and the information retrieved using that token from the ZDV SSO API.
+ *
+ * This JWT serves as the user's session information, to be stored in
+ * their browser's `localStorage`.
+ */
+export async function createJwt(
+  access_token: string,
+  info: ZdvUserInfo,
+): Promise<string> {
+  const secret = new TextEncoder().encode(import.meta.env.JWT_SECRET);
+  return await new jose.SignJWT({
+    access_token,
+    info,
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuer("urn:zdv:training-scheduler")
+    .setAudience("urn:zdv:training-scheduler")
+    .setIssuedAt()
+    .sign(secret);
+}
+
+/**
+ * Verify a JWT and return its content.
+ */
+export async function verifyJwt(jwt: string): Promise<unknown> {
+  const secret = new TextEncoder().encode(import.meta.env.JWT_SECRET);
+  const { payload } = await jose.jwtVerify(jwt, secret, {
+    issuer: "urn:zdv:training-scheduler",
+    audience: "urn:zdv:training-scheduler",
+  });
+  return payload;
 }
