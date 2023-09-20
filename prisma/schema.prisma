@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model TeacherRating {
+  cid           Int @id
+  minorGround   Boolean
+  majorGround   Boolean
+  minorTower    Boolean
+  majorTower    Boolean
+  minorApproach Boolean
+  majorApproach Boolean
+  center        Boolean
+  createdAt     DateTime
+  updatedAt     DateTime
+}
+
+model TrainingSchedule {
+  id         Int @id @default(autoincrement())
+  Instructor Int
+  dayOfWeek  Int
+  timeOfDay  Int
+  createdAt  DateTime
+  updatedAt  DateTime
+}
+
+model TrainingSession {
+  id         Int @id @default(autoincrement())
+  instructor Int
+  student    Int?
+  start      String
+  end        String
+  createdAt  DateTime
+  updatedAt  DateTime
+}
