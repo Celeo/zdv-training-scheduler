@@ -33,4 +33,5 @@ This project is currently **not** open to outside contributions.
 
 ## License
 
-MIT or Apache-2.0
+- Project under MIT or Apache-2.0
+- Libraries in use under their respective licenses
