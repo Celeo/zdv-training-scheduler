@@ -25,18 +25,19 @@ CREATE TABLE "TrainingSchedule" (
 -- CreateTable
 CREATE TABLE "TrainingSession" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "scheduleId" INTEGER,
     "instructor" INTEGER NOT NULL,
     "student" INTEGER,
-    "start" TEXT NOT NULL,
-    "end" TEXT NOT NULL,
+    "date" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'open',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "TrainingSession_scheduleId_fkey" FOREIGN KEY ("scheduleId") REFERENCES "TrainingSchedule" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "UserBlocklist" (
     "cid" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "reason" TEXT NOT NULL
+    "reason" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

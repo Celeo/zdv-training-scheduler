@@ -2,7 +2,7 @@ import axios from "axios";
 import { nanoid } from "nanoid";
 import liboauth from "oauth";
 import * as jose from "jose";
-import { isCidBlocked } from "../data/db";
+import { DB } from "../data/db";
 
 export type ZdvAccessData = {
   accessToken: string;
@@ -18,6 +18,16 @@ export type ZdvUserInfo = {
   oi: string;
   roles: Array<{ name: string }>;
 };
+
+export type JwtPayload = {
+  access_token: string;
+  info: ZdvUserInfo;
+  iss: string;
+  aud: string;
+  iat: number;
+};
+
+const AUTHORIZATION_HEADER = "authorization";
 
 const ZDV_OAUTH = new liboauth.OAuth2(
   import.meta.env.ZDV_OAUTH_CLIENT_ID,
@@ -71,12 +81,16 @@ export async function getAccessToken(code: string): Promise<ZdvAccessData> {
 export async function getUserInfo(
   access_token: string,
 ): Promise<ZdvUserInfo | null> {
+  // make the authenticated call back to ZDV SSO
   const { data } = await axios.get<any>(
     import.meta.env.ZDV_OAUTH_USER_INFO_URI,
     { headers: { Authorization: `Bearer ${access_token}` } },
   );
 
-  const block = await isCidBlocked(data.user.cid);
+  // prevent logins if needed
+  const block = await DB.userBlocklist.findFirst({
+    where: { cid: data.user.cid },
+  });
   if (block !== null) {
     console.log(
       `${data.user.firstname} ${data.user.lastname} (${data.user.oi.oi}, ${data.user.cid.cid}) has been prevented from logging in: ${block.reason}`,
@@ -84,6 +98,7 @@ export async function getUserInfo(
     return null;
   }
 
+  // payload to be put into the JWT
   return {
     cid: data.user.cid,
     email: data.user.email,
@@ -108,11 +123,7 @@ export async function createJwt(
   info: ZdvUserInfo,
 ): Promise<string> {
   const secret = new TextEncoder().encode(import.meta.env.JWT_SECRET);
-  return await new jose.SignJWT({
-    access_token,
-    info,
-    login_at: new Date().toLocaleString("en-US"),
-  })
+  return await new jose.SignJWT({ access_token, info })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuer("urn:zdv:training-scheduler")
     .setAudience("urn:zdv:training-scheduler")
@@ -121,13 +132,46 @@ export async function createJwt(
 }
 
 /**
- * Verify a JWT and return its content.
+ * Verify a JWT and return its payload.
  */
-export async function verifyJwt(jwt: string): Promise<unknown> {
+async function verifyJwt(jwt: string): Promise<JwtPayload> {
   const secret = new TextEncoder().encode(import.meta.env.JWT_SECRET);
   const { payload } = await jose.jwtVerify(jwt, secret, {
     issuer: "urn:zdv:training-scheduler",
     audience: "urn:zdv:training-scheduler",
   });
-  return payload;
+  return payload as JwtPayload;
+}
+
+/**
+ * Check the authorization header from the request, retrieving and
+ * validating the JWT, and ensuring the user has the ability to
+ * access logged-in-only parts of the site.
+ */
+export async function checkAuth(request: Request): Promise<Response | null> {
+  const authHeader = request.headers.get(AUTHORIZATION_HEADER);
+  if (authHeader === null) {
+    return new Response(`Missing "${AUTHORIZATION_HEADER}" header`, {
+      status: 401,
+    });
+  }
+  try {
+    const auth = await verifyJwt(authHeader);
+    /*
+     * Since JWTs live on the user's browser, there needs to be some way to
+     * prevent their access of the site if needed, like for dismissals,
+     * abuse, or mandate of the ATM/DATM/TA.
+     */
+    const blocked = await DB.userBlocklist.findFirst({
+      where: { cid: auth.info.cid },
+    });
+    if (blocked) {
+      return new Response("You have been blocked from accessing this site", {
+        status: 403,
+      });
+    }
+  } catch {
+    return new Response("Could not verify JWT", { status: 400 });
+  }
+  return null;
 }

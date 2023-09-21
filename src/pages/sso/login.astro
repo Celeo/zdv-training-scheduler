@@ -1,6 +1,6 @@
 ---
 import Main from "../../layouts/Main.astro";
-import { getAuthorizationUrl } from "../../util/zdv_sso";
+import { getAuthorizationUrl } from "../../util/auth";
 import { ssoState } from "../../data/stores";
 
 const authUrl = getAuthorizationUrl();
@@ -19,3 +19,4 @@ ssoState.set(authUrl.state);
     ).value;
   }, 1000);
 </script>
+ ../../util/auth

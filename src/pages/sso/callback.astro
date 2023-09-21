@@ -1,6 +1,6 @@
 ---
 import Main from "../../layouts/Main.astro";
-import { createJwt, getAccessToken, getUserInfo } from "../../util/zdv_sso";
+import { createJwt, getAccessToken, getUserInfo } from "../../util/auth";
 import { ssoState } from "../../data/stores";
 
 let loginError = null;
@@ -66,3 +66,4 @@ if (loginError === null) {
     }, 1000);
   }
 </script>
+ ../../util/auth

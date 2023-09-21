@@ -1,19 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import type { Value } from "../util/calendarTypes.ts";
 import "react-calendar/dist/Calendar.css";
+import type { TrainingSchedule, TrainingSession } from "@prisma/client";
 
 export function Scheduling() {
   const [selectedDate, setSelectedDate] = useState<Value>(new Date());
   const [isLoading, setIsLoading] = useState(false);
+  const [schedules, setSchedules] = useState<Array<TrainingSchedule>>([]);
+  const [sessions, setSessions] = useState<Array<TrainingSession>>([]);
   const [error, setError] = useState<string | null>(null);
 
   const selectDay = (val: Value) => {
     setSelectedDate(val);
-    fetchSessions();
+    fetchDayData();
   };
 
-  const fetchSessions = async () => {
+  const fetchDayData = async () => {
     setIsLoading(true);
     //
     setIsLoading(false);
@@ -26,6 +29,19 @@ export function Scheduling() {
   const cancelSession = async () => {
     //
   };
+
+  useEffect(() => {
+    fetchDayData();
+    fetch("/api/schedules", {
+      headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
+    })
+      .then((resp) => {
+        return resp.json();
+      })
+      .then((data) => {
+        setSchedules(data);
+      });
+  }, []);
 
   return (
     <div className="mx-auto pt-10 flex justify-between items-start space-x-10">
