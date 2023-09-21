@@ -31,16 +31,14 @@ export function Scheduling() {
   };
 
   useEffect(() => {
-    fetchDayData();
-    fetch("/api/schedules", {
-      headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
-    })
-      .then((resp) => {
-        return resp.json();
-      })
-      .then((data) => {
-        setSchedules(data);
+    (async () => {
+      await fetchDayData();
+      const resp = await fetch("/api/schedules", {
+        headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
       });
+      const data = await resp.json();
+      setSchedules(data);
+    })();
   }, []);
 
   return (

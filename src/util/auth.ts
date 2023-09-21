@@ -16,7 +16,7 @@ export type ZdvUserInfo = {
   first_name: string;
   last_name: string;
   oi: string;
-  roles: Array<{ name: string }>;
+  roles: Array<string>;
 };
 
 export type JwtPayload = {
@@ -28,6 +28,20 @@ export type JwtPayload = {
 };
 
 const AUTHORIZATION_HEADER = "authorization";
+
+enum RequiredPermission {
+  All,
+  Trainer,
+  Admin,
+}
+
+const TRAINER_ROLES = ["mtr", "ins", "atm", "datm", "ta"];
+const ADMIN_ROLES = ["atm", "datm", "ta", "wm"];
+
+const GATE_TO_ROLES = {
+  [RequiredPermission.Trainer]: TRAINER_ROLES,
+  [RequiredPermission.Admin]: ADMIN_ROLES,
+};
 
 const ZDV_OAUTH = new liboauth.OAuth2(
   import.meta.env.ZDV_OAUTH_CLIENT_ID,
@@ -105,9 +119,7 @@ export async function getUserInfo(
     first_name: data.user.firstname,
     last_name: data.user.lastname,
     oi: data.user.oi,
-    roles: data.user.roles.map((role: Record<string, unknown>) => ({
-      name: role.name,
-    })),
+    roles: data.user.roles.map((role: Record<string, unknown>) => role.name),
   };
 }
 
@@ -148,7 +160,10 @@ async function verifyJwt(jwt: string): Promise<JwtPayload> {
  * validating the JWT, and ensuring the user has the ability to
  * access logged-in-only parts of the site.
  */
-export async function checkAuth(request: Request): Promise<Response | null> {
+export async function checkAuth(
+  request: Request,
+  gate: RequiredPermission = RequiredPermission.All,
+): Promise<Response | null> {
   const authHeader = request.headers.get(AUTHORIZATION_HEADER);
   if (authHeader === null) {
     return new Response(`Missing "${AUTHORIZATION_HEADER}" header`, {
@@ -157,6 +172,16 @@ export async function checkAuth(request: Request): Promise<Response | null> {
   }
   try {
     const auth = await verifyJwt(authHeader);
+
+    if (gate !== RequiredPermission.All) {
+      const sufficient = auth.info.roles.find((role) =>
+        GATE_TO_ROLES[gate].includes(role),
+      );
+      if (!sufficient) {
+        return new Response("Missing roles", { status: 403 });
+      }
+    }
+
     /*
      * Since JWTs live on the user's browser, there needs to be some way to
      * prevent their access of the site if needed, like for dismissals,
