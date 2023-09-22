@@ -1,5 +1,6 @@
-dist
-node_modules
+dist/
+node_modules/
+npm-debug.log*
+.config.toml
+data.sqlite*
 .env
-.env.*
-data.*

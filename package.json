@@ -20,6 +20,7 @@
     "astro": "^3.1.0",
     "axios": "^1.5.0",
     "jose": "^4.14.6",
+    "memoizee": "^0.4.15",
     "nanoid": "^5.0.1",
     "nanostores": "^0.9.3",
     "oauth": "^0.10.0",
@@ -27,9 +28,11 @@
     "react": "^18.2.0",
     "react-calendar": "^4.6.0",
     "react-dom": "^18.2.0",
-    "tailwindcss": "^3.3.3"
+    "tailwindcss": "^3.3.3",
+    "toml": "^3.0.0"
   },
   "devDependencies": {
+    "@types/memoizee": "^0.4.8",
     "@types/oauth": "^0.9.2",
     "@types/react": "^18.2.22",
     "@types/react-dom": "^18.2.7",

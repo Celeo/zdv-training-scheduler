@@ -1,0 +1,12 @@
+jwtSecret = ""
+
+[oauth]
+
+clientId = ""
+clientSecret = ""
+baseUrl = ""
+authorizeEndpoint = ""
+tokenEndpoint = ""
+redirectUri = ""
+scopes = ""
+userInfoUri = ""
