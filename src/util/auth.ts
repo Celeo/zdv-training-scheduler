@@ -76,7 +76,6 @@ export async function getAuthorizationUrl(): Promise<{
   const config = await loadConfig();
   const url = getOAuth(config).getAuthorizeUrl({
     redirect_uri: config.oauth.redirectUri,
-    scope: config.oauth.scopes,
     state,
     response_type: "code",
   });

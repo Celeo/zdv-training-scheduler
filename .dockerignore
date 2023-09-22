@@ -1,6 +1,6 @@
 dist/
 node_modules/
 npm-debug.log*
-.config.toml
+.config.*toml
 data.sqlite*
 .env

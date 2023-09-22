@@ -17,7 +17,6 @@ export type Config = {
     authorizeEndpoint: string;
     tokenEndpoint: string;
     redirectUri: string;
-    scopes: string;
     userInfoUri: string;
   };
 };
