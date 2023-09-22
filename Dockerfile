@@ -1,18 +1,17 @@
 # syntax=docker/dockerfile:1
-FROM node:lts
+FROM node:lts AS runtime
 
+EXPOSE 4321
 WORKDIR /app
 ENV NODE_ENV="production"
 ENV DATABASE_URL="file:///data/sqlite.db"
-COPY package.json package-lock.json .
-RUN npm ci
-COPY . .
-RUN mkdir -p /data
 VOLUME /data
 
-RUN --mount=type=secret,id=astro,target=/app/.env npm run astro build
-RUN prisma migrate deploy
+COPY . .
+RUN npm ci
 
-EXPOSE 4321
+RUN --mount=type=secret,id=astro,target=/app/.env npm run astro build
+RUN npx prisma migrate deploy
+
 ENV HOST=0.0.0.0
-CMD ["node", "dist/server/entry.mjs"]
+CMD node dist/server/entry.mjs
