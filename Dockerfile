@@ -11,7 +11,7 @@ VOLUME /data
 COPY . .
 RUN npm ci
 
-RUN --mount=type=secret,id=astro,target=/app/.env npm run astro build
+RUN npm run astro build
 RUN npx prisma migrate deploy
 
 CMD ["bash", "docker-entrypoint.sh"]
