@@ -1,4 +1,4 @@
-# zdv_training_scheduler
+# zdv-training-scheduler
 
 [![CI](https://github.com/Celeo/zdv-training-scheduler/actions/workflows/ci.yml/badge.svg)](https://github.com/Celeo/zdv-training-scheduler/actions/workflows/ci.yml)
 
