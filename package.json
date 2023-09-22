@@ -5,9 +5,8 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro check && tsc --noEmit && astro build",
-    "preview": "astro preview",
+    "build_": "astro check && tsc --noEmit && astro build",
+    "build": "astro build",
     "astro": "astro",
     "format": "prettier --write \"src/**/*.{ts,tsx,astro}\""
   },
