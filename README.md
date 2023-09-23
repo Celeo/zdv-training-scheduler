@@ -24,6 +24,10 @@ This is first and foremost an Astro project, allowing the site to utilize [SSR](
 1. Prepare the configuration by copying ".config.example.toml" to ".config.toml" and populate
 1. Run `npm run dev` to run the dev server
 
+### Deploying
+
+WIP.
+
 ## Contribution
 
 This project is currently not open to outside contributions as it is actively in-dev.
