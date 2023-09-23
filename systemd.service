@@ -1,0 +1,13 @@
+[Unit]
+Description=ZDV Training Schduler Docker container
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/srv
+ExecStart=docker run --init -d --rm -p 80:4321 -v /srv/data:/data -v /srv/zdv-training-scheduler.config.toml:/app/.config.toml --name zdv-training-scheduler zdv-training-scheduler:latest
+ExecReload=docker stop zdv-training-scheduler
+Restart=always
+
+[Install]
+WantedBy=default.target

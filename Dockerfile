@@ -14,5 +14,4 @@ RUN npm ci
 RUN npm run astro build
 RUN npx prisma migrate deploy
 
-ENTRYPOINT ["bash", "docker-entrypoint.sh"]
 CMD ["node", "dist/server/entry.mjs"]
