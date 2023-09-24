@@ -190,12 +190,13 @@ export async function checkAuth(
 ): Promise<Response | null> {
   const authHeader = request.headers.get(AUTHORIZATION_HEADER);
   if (authHeader === null) {
+    console.log(`Request to ${request.url} without auth header`);
     return new Response(`Missing "${AUTHORIZATION_HEADER}" header`, {
       status: 401,
     });
   }
   try {
-    const auth = await verifyJwt(authHeader);
+    const auth = await verifyJwt(authHeader.substring(7));
 
     if (gate !== RequiredPermission.All) {
       const sufficient = auth.info.roles.find((role) =>
@@ -215,11 +216,15 @@ export async function checkAuth(
       where: { cid: auth.info.cid },
     });
     if (blocked) {
+      console.log(
+        `${auth.info.first_name} ${auth.info.last_name} (${auth.info.oi}, ${auth.info.cid}) was blocked from logging in`,
+      );
       return new Response("You have been blocked from accessing this site", {
         status: 403,
       });
     }
   } catch {
+    console.log("Could not verify JWT from user");
     return new Response("Could not verify JWT", { status: 400 });
   }
   return null;

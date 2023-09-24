@@ -10,7 +10,7 @@ export async function GET(
     return shortCircuit;
   }
 
-  const urlParams = new URLSearchParams(context.request.url);
+  const urlParams = new URL(context.request.url).searchParams;
   const date = urlParams.get("date");
   if (!date) {
     return new Response('Missing "date"', { status: 400 });
@@ -29,20 +29,13 @@ export async function GET(
   );
 }
 
-export async function POST(
-  _context: APIContext<Record<string, any>>,
-): Promise<Response> {
-  return new Response(null, { status: 404 });
-}
-
-export async function PATCH(
-  _context: APIContext<Record<string, any>>,
-): Promise<Response> {
-  return new Response(null, { status: 404 });
-}
-
-export async function DELETE(
-  _context: APIContext<Record<string, any>>,
-): Promise<Response> {
-  return new Response(null, { status: 404 });
+export async function POST(): Promise<Response> {
+  await DB.trainingSession.create({
+    data: {
+      instructor: 1,
+      date: "2023-09-24",
+      status: "open",
+    },
+  });
+  return new Response("Created", { status: 201 });
 }
