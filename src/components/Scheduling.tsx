@@ -10,6 +10,7 @@ export function Scheduling() {
   const [isLoading, setIsLoading] = useState(false);
   const [schedules, setSchedules] = useState<Array<TrainingSchedule>>([]);
   const [sessions, setSessions] = useState<Array<TrainingSession>>([]);
+  const [mySessions, setMySessions] = useState<Array<TrainingSession>>([]);
   const [error, setError] = useState<string | null>(null);
 
   const selectDay = (val: Value) => {
@@ -44,10 +45,19 @@ export function Scheduling() {
         });
         const data = await resp.json();
         setSchedules(data);
-        setError(null);
       } catch (err) {
         console.error(`Error getting schedules: ${err}`);
-        setError("Could not get scheduled sesssions");
+        setError("Could not get scheduled sessions");
+      }
+      try {
+        const resp = await fetch("/api/sessions/mine", {
+          headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
+        });
+        const data = await resp.json();
+        setMySessions(data);
+      } catch (err) {
+        console.error(`Error getting my sessions: ${err}`);
+        setError("Could not get your scheduled sessions");
       }
     })();
   }, []);
@@ -81,7 +91,9 @@ export function Scheduling() {
 
   return (
     <div className="mx-auto pt-10">
-      <div>{/* selected sessions */}</div>
+      {mySessions.length > 0 &&
+        mySessions.map((s) => <p>{JSON.stringify(s)}</p>)}
+
       <div className="flex justify-between items-start space-x-10">
         <div className="text-black flex-none">
           <Calendar
@@ -97,6 +109,7 @@ export function Scheduling() {
         </div>
         <div className="flex-1">{body}</div>
       </div>
+
       {error && (
         <h2 className="text-2xl text-red-500 pt-3 text-center">{error}</h2>
       )}
