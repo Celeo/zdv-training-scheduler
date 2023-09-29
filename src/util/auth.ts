@@ -38,6 +38,14 @@ export type JwtPayload = {
   iat: number;
 };
 
+/**
+ * Result of checking the user's JWT.
+ */
+export type AuthStatus = {
+  info: JwtPayload | null;
+  shortCircuit: Response | null;
+};
+
 const AUTHORIZATION_HEADER = "authorization";
 
 enum RequiredPermission {
@@ -180,20 +188,23 @@ async function verifyJwt(jwt: string): Promise<JwtPayload> {
  * validating the JWT, and ensuring the user has the ability to
  * access logged-in-only parts of the site.
  *
- * If there is an error with the user's authentication, a `Response`
- * will be returned from this function, which should be returned
+ * If there is an error with the user's authentication, part of the
+ * returned object will have a `Response` which should be returned
  * to the user directly.
  */
 export async function checkAuth(
   request: Request,
   gate: RequiredPermission = RequiredPermission.All,
-): Promise<Response | null> {
+): Promise<AuthStatus> {
   const authHeader = request.headers.get(AUTHORIZATION_HEADER);
   if (authHeader === null) {
     console.log(`Request to ${request.url} without auth header`);
-    return new Response(`Missing "${AUTHORIZATION_HEADER}" header`, {
-      status: 401,
-    });
+    return {
+      info: null,
+      shortCircuit: new Response(`Missing "${AUTHORIZATION_HEADER}" header`, {
+        status: 401,
+      }),
+    };
   }
   try {
     const auth = await verifyJwt(authHeader.substring(7));
@@ -203,7 +214,10 @@ export async function checkAuth(
         GATE_TO_ROLES[gate].includes(role),
       );
       if (!sufficient) {
-        return new Response("Missing roles", { status: 403 });
+        return {
+          info: null,
+          shortCircuit: new Response("Missing roles", { status: 403 }),
+        };
       }
     }
 
@@ -219,13 +233,25 @@ export async function checkAuth(
       console.log(
         `${auth.info.first_name} ${auth.info.last_name} (${auth.info.oi}, ${auth.info.cid}) was blocked from logging in`,
       );
-      return new Response("You have been blocked from accessing this site", {
-        status: 403,
-      });
+      return {
+        info: null,
+        shortCircuit: new Response(
+          "You have been blocked from accessing this site",
+          {
+            status: 403,
+          },
+        ),
+      };
     }
+    return {
+      info: auth,
+      shortCircuit: null,
+    };
   } catch {
     console.log("Could not verify JWT from user");
-    return new Response("Could not verify JWT", { status: 400 });
+    return {
+      info: null,
+      shortCircuit: new Response("Could not verify JWT", { status: 400 }),
+    };
   }
-  return null;
 }

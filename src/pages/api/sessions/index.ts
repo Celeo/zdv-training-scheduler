@@ -1,11 +1,11 @@
 import type { APIContext } from "astro";
-import { DB } from "../../data/db";
-import { checkAuth } from "../../util/auth";
+import { DB } from "../../../data/db";
+import { checkAuth } from "../../../util/auth";
 
 export async function GET(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const shortCircuit = await checkAuth(context.request);
+  const { shortCircuit } = await checkAuth(context.request);
   if (shortCircuit) {
     return shortCircuit;
   }
