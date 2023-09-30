@@ -28,8 +28,10 @@ CREATE TABLE "TrainingSession" (
     "scheduleId" INTEGER,
     "instructor" INTEGER NOT NULL,
     "student" INTEGER,
+    "selectedPosition" TEXT NOT NULL,
     "date" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'open',
+    "notes" TEXT NOT NULL DEFAULT '',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "TrainingSession_scheduleId_fkey" FOREIGN KEY ("scheduleId") REFERENCES "TrainingSchedule" ("id") ON DELETE SET NULL ON UPDATE CASCADE
@@ -40,4 +42,26 @@ CREATE TABLE "UserBlocklist" (
     "cid" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "reason" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CreateTable
+CREATE TABLE "UserPreference" (
+    "cid" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "receiveEmails" BOOLEAN NOT NULL DEFAULT true,
+    "receiveDiscordMessages" BOOLEAN NOT NULL DEFAULT false
+);
+
+-- CreateTable
+CREATE TABLE "DiscordMessage" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "cid" INTEGER NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "completedAt" DATETIME NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "Log" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "message" TEXT NOT NULL,
+    "date" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

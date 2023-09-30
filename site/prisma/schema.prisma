@@ -31,16 +31,17 @@ model TrainingSchedule {
 }
 
 model TrainingSession {
-  id         Int               @id @default(autoincrement())
-  schedule   TrainingSchedule? @relation(fields: [scheduleId], references: [id])
-  scheduleId Int?
-  instructor Int
-  student    Int?
-  date       String
-  status     String            @default("open")
-  notes      String            @default("")
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
+  id               Int               @id @default(autoincrement())
+  scheduleId       Int?
+  schedule         TrainingSchedule? @relation(fields: [scheduleId], references: [id])
+  instructor       Int
+  student          Int?
+  selectedPosition String
+  date             String
+  status           String            @default("open")
+  notes            String            @default("")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 }
 
 model UserBlocklist {
@@ -49,15 +50,21 @@ model UserBlocklist {
   createdAt DateTime @default(now())
 }
 
-model UserPreferences {
+model UserPreference {
   cid                    Int     @id
   receiveEmails          Boolean @default(true)
   receiveDiscordMessages Boolean @default(false)
 }
 
-model DiscordMessages {
+model DiscordMessage {
   id          Int      @id @default(autoincrement())
   cid         Int
   createdAt   DateTime @default(now())
-  completedAt DateTime @updatedAt
+  completedAt DateTime
+}
+
+model Log {
+  id      Int      @id @default(autoincrement())
+  message String
+  date    DateTime @default(now())
 }

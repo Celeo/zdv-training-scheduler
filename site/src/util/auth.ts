@@ -54,7 +54,7 @@ enum RequiredPermission {
   Admin,
 }
 
-const TRAINER_ROLES = ["mtr", "ins", "atm", "datm", "ta"];
+const TRAINER_ROLES = ["mtr", "ins"];
 const ADMIN_ROLES = ["atm", "datm", "ta", "wm"];
 
 const GATE_TO_ROLES = {
@@ -62,6 +62,25 @@ const GATE_TO_ROLES = {
   [RequiredPermission.Admin]: ADMIN_ROLES,
 };
 
+const JWT_SOURCE = "urn:zdv:training-scheduler";
+
+/**
+ * Check if the user has a trainer role.
+ */
+export function canBeTrainer(info: ZdvUserInfo): boolean {
+  return TRAINER_ROLES.some((role) => info.roles.includes(role));
+}
+
+/**
+ * Check whether the user is a Senior Staff member (or WM).
+ */
+export function isSiteAdmin(info: ZdvUserInfo): boolean {
+  return ADMIN_ROLES.some((role) => info.roles.includes(role));
+}
+
+/**
+ * Build the OAuth2 library object.
+ */
 function getOAuth(config: Config): OAuth2 {
   return new liboauth.OAuth2(
     config.oauth.clientId,
@@ -75,6 +94,8 @@ function getOAuth(config: Config): OAuth2 {
 /**
  * Return the ZDV OAuth authorization URL using a random state,
  * and that state for verification.
+ *
+ * Called to start the login flow.
  */
 export async function getAuthorizationUrl(): Promise<{
   url: string;
@@ -92,6 +113,8 @@ export async function getAuthorizationUrl(): Promise<{
 
 /**
  * Exchange a code from ZDV OAuth for access and refresh tokens.
+ *
+ * Called as part 2 of the login flow.
  */
 export async function getAccessToken(code: string): Promise<ZdvAccessData> {
   const config = await loadConfig();
@@ -117,6 +140,8 @@ export async function getAccessToken(code: string): Promise<ZdvAccessData> {
 
 /**
  * Get the information for the user of the access token.
+ *
+ * Called as part 3 of the login flow.
  */
 export async function getUserInfo(
   access_token: string,
@@ -134,14 +159,16 @@ export async function getUserInfo(
     where: { cid: data.user.cid },
   });
   if (block !== null) {
-    console.log(
-      `${data.user.firstname} ${data.user.lastname} (${data.user.oi.oi}, ${data.user.cid.cid}) has been prevented from logging in: ${block.reason}`,
-    );
+    await DB.log.create({
+      data: {
+        message: `${data.user.firstname} ${data.user.lastname} (${data.user.oi.oi}, ${data.user.cid.cid}) has been prevented from logging in: ${block.reason}`,
+      },
+    });
     return null;
   }
 
   // payload to be put into the JWT; only part of the available data
-  return {
+  const userInfo = {
     cid: data.user.cid,
     email: data.user.email,
     first_name: data.user.firstname,
@@ -149,6 +176,33 @@ export async function getUserInfo(
     oi: data.user.oi,
     roles: data.user.roles.map((role: { name: string }) => role.name),
   };
+
+  // create `TeacherRating` if is trainer and no existing record
+  if (canBeTrainer(userInfo)) {
+    const teacherRating = await DB.teacherRating.findFirst({
+      where: { cid: userInfo.cid },
+    });
+    if (teacherRating === null) {
+      await DB.teacherRating.create({ data: { cid: userInfo.cid } });
+    }
+  }
+
+  // create `UserPreference` if no existing record
+  const userPrefs = await DB.userPreference.findFirst({
+    where: { cid: userInfo.cid },
+  });
+  if (userPrefs === null) {
+    await DB.userPreference.create({ data: { cid: userInfo.cid } });
+  }
+
+  // log it
+  await DB.log.create({
+    data: {
+      message: `${userInfo.first_name} ${userInfo.last_name} (${userInfo.oi}, ${userInfo.cid}) has logged in`,
+    },
+  });
+
+  return userInfo;
 }
 
 /**
@@ -157,6 +211,8 @@ export async function getUserInfo(
  *
  * This JWT serves as the user's session information, to be stored in
  * their browser's `localStorage`.
+ *
+ * Called as part 4 of the login flow.
  */
 export async function createJwt(
   access_token: string,
@@ -165,8 +221,8 @@ export async function createJwt(
   const secret = new TextEncoder().encode((await loadConfig()).jwtSecret);
   return await new jose.SignJWT({ access_token, info })
     .setProtectedHeader({ alg: "HS256" })
-    .setIssuer("urn:zdv:training-scheduler")
-    .setAudience("urn:zdv:training-scheduler")
+    .setIssuer(JWT_SOURCE)
+    .setAudience(JWT_SOURCE)
     .setIssuedAt()
     .sign(secret);
 }
@@ -177,8 +233,8 @@ export async function createJwt(
 async function verifyJwt(jwt: string): Promise<JwtPayload> {
   const secret = new TextEncoder().encode((await loadConfig()).jwtSecret);
   const { payload } = await jose.jwtVerify(jwt, secret, {
-    issuer: "urn:zdv:training-scheduler",
-    audience: "urn:zdv:training-scheduler",
+    issuer: JWT_SOURCE,
+    audience: JWT_SOURCE,
   });
   return payload as JwtPayload;
 }
@@ -191,6 +247,8 @@ async function verifyJwt(jwt: string): Promise<JwtPayload> {
  * If there is an error with the user's authentication, part of the
  * returned object will have a `Response` which should be returned
  * to the user directly.
+ *
+ * Called as part of endpoint authentication & authorization flow.
  */
 export async function checkAuth(
   request: Request,
@@ -198,7 +256,7 @@ export async function checkAuth(
 ): Promise<AuthStatus> {
   const authHeader = request.headers.get(AUTHORIZATION_HEADER);
   if (authHeader === null) {
-    console.log(`Request to ${request.url} without auth header`);
+    // user is not logged in
     return {
       payload: null,
       shortCircuit: new Response(`Missing "${AUTHORIZATION_HEADER}" header`, {
@@ -209,6 +267,7 @@ export async function checkAuth(
   try {
     const auth = await verifyJwt(authHeader.substring(7));
 
+    // per-page permissions gating
     if (gate !== RequiredPermission.All) {
       const sufficient = auth.info.roles.find((role) =>
         GATE_TO_ROLES[gate].includes(role),
@@ -230,38 +289,32 @@ export async function checkAuth(
       where: { cid: auth.info.cid },
     });
     if (blocked) {
-      console.log(
-        `${auth.info.first_name} ${auth.info.last_name} (${auth.info.oi}, ${auth.info.cid}) was blocked from logging in`,
-      );
+      await DB.log.create({
+        data: {
+          message: `${auth.info.first_name} ${auth.info.last_name} (${auth.info.oi}, ${auth.info.cid}) was blocked from accessing the site`,
+        },
+      });
       return {
         payload: null,
         shortCircuit: new Response(
           "You have been blocked from accessing this site",
-          {
-            status: 403,
-          },
+          { status: 401 },
         ),
       };
     }
-
-    // TODO create `TeacherRating` if is trainer and no existing record
 
     return {
       payload: auth,
       shortCircuit: null,
     };
-  } catch {
-    console.log("Could not verify JWT from user");
+  } catch (err) {
+    // singing issue? tampered with?
+    await DB.log.create({
+      data: { message: `Could not verify JWT from user: ${err}` },
+    });
     return {
       payload: null,
       shortCircuit: new Response("Could not verify JWT", { status: 400 }),
     };
   }
-}
-
-/**
- * Check if the user has a trainer role.
- */
-export function canBeTrainer(info: ZdvUserInfo): boolean {
-  return ["ins", "mtr"].some((role) => info.roles.includes(role));
 }
