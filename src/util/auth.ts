@@ -14,7 +14,7 @@ export type ZdvAccessData = {
 };
 
 /**
- * Information about a ZDV member.
+ * Information about a ZDV member. Stored in JWT.
  *
  * This is only a subset of what ZDV SSO returns.
  */
@@ -42,7 +42,7 @@ export type JwtPayload = {
  * Result of checking the user's JWT.
  */
 export type AuthStatus = {
-  info: JwtPayload | null;
+  payload: JwtPayload | null;
   shortCircuit: Response | null;
 };
 
@@ -200,7 +200,7 @@ export async function checkAuth(
   if (authHeader === null) {
     console.log(`Request to ${request.url} without auth header`);
     return {
-      info: null,
+      payload: null,
       shortCircuit: new Response(`Missing "${AUTHORIZATION_HEADER}" header`, {
         status: 401,
       }),
@@ -215,7 +215,7 @@ export async function checkAuth(
       );
       if (!sufficient) {
         return {
-          info: null,
+          payload: null,
           shortCircuit: new Response("Missing roles", { status: 403 }),
         };
       }
@@ -234,7 +234,7 @@ export async function checkAuth(
         `${auth.info.first_name} ${auth.info.last_name} (${auth.info.oi}, ${auth.info.cid}) was blocked from logging in`,
       );
       return {
-        info: null,
+        payload: null,
         shortCircuit: new Response(
           "You have been blocked from accessing this site",
           {
@@ -243,15 +243,25 @@ export async function checkAuth(
         ),
       };
     }
+
+    // TODO create `TeacherRating` if is trainer and no existing record
+
     return {
-      info: auth,
+      payload: auth,
       shortCircuit: null,
     };
   } catch {
     console.log("Could not verify JWT from user");
     return {
-      info: null,
+      payload: null,
       shortCircuit: new Response("Could not verify JWT", { status: 400 }),
     };
   }
+}
+
+/**
+ * Check if the user has a trainer role.
+ */
+export function canBeTrainer(info: ZdvUserInfo): boolean {
+  return ["ins", "mtr"].some((role) => info.roles.includes(role));
 }

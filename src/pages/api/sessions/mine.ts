@@ -11,11 +11,11 @@ import { SESSION_STATUS } from "../../../util/config";
 export async function GET(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { info, shortCircuit } = await checkAuth(context.request);
+  const { payload, shortCircuit } = await checkAuth(context.request);
   if (shortCircuit) {
     return shortCircuit;
   }
-  if (!info) {
+  if (!payload) {
     return new Response("Undefined user", { status: 500 });
   }
 
@@ -26,14 +26,16 @@ export async function GET(
     return new Response(
       JSON.stringify(
         await DB.trainingSession.findMany({
-          where: { student: info.info.cid, status: SESSION_STATUS.ACCEPTED },
+          where: { student: payload.info.cid, status: SESSION_STATUS.ACCEPTED },
         }),
       ),
     );
   }
   return new Response(
     JSON.stringify(
-      await DB.trainingSession.findMany({ where: { student: info.info.cid } }),
+      await DB.trainingSession.findMany({
+        where: { student: payload.info.cid },
+      }),
     ),
   );
 }

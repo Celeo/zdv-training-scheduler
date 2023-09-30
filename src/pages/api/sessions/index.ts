@@ -1,8 +1,15 @@
 import type { APIContext } from "astro";
 import { DB } from "../../../data/db";
-import { checkAuth } from "../../../util/auth";
+import { canBeTrainer, checkAuth } from "../../../util/auth";
 import { SESSION_STATUS } from "../../../util/config";
 
+/**
+ * Get all sessions. 'date' is a require query param.
+ *
+ * Can optionally include a 'limit-to-open' query param
+ * to filter the retrieved rows to just those that have
+ * the 'open' status.
+ */
 export async function GET(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
@@ -10,7 +17,6 @@ export async function GET(
   if (shortCircuit) {
     return shortCircuit;
   }
-
   const urlParams = new URL(context.request.url).searchParams;
   const date = urlParams.get("date");
   if (!date) {
@@ -36,40 +42,21 @@ export async function GET(
  * Create a new session. Trainers only.
  */
 export async function POST(
-  _context: APIContext<Record<string, any>>,
+  context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  // TODO
-  return new Response(null, { status: 500 });
-}
+  const { payload, shortCircuit } = await checkAuth(context.request);
+  if (shortCircuit) {
+    return shortCircuit;
+  }
+  if (!canBeTrainer(payload!.info)) {
+    return new Response("Missing roles", { status: 400 });
+  }
 
-/**
- * Edit a session.
- *
- * Trainers can edit any of their sessions.
- *
- * Students will use this endpoint to accept an
- * available session.
- */
-export async function PUT(
-  _context: APIContext<Record<string, any>>,
-): Promise<Response> {
-  // TODO
-  return new Response(null, { status: 500 });
-}
-
-/**
- * Delete a session.
- *
- * Trainers can delete any of their sessions. If a student has
- * already accepted it, they will be notified.
- *
- * Students can cancel an existing reservation.
- *
- * TODO: needed reporting/auditing for late cancellation?
- */
-export async function DELETE(
-  _context: APIContext<Record<string, any>>,
-): Promise<Response> {
-  // TODO
-  return new Response(null, { status: 500 });
+  await DB.trainingSession.create({
+    data: {
+      instructor: payload!.info.cid,
+      date: (await context.request.json()).date,
+    },
+  });
+  return new Response(null, { status: 201 });
 }
