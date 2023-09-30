@@ -31,15 +31,16 @@ model TrainingSchedule {
 }
 
 model TrainingSession {
-  id            Int               @id @default(autoincrement())
-  schedule      TrainingSchedule? @relation(fields: [scheduleId], references: [id])
-  scheduleId    Int?
-  instructor    Int
-  student       Int?
-  date          String
-  status        String            @default("open")
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
+  id         Int               @id @default(autoincrement())
+  schedule   TrainingSchedule? @relation(fields: [scheduleId], references: [id])
+  scheduleId Int?
+  instructor Int
+  student    Int?
+  date       String
+  status     String            @default("open")
+  notes      String            @default("")
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
 }
 
 model UserBlocklist {
