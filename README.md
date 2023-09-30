@@ -31,17 +31,17 @@ sequenceDiagram
   A->>B: Start OAuth2 flow
   B->>B: Check logged in
   alt is logged in
-    B->>A: send code
+    B->>A: Send code
   else is not logged in
-    B->>U: send to auth.vatsim.net
-    U->>C: log in
-    C->>B: log in
-    B->>A: send code
+    B->>U: Send to auth.vatsim.net
+    U->>C: Log in
+    C->>B: Log in
+    B->>A: Send code
   end
   A->>B: exchange code for token
   B->>A: Return access/refresh tokens
-  A->>B: use access token to get user information
-  A->>U: shows logged in
+  A->>B: Use access token to get user information
+  A->>U: Shows success
 ```
 
 ### Create a session
@@ -95,8 +95,8 @@ sequenceDiagram
   else Discord preference
     A->>A: Store message
     C->>A: Check for messages
-    C->>C: Send message instruction
-    C->>U: Send message
+    A->>C: Return message(s)
+    C->>U: Send message(s)
   end
 ```
 
@@ -112,6 +112,9 @@ to train students on:
 - Minor Approach
 - Major Approach
 - Center
+
+When Senior Staff update the permissions for a trainer, all of their open sessions
+are updated to show the increased training opportunities.
 
 ```mermaid
 sequenceDiagram
