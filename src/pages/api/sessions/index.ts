@@ -28,14 +28,3 @@ export async function GET(
     JSON.stringify(await DB.trainingSession.findMany({ where: { date } })),
   );
 }
-
-export async function POST(): Promise<Response> {
-  await DB.trainingSession.create({
-    data: {
-      instructor: 1,
-      date: "2023-09-24",
-      status: "open",
-    },
-  });
-  return new Response("Created", { status: 201 });
-}
