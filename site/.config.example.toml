@@ -9,3 +9,11 @@ authorizeEndpoint = ""
 tokenEndpoint = ""
 redirectUri = ""
 userInfoUri = ""
+
+[email]
+
+host = ""
+port = 0
+user = ""
+password = ""
+from = ""

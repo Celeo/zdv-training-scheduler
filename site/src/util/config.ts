@@ -19,6 +19,14 @@ export type Config = {
     redirectUri: string;
     userInfoUri: string;
   };
+  /** ZDV email data */
+  email: {
+    host: string;
+    port: number;
+    user: string;
+    password: string;
+    from: string;
+  };
 };
 
 async function _loadConfig(): Promise<Config> {

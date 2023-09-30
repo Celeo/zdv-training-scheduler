@@ -48,3 +48,16 @@ model UserBlocklist {
   reason    String
   createdAt DateTime @default(now())
 }
+
+model UserPreferences {
+  cid                    Int     @id
+  receiveEmails          Boolean @default(true)
+  receiveDiscordMessages Boolean @default(false)
+}
+
+model DiscordMessages {
+  id          Int      @id @default(autoincrement())
+  cid         Int
+  createdAt   DateTime @default(now())
+  completedAt DateTime @updatedAt
+}
