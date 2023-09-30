@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Celeo/zdv-training-scheduler/actions/workflows/ci.yml/badge.svg)](https://github.com/Celeo/zdv-training-scheduler/actions/workflows/ci.yml)
 
-Website for scheduling training sessions for the [VATSIM](https://vatsim.net/) [Denver ARTCC](https://zdvartcc.org/).
+Website and Discord bot for scheduling training sessions for the [VATSIM Denver ARTCC](https://zdvartcc.org/).
 
 ## Tech
 
