@@ -55,8 +55,9 @@ CREATE TABLE "UserPreference" (
 CREATE TABLE "DiscordMessage" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "cid" INTEGER NOT NULL,
+    "message" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "completedAt" DATETIME NOT NULL
+    "completedAt" DATETIME
 );
 
 -- CreateTable

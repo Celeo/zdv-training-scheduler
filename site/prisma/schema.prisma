@@ -57,10 +57,11 @@ model UserPreference {
 }
 
 model DiscordMessage {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   cid         Int
-  createdAt   DateTime @default(now())
-  completedAt DateTime
+  message     String
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
 }
 
 model Log {
