@@ -37,6 +37,7 @@ export function Scheduling() {
     setIsLoading(false);
   };
 
+  // retrieve schedules and the current user's pending sessions
   useEffect(() => {
     (async () => {
       try {

@@ -32,3 +32,13 @@ async function _loadConfig(): Promise<Config> {
  * This function is memoized.
  */
 export const loadConfig = memoize(_loadConfig);
+
+/**
+ * Valid session statuses.
+ */
+export enum SESSION_STATUS {
+  OPEN = "open",
+  ACCEPTED = "accepted",
+  COMPLETE = "complete",
+  CANCELLED = "cancelled",
+}

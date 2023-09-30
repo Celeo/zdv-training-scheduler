@@ -1,6 +1,7 @@
 import type { APIContext } from "astro";
 import { DB } from "../../../data/db";
 import { checkAuth } from "../../../util/auth";
+import { SESSION_STATUS } from "../../../util/config";
 
 export async function GET(
   context: APIContext<Record<string, any>>,
@@ -20,7 +21,9 @@ export async function GET(
   if (limitToOpen) {
     return new Response(
       JSON.stringify(
-        await DB.trainingSession.findMany({ where: { date, status: "open" } }),
+        await DB.trainingSession.findMany({
+          where: { date, status: SESSION_STATUS.OPEN },
+        }),
       ),
     );
   }
