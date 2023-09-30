@@ -3,6 +3,11 @@ import { checkAuth } from "../../../util/auth";
 import { DB } from "../../../data/db";
 import { SESSION_STATUS } from "../../../util/config";
 
+/**
+ * Get the sessions that the current user is a student of.
+ *
+ * Optionally filter to just the sessions that are accepted.
+ */
 export async function GET(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
