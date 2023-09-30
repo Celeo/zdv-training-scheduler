@@ -15,4 +15,6 @@ jobs:
       with:
         node-version: 20.x
     - run: npm ci
+      working-directory: site
     - run: npm run build
+      working-directory: site
