@@ -19,6 +19,11 @@ export function NavbarEntries() {
             </a>
           </li>
           <li>
+            <a href="/prefs" className="block p-0 rounded hover:text-blue-500">
+              Preferences
+            </a>
+          </li>
+          <li>
             <a
               href="/sso/logout"
               className="block p-0 rounded hover:text-blue-500"

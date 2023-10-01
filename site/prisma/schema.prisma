@@ -21,28 +21,30 @@ model TeacherRating {
 }
 
 model TrainingSchedule {
-  id              Int               @id @default(autoincrement())
-  Instructor      Int
-  dayOfWeek       Int
-  timeOfDay       Int
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  TrainingSession TrainingSession[]
+  id         Int      @id @default(autoincrement())
+  instructor Int
+  dayOfWeek  Int
+  timeOfDay  Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  trainingSessions TrainingSession[]
 }
 
 model TrainingSession {
-  id               Int               @id @default(autoincrement())
+  id               Int      @id @default(autoincrement())
   scheduleId       Int?
-  schedule         TrainingSchedule? @relation(fields: [scheduleId], references: [id])
   instructor       Int
   student          Int?
   selectedPosition String?
   date             String
   time             String
-  status           String            @default("open")
-  notes            String            @default("")
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  status           String   @default("open")
+  notes            String   @default("")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  schedule TrainingSchedule? @relation(fields: [scheduleId], references: [id])
 }
 
 model UserBlocklist {

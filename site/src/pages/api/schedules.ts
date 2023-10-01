@@ -29,31 +29,23 @@ export async function POST(
   if (shortCircuit) {
     return shortCircuit;
   }
-  // TODO
-  return new Response(null, { status: 500 });
-}
-
-/**
- * Edit a schedule. Trainers only. Only the
- * owning user can perform this action.
- */
-export async function PUT(
-  context: APIContext<Record<string, any>>,
-): Promise<Response> {
-  const { payload, shortCircuit } = await checkAuth(
-    context.request,
-    RequiredPermission.TRAINER,
-  );
-  if (shortCircuit) {
-    return shortCircuit;
-  }
-  // TODO
-  return new Response(null, { status: 500 });
+  const body = await context.request.json();
+  await DB.trainingSchedule.create({
+    data: {
+      instructor: payload!.info.cid,
+      dayOfWeek: body.dayOfWeek,
+      timeOfDay: body.timeOfDay,
+    },
+  });
+  return new Response(null, { status: 201 });
 }
 
 /**
  * Delete a schedule. Trainers only. Only the
  * owning user can perform this action.
+ *
+ * Note that any sessions that have already been accepted
+ * by students will not be deleted as part of this action.
  */
 export async function DELETE(
   context: APIContext<Record<string, any>>,
@@ -65,6 +57,24 @@ export async function DELETE(
   if (shortCircuit) {
     return shortCircuit;
   }
-  // TODO
-  return new Response(null, { status: 500 });
+  const body = await context.request.json();
+  const record = await DB.trainingSchedule.findFirst({
+    where: { id: body.id },
+  });
+  if (record === null) {
+    return new Response("Could not find schedule", { status: 404 });
+  }
+  if (record.instructor !== payload?.info.cid) {
+    return new Response("You cannot delete someone else's schedule", {
+      status: 400,
+    });
+  }
+  // disconnect existing sessions
+  await DB.trainingSession.updateMany({
+    where: { scheduleId: body.id },
+    data: { scheduleId: null },
+  });
+  // delete the schedule
+  await DB.trainingSchedule.delete({ where: { id: body.id } });
+  return new Response(null, { status: 200 });
 }

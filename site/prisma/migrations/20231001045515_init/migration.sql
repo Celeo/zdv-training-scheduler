@@ -15,7 +15,7 @@ CREATE TABLE "TeacherRating" (
 -- CreateTable
 CREATE TABLE "TrainingSchedule" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "Instructor" INTEGER NOT NULL,
+    "instructor" INTEGER NOT NULL,
     "dayOfWeek" INTEGER NOT NULL,
     "timeOfDay" INTEGER NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
