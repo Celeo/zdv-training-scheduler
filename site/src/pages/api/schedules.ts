@@ -1,5 +1,5 @@
 import type { APIContext } from "astro";
-import { checkAuth } from "../../util/auth";
+import { RequiredPermission, checkAuth } from "../../util/auth";
 import { DB } from "../../data/db";
 
 /**
@@ -20,8 +20,15 @@ export async function GET(
  * Create a new schedule. Trainers only.
  */
 export async function POST(
-  _context: APIContext<Record<string, any>>,
+  context: APIContext<Record<string, any>>,
 ): Promise<Response> {
+  const { payload, shortCircuit } = await checkAuth(
+    context.request,
+    RequiredPermission.TRAINER,
+  );
+  if (shortCircuit) {
+    return shortCircuit;
+  }
   // TODO
   return new Response(null, { status: 500 });
 }
@@ -31,8 +38,15 @@ export async function POST(
  * owning user can perform this action.
  */
 export async function PUT(
-  _context: APIContext<Record<string, any>>,
+  context: APIContext<Record<string, any>>,
 ): Promise<Response> {
+  const { payload, shortCircuit } = await checkAuth(
+    context.request,
+    RequiredPermission.TRAINER,
+  );
+  if (shortCircuit) {
+    return shortCircuit;
+  }
   // TODO
   return new Response(null, { status: 500 });
 }
@@ -42,8 +56,15 @@ export async function PUT(
  * owning user can perform this action.
  */
 export async function DELETE(
-  _context: APIContext<Record<string, any>>,
+  context: APIContext<Record<string, any>>,
 ): Promise<Response> {
+  const { payload, shortCircuit } = await checkAuth(
+    context.request,
+    RequiredPermission.TRAINER,
+  );
+  if (shortCircuit) {
+    return shortCircuit;
+  }
   // TODO
   return new Response(null, { status: 500 });
 }

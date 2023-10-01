@@ -1,8 +1,14 @@
 import type { APIContext } from "astro";
-import { canBeTrainer, checkAuth } from "../../../util/auth";
+import {
+  RequiredPermission,
+  canBeTrainer,
+  checkAuth,
+  getUserInfoFromCid,
+} from "../../../util/auth";
 import { DB } from "../../../data/db";
 import { SESSION_STATUS } from "../../../util/config";
 import { dateToDateStr } from "../../../util/date";
+import { InformTypes, informUser } from "../../../util/inform";
 
 type UpdatePayload = {
   action: "ACCEPT" | "UNACCEPT" | "UPDATE_NOTES";
@@ -56,7 +62,13 @@ export async function PUT(
       where: { id: record.id },
       data: { student: payload!.info.cid, status: SESSION_STATUS.ACCEPTED },
     });
-    // TODO notify trainer
+    await informUser(record.instructor, InformTypes.ACCEPTED_SESSION, {
+      first_name: payload?.info.first_name,
+      last_name: payload?.info.last_name,
+      oi: payload?.info.oi,
+      date: record.date,
+      time: record.time,
+    });
     return new Response("Accepted");
   } else if (body.action === "UNACCEPT") {
     if (record.student !== payload?.info.cid) {
@@ -68,7 +80,13 @@ export async function PUT(
       where: { id: record.id },
       data: { student: null, status: SESSION_STATUS.OPEN },
     });
-    // TODO notify trainer
+    await informUser(record.instructor, InformTypes.STUDENT_CANCELLED_SESSION, {
+      first_name: payload?.info.first_name,
+      last_name: payload?.info.last_name,
+      oi: payload?.info.oi,
+      date: record.date,
+      time: record.time,
+    });
     return new Response("Un-accepted");
   } else {
     if (record.instructor !== payload?.info.cid) {
@@ -98,12 +116,12 @@ export async function DELETE(
     return new Response(null, { status: 404 });
   }
   const id = parseInt(context.params.id);
-  const { payload, shortCircuit } = await checkAuth(context.request);
+  const { payload, shortCircuit } = await checkAuth(
+    context.request,
+    RequiredPermission.TRAINER,
+  );
   if (shortCircuit) {
     return shortCircuit;
-  }
-  if (!canBeTrainer(payload!.info)) {
-    return new Response("You are not a trainer", { status: 403 });
   }
 
   const record = await DB.trainingSession.findFirst({ where: { id } });
@@ -122,7 +140,14 @@ export async function DELETE(
     });
   }
   if (record.student !== null) {
-    // TODO notify student
+    const instructor = await getUserInfoFromCid(record.instructor);
+    await informUser(record.student, InformTypes.TRAINER_CANCELLED_SESSION, {
+      first_name: instructor.first_name,
+      last_name: instructor.last_name,
+      oi: instructor.oi,
+      date: record.date,
+      time: record.time,
+    });
   }
   await DB.trainingSession.delete({ where: { id: record.id } });
   return new Response("Session deleted");

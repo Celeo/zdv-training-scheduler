@@ -18,6 +18,7 @@ export type Config = {
     tokenEndpoint: string;
     redirectUri: string;
     userInfoUri: string;
+    userRoster: string;
   };
   /** ZDV email data */
   email: {

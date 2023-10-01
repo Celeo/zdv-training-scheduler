@@ -9,6 +9,7 @@ authorizeEndpoint = ""
 tokenEndpoint = ""
 redirectUri = ""
 userInfoUri = ""
+userRoster = ""
 
 [email]
 

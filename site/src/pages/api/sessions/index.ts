@@ -1,6 +1,6 @@
 import type { APIContext } from "astro";
 import { DB } from "../../../data/db";
-import { canBeTrainer, checkAuth } from "../../../util/auth";
+import { RequiredPermission, checkAuth } from "../../../util/auth";
 import { SESSION_STATUS } from "../../../util/config";
 
 /**
@@ -44,18 +44,20 @@ export async function GET(
 export async function POST(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { payload, shortCircuit } = await checkAuth(context.request);
+  const { payload, shortCircuit } = await checkAuth(
+    context.request,
+    RequiredPermission.TRAINER,
+  );
   if (shortCircuit) {
     return shortCircuit;
   }
-  if (!canBeTrainer(payload!.info)) {
-    return new Response("Missing roles", { status: 400 });
-  }
 
+  const body = await context.request.json();
   await DB.trainingSession.create({
     data: {
       instructor: payload!.info.cid,
-      date: (await context.request.json()).date,
+      date: body.date,
+      time: body.time,
     },
   });
   return new Response(null, { status: 201 });

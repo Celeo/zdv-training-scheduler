@@ -36,8 +36,9 @@ model TrainingSession {
   schedule         TrainingSchedule? @relation(fields: [scheduleId], references: [id])
   instructor       Int
   student          Int?
-  selectedPosition String
+  selectedPosition String?
   date             String
+  time             String
   status           String            @default("open")
   notes            String            @default("")
   createdAt        DateTime          @default(now())

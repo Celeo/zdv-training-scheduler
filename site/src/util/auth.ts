@@ -48,18 +48,21 @@ export type AuthStatus = {
 
 const AUTHORIZATION_HEADER = "authorization";
 
-enum RequiredPermission {
-  All,
-  Trainer,
-  Admin,
+/**
+ * Permissions for an endpoint.
+ */
+export enum RequiredPermission {
+  ALL,
+  TRAINER,
+  ADMIN,
 }
 
 const TRAINER_ROLES = ["mtr", "ins"];
 const ADMIN_ROLES = ["atm", "datm", "ta", "wm"];
 
 const GATE_TO_ROLES = {
-  [RequiredPermission.Trainer]: TRAINER_ROLES,
-  [RequiredPermission.Admin]: ADMIN_ROLES,
+  [RequiredPermission.TRAINER]: TRAINER_ROLES,
+  [RequiredPermission.ADMIN]: ADMIN_ROLES,
 };
 
 const JWT_SOURCE = "urn:zdv:training-scheduler";
@@ -252,7 +255,7 @@ async function verifyJwt(jwt: string): Promise<JwtPayload> {
  */
 export async function checkAuth(
   request: Request,
-  gate: RequiredPermission = RequiredPermission.All,
+  gate: RequiredPermission = RequiredPermission.ALL,
 ): Promise<AuthStatus> {
   const authHeader = request.headers.get(AUTHORIZATION_HEADER);
   if (authHeader === null) {
@@ -268,7 +271,7 @@ export async function checkAuth(
     const auth = await verifyJwt(authHeader.substring(7));
 
     // per-page permissions gating
-    if (gate !== RequiredPermission.All) {
+    if (gate !== RequiredPermission.ALL) {
       const sufficient = auth.info.roles.find((role) =>
         GATE_TO_ROLES[gate].includes(role),
       );
@@ -308,7 +311,7 @@ export async function checkAuth(
       shortCircuit: null,
     };
   } catch (err) {
-    // singing issue? tampered with?
+    // singing issue / tampered with / different secret / something weird
     await DB.log.create({
       data: { message: `Could not verify JWT from user: ${err}` },
     });
@@ -317,4 +320,32 @@ export async function checkAuth(
       shortCircuit: new Response("Could not verify JWT", { status: 400 }),
     };
   }
+}
+
+/**
+ * Get a controller's information from their CID from ZDV.
+ */
+export async function getUserInfoFromCid(cid: number): Promise<ZdvUserInfo> {
+  const config = await loadConfig();
+  /*
+   * Would be nice to get a specific user, rather than the whole roster,
+   * but that endpoint throws errors. This endpoint only gets the active
+   * roster, rather than all controllers who've been through ZDV, so
+   * it's "fast enough".
+   */
+  const resp = await axios.get<Array<Record<string, unknown>>>(
+    config.oauth.userRoster,
+  );
+  const controller = resp.data.find((c) => c.cid === cid);
+  if (!controller) {
+    throw new Error(`Could not find controller with CID ${cid}`);
+  }
+  return {
+    cid: controller.cid as number,
+    email: controller.email as string,
+    first_name: controller.first_name as string,
+    last_name: controller.last_name as string,
+    oi: controller.operating_initials as string,
+    roles: controller.roles as Array<string>,
+  };
 }
