@@ -4,6 +4,8 @@ import "react-calendar/dist/Calendar.css";
 import type { Value } from "../util/calendarTypes.ts";
 import type { TrainingSchedule, TrainingSession } from "@prisma/client";
 import { SessionInfo } from "./SessionInfo.tsx";
+import { dateToDateStr } from "../util/date.ts";
+import type { CidMap } from "../pages/api/cid_map.ts";
 
 export function Scheduling() {
   const [selectedDate, setSelectedDate] = useState<Value>(null);
@@ -12,6 +14,8 @@ export function Scheduling() {
   const [sessions, setSessions] = useState<Array<TrainingSession>>([]);
   const [mySessions, setMySessions] = useState<Array<TrainingSession>>([]);
   const [error, setError] = useState<string | null>(null);
+  const [cidMap, setCidMap] = useState<CidMap>({});
+  const [ratingMap, setRatingMap] = useState<{}>({});
 
   const selectDay = (val: Value) => {
     setSelectedDate(val);
@@ -21,9 +25,7 @@ export function Scheduling() {
   const fetchDayData = async (date: Date) => {
     setIsLoading(true);
     try {
-      const d = `${date.getFullYear()}-${(date.getMonth() + 1)
-        .toString()
-        .padStart(2, "0")}-${date.getDate()}`;
+      const d = dateToDateStr(date);
       const resp = await fetch(`/api/sessions?limit-to-open=true&date=${d}`, {
         headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
       });
@@ -60,6 +62,26 @@ export function Scheduling() {
         console.error(`Error getting my sessions: ${err}`);
         setError("Could not get your scheduled sessions");
       }
+      try {
+        const resp = await fetch("/api/cid_map", {
+          headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
+        });
+        const data = await resp.json();
+        setCidMap(data);
+      } catch (err) {
+        console.error(`Error getting CID mapping: ${err}`);
+        setError("Could not look up CIDs");
+      }
+      try {
+        const resp = await fetch("/api/ratings_map", {
+          headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
+        });
+        const data = await resp.json();
+        setRatingMap(data);
+      } catch (err) {
+        console.error(`Error getting ratings mapping: ${err}`);
+        setError("Could not look up ratings");
+      }
     })();
   }, []);
 
@@ -67,25 +89,23 @@ export function Scheduling() {
   if (isLoading) {
     body = <p className="italic text-lg text-gray-300">Loading ...</p>;
   } else if (selectedDate === null) {
-    body = <p>Select a date on the calendar</p>;
+    body = <h3 className="text-xl">Select a date on the calendar</h3>;
   } else {
     body = (
       <>
-        <h3 className="text-xl">Open sessions</h3>
-        {sessions.map((session) => (
-          <p>
-            <SessionInfo {...session} />
-          </p>
-        ))}
-        <h3 className="text-xl pt-5">Sessions from schedules</h3>
-        {schedules
-          .filter(
-            (schedule) =>
-              schedule.dayOfWeek === (selectedDate as Date).getDay(),
-          )
-          .map((schedule) => (
-            <p>{JSON.stringify(schedule)}</p>
-          ))}
+        <h3 className="text-xl pb-3">Open sessions</h3>
+        {sessions.length > 0 ? (
+          sessions.map((session) => (
+            <SessionInfo
+              key={session.id}
+              {...session}
+              cidMap={cidMap}
+              ratingMap={ratingMap}
+            />
+          ))
+        ) : (
+          <p className="text-md">No sessions available on this date</p>
+        )}
       </>
     );
   }
