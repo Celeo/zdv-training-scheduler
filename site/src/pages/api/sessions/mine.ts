@@ -15,10 +15,6 @@ export async function GET(
   if (shortCircuit) {
     return shortCircuit;
   }
-  if (!payload) {
-    return new Response("Undefined user", { status: 500 });
-  }
-
   const urlParams = new URL(context.request.url).searchParams;
   const accepted = urlParams.get("accepted");
 
@@ -26,7 +22,10 @@ export async function GET(
     return new Response(
       JSON.stringify(
         await DB.trainingSession.findMany({
-          where: { student: payload.info.cid, status: SESSION_STATUS.ACCEPTED },
+          where: {
+            student: payload!.info.cid,
+            status: SESSION_STATUS.ACCEPTED,
+          },
         }),
       ),
     );
@@ -34,7 +33,7 @@ export async function GET(
   return new Response(
     JSON.stringify(
       await DB.trainingSession.findMany({
-        where: { student: payload.info.cid },
+        where: { student: payload!.info.cid },
       }),
     ),
   );

@@ -74,6 +74,7 @@ export async function PUT(
     if (record.student !== payload?.info.cid) {
       return new Response(
         "You cannot un-accept this session - you're not assigned to it",
+        { status: 400 },
       );
     }
     await DB.trainingSession.update({
