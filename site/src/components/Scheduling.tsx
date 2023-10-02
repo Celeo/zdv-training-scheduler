@@ -42,46 +42,20 @@ export function Scheduling() {
   // retrieve schedules and the current user's pending sessions
   useEffect(() => {
     (async () => {
-      try {
-        const resp = await fetch("/api/schedules", {
-          headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
-        });
-        const data = await resp.json();
-        setSchedules(data);
-      } catch (err) {
-        console.error(`Error getting schedules: ${err}`);
-        setError("Could not get scheduled sessions");
-      }
-      try {
-        const resp = await fetch("/api/sessions/mine", {
-          headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
-        });
-        const data = await resp.json();
-        setMySessions(data);
-      } catch (err) {
-        console.error(`Error getting my sessions: ${err}`);
-        setError("Could not get your scheduled sessions");
-      }
-      try {
-        const resp = await fetch("/api/cid_map", {
-          headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
-        });
-        const data = await resp.json();
-        setCidMap(data);
-      } catch (err) {
-        console.error(`Error getting CID mapping: ${err}`);
-        setError("Could not look up CIDs");
-      }
-      try {
-        const resp = await fetch("/api/ratings_map", {
-          headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
-        });
-        const data = await resp.json();
-        setRatingMap(data);
-      } catch (err) {
-        console.error(`Error getting ratings mapping: ${err}`);
-        setError("Could not look up ratings");
-      }
+      await Promise.all(
+        [
+          { path: "/api/schedules", f: setSchedules },
+          { path: "/api/sessions/mine", f: setMySessions },
+          { path: "/api/cid_map", f: setCidMap },
+          { path: "/api/ratings_map", f: setRatingMap },
+        ].map(async (obj) => {
+          const resp = await fetch(obj.path, {
+            headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
+          });
+          const data = await resp.json();
+          obj.f(data);
+        }),
+      );
     })();
   }, []);
 
