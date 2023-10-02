@@ -1,5 +1,7 @@
 import { DB } from "../data/db";
+import { getUserInfoFromCid } from "./auth";
 import { loadConfig } from "./config";
+import * as nodemailer from "nodemailer";
 
 /**
  * Triggering events that warrant async communication to the user.
@@ -67,7 +69,26 @@ async function queueDiscordMessage(
 /**
  * Send an email via ZDV's email services.
  */
-async function sendEmail(cid: number, message: string): Promise<void> {
+async function sendEmail(cid: number, text: string): Promise<void> {
   const config = await loadConfig();
-  // TODO
+  const userInfo = await getUserInfoFromCid(cid);
+  const transporter = nodemailer.createTransport({
+    host: config.email.host,
+    port: config.email.port,
+    secure: true,
+    auth: {
+      user: config.email.user,
+      pass: config.email.password,
+    },
+    tls: {
+      servername: config.email.servername,
+    },
+  });
+  await transporter.sendMail({
+    from: config.email.from,
+    to: userInfo.email,
+    subject: "ZDV Training Notification",
+    text,
+  });
+  await DB.log.create({ data: { message: `Sent email to ${userInfo.email}` } });
 }

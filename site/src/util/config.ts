@@ -23,6 +23,7 @@ export type Config = {
   /** ZDV email data */
   email: {
     host: string;
+    servername: string;
     port: number;
     user: string;
     password: string;
