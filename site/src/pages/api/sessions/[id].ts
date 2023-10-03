@@ -6,7 +6,7 @@ import {
   getUserInfoFromCid,
 } from "../../../util/auth";
 import { DB } from "../../../data/db";
-import { SESSION_STATUS } from "../../../util/config";
+import { SESSION_STATUS } from "../../../util/contants";
 import { dateToDateStr } from "../../../util/date";
 import { InformTypes, informUser } from "../../../util/inform";
 

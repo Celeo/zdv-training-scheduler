@@ -1,7 +1,7 @@
 import type { APIContext } from "astro";
 import { DB } from "../../../data/db";
 import { RequiredPermission, checkAuth } from "../../../util/auth";
-import { SESSION_STATUS } from "../../../util/config";
+import { SESSION_STATUS } from "../../../util/contants";
 
 /**
  * Get all sessions. 'date' is a require query param.

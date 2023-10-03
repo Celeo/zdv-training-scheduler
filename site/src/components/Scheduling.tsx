@@ -6,6 +6,7 @@ import type { TrainingSchedule, TrainingSession } from "@prisma/client";
 import { SessionInfo } from "./SessionInfo.tsx";
 import { dateToDateStr } from "../util/date.ts";
 import type { CidMap } from "../pages/api/cid_map.ts";
+import { SESSION_STATUS } from "../util/contants.ts";
 
 export function Scheduling() {
   const [selectedDate, setSelectedDate] = useState<Value>(null);
@@ -17,20 +18,43 @@ export function Scheduling() {
   const [cidMap, setCidMap] = useState<CidMap>({});
   const [ratingMap, setRatingMap] = useState<{}>({});
 
-  const selectDay = (val: Value) => {
+  // called when the user selects a date on the calendar
+  const selectDay = async (val: Value) => {
     setSelectedDate(val);
-    fetchDayData(val as Date);
-  };
-
-  const fetchDayData = async (date: Date) => {
     setIsLoading(true);
+    const date = val as Date;
     try {
       const d = dateToDateStr(date);
       const resp = await fetch(`/api/sessions?limit-to-open=true&date=${d}`, {
         headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
       });
-      const data = await resp.json();
-      setSessions(data);
+      const daySessions: Array<TrainingSession> = await resp.json();
+
+      for (const schedule of schedules) {
+        if (date.getDay() === schedule.dayOfWeek) {
+          const alreadyAsSession =
+            daySessions.find((s) => s.time === schedule.timeOfDay) !==
+            undefined;
+          if (alreadyAsSession) {
+            continue;
+          }
+          daySessions.push({
+            id: -1,
+            scheduleId: schedule.id,
+            instructor: schedule.instructor,
+            student: null,
+            selectedPosition: null,
+            date: dateToDateStr(date),
+            time: schedule.timeOfDay,
+            status: SESSION_STATUS.OPEN,
+            notes: "",
+            createdAt: date,
+            updatedAt: date,
+          });
+        }
+      }
+
+      setSessions(daySessions);
       setError(null);
     } catch (err) {
       console.error(`Error getting sessions for ${date}: ${err}`);
@@ -48,12 +72,12 @@ export function Scheduling() {
           { path: "/api/sessions/mine", f: setMySessions },
           { path: "/api/cid_map", f: setCidMap },
           { path: "/api/ratings_map", f: setRatingMap },
-        ].map(async (obj) => {
-          const resp = await fetch(obj.path, {
+        ].map(async ({ path, f }) => {
+          const resp = await fetch(path, {
             headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
           });
           const data = await resp.json();
-          obj.f(data);
+          f(data);
         }),
       );
     })();

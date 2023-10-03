@@ -170,7 +170,7 @@ export async function getUserInfo(
     return null;
   }
 
-  // payload to be put into the JWT; only part of the available data
+  // data to be put into the JWT; only part of the available data
   const userInfo = {
     cid: data.user.cid,
     email: data.user.email,

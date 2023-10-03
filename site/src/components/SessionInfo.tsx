@@ -6,7 +6,7 @@ export type SessionInfoProps = {
   scheduleId: number | null;
   instructor: number;
   date: string;
-  time: string;
+  time: number;
   status: string;
   cidMap: CidMap;
   ratingMap: TrainerRatingMap;
@@ -48,10 +48,11 @@ function ratingNames(cid: number, map: TrainerRatingMap): string {
 }
 
 export function SessionInfo(props: SessionInfoProps) {
+  const time = props.time.toString().padStart(4, "0");
   return (
     <button className="block p-3 mb-1 w-full max-w-3xl border rounded-lg shadow bg-gray-800 border-gray-700 hover:bg-gray-700">
       <h5 className="mb-2 text-2xl font-bold tracking-tight text-white">
-        {props.time.substring(0, 2)}:{props.time.substring(2)}
+        {time.toString().substring(0, 2)}:{time.toString().substring(2)}
       </h5>
       <div className="font-normal text-gray-400">
         <p>

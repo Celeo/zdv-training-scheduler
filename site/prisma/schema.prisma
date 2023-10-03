@@ -38,7 +38,7 @@ model TrainingSession {
   student          Int?
   selectedPosition String?
   date             String
-  time             String
+  time             Int
   status           String   @default("open")
   notes            String   @default("")
   createdAt        DateTime @default(now())

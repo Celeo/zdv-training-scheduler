@@ -1,7 +1,7 @@
 import type { APIContext } from "astro";
 import { checkAuth } from "../../../util/auth";
 import { DB } from "../../../data/db";
-import { SESSION_STATUS } from "../../../util/config";
+import { SESSION_STATUS } from "../../../util/contants";
 
 /**
  * Get the sessions that the current user is a student of.
