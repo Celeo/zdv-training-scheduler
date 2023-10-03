@@ -18,23 +18,44 @@ export async function GET(
     return shortCircuit;
   }
   const urlParams = new URL(context.request.url).searchParams;
-  const date = urlParams.get("date");
-  if (!date) {
+  const dateStr = urlParams.get("date");
+  if (!dateStr) {
     return new Response('Missing "date"', { status: 400 });
   }
+  const date = new Date(dateStr);
+  date.setDate(date.getDate() + 1); // come up with a better fix
 
-  const limitToOpen = urlParams.get("limit-to-open");
-  if (limitToOpen) {
-    return new Response(
-      JSON.stringify(
-        await DB.trainingSession.findMany({
-          where: { date, status: SESSION_STATUS.OPEN },
-        }),
-      ),
-    );
-  }
+  const sessions = await DB.trainingSession.findMany({
+    where: { date: dateStr },
+  });
+  const schedules = await DB.trainingSchedule.findMany({
+    where: { dayOfWeek: date.getDay() },
+  });
+  const schedulesWithoutSessions = schedules.filter(
+    (schedule) =>
+      sessions.find((session) => session.scheduleId === schedule.id) ===
+      undefined,
+  );
+  schedulesWithoutSessions
+    .map((schedule) => ({
+      id: -1,
+      scheduleId: schedule.id,
+      instructor: schedule.instructor,
+      student: null,
+      selectedPosition: null,
+      date: dateStr,
+      time: schedule.timeOfDay,
+      status: SESSION_STATUS.OPEN,
+      notes: "~~ Scheduled ~~",
+      createdAt: date,
+      updatedAt: date,
+    }))
+    .forEach((s) => sessions.push(s));
+
   return new Response(
-    JSON.stringify(await DB.trainingSession.findMany({ where: { date } })),
+    JSON.stringify(
+      sessions.filter((session) => session.status === SESSION_STATUS.OPEN),
+    ),
   );
 }
 

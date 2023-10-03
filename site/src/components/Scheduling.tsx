@@ -2,16 +2,14 @@ import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import type { Value } from "../util/calendarTypes.ts";
-import type { TrainingSchedule, TrainingSession } from "@prisma/client";
+import type { TrainingSession } from "@prisma/client";
 import { SessionInfo } from "./SessionInfo.tsx";
 import { dateToDateStr } from "../util/date.ts";
 import type { CidMap } from "../pages/api/cid_map.ts";
-import { SESSION_STATUS } from "../util/contants.ts";
 
 export function Scheduling() {
   const [selectedDate, setSelectedDate] = useState<Value>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [schedules, setSchedules] = useState<Array<TrainingSchedule>>([]);
   const [sessions, setSessions] = useState<Array<TrainingSession>>([]);
   const [mySessions, setMySessions] = useState<Array<TrainingSession>>([]);
   const [error, setError] = useState<string | null>(null);
@@ -25,36 +23,11 @@ export function Scheduling() {
     const date = val as Date;
     try {
       const d = dateToDateStr(date);
-      const resp = await fetch(`/api/sessions?limit-to-open=true&date=${d}`, {
+      const resp = await fetch(`/api/sessions?date=${d}`, {
         headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
       });
-      const daySessions: Array<TrainingSession> = await resp.json();
-
-      for (const schedule of schedules) {
-        if (date.getDay() === schedule.dayOfWeek) {
-          const alreadyAsSession =
-            daySessions.find((s) => s.time === schedule.timeOfDay) !==
-            undefined;
-          if (alreadyAsSession) {
-            continue;
-          }
-          daySessions.push({
-            id: -1,
-            scheduleId: schedule.id,
-            instructor: schedule.instructor,
-            student: null,
-            selectedPosition: null,
-            date: dateToDateStr(date),
-            time: schedule.timeOfDay,
-            status: SESSION_STATUS.OPEN,
-            notes: "",
-            createdAt: date,
-            updatedAt: date,
-          });
-        }
-      }
-
-      setSessions(daySessions);
+      const data: Array<TrainingSession> = await resp.json();
+      setSessions(data);
       setError(null);
     } catch (err) {
       console.error(`Error getting sessions for ${date}: ${err}`);
@@ -68,19 +41,21 @@ export function Scheduling() {
     (async () => {
       await Promise.all(
         [
-          { path: "/api/schedules", f: setSchedules },
           { path: "/api/sessions/mine", f: setMySessions },
           { path: "/api/cid_map", f: setCidMap },
           { path: "/api/ratings_map", f: setRatingMap },
         ].map(async ({ path, f }) => {
           const resp = await fetch(path, {
-            headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
+            headers: {
+              authorization: `Bearer ${localStorage.getItem("jwt")}`,
+            },
           });
           const data = await resp.json();
           f(data);
         }),
       );
     })();
+    // no args - called only on mount
   }, []);
 
   let body;
@@ -110,8 +85,9 @@ export function Scheduling() {
 
   return (
     <div className="mx-auto pt-10">
+      {/* TODO format these */}
       {mySessions.length > 0 &&
-        mySessions.map((s) => <p>{JSON.stringify(s)}</p>)}
+        mySessions.map((s) => <p id={s.id.toString()}>{JSON.stringify(s)}</p>)}
 
       <div className="flex justify-between items-start space-x-10">
         <div className="text-black flex-none">
