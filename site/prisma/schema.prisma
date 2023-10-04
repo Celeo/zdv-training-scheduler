@@ -24,7 +24,7 @@ model TrainingSchedule {
   id         Int      @id @default(autoincrement())
   instructor Int
   dayOfWeek  Int
-  timeOfDay  Int
+  timeOfDay  String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -38,7 +38,7 @@ model TrainingSession {
   student          Int?
   selectedPosition String?
   date             String
-  time             Int
+  time             String
   status           String   @default("open")
   notes            String   @default("")
   createdAt        DateTime @default(now())

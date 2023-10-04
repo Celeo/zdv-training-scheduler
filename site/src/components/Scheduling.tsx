@@ -4,8 +4,8 @@ import "react-calendar/dist/Calendar.css";
 import type { Value } from "../util/calendarTypes.ts";
 import type { TrainingSession } from "@prisma/client";
 import { SessionInfo } from "./SessionInfo.tsx";
-import { dateToDateStr } from "../util/date.ts";
 import type { CidMap } from "../pages/api/cid_map.ts";
+import { DateTime } from "luxon";
 
 export function Scheduling() {
   const [selectedDate, setSelectedDate] = useState<Value>(null);
@@ -22,8 +22,11 @@ export function Scheduling() {
     setIsLoading(true);
     const date = val as Date;
     try {
-      const d = dateToDateStr(date);
-      const resp = await fetch(`/api/sessions?date=${d}`, {
+      const dt = DateTime.fromJSDate(date);
+      const ds = `${dt.year}-${dt.month.toString().padStart(2, "0")}-${dt.day
+        .toString()
+        .padStart(2, "0")}`;
+      const resp = await fetch(`/api/sessions?date=${ds}`, {
         headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
       });
       const data: Array<TrainingSession> = await resp.json();
@@ -41,7 +44,7 @@ export function Scheduling() {
     (async () => {
       await Promise.all(
         [
-          { path: "/api/sessions/mine", f: setMySessions },
+          { path: "/api/sessions/mine?pending=true", f: setMySessions },
           { path: "/api/cid_map", f: setCidMap },
           { path: "/api/ratings_map", f: setRatingMap },
         ].map(async ({ path, f }) => {

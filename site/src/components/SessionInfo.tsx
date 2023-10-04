@@ -6,7 +6,7 @@ export type SessionInfoProps = {
   scheduleId: number | null;
   instructor: number;
   date: string;
-  time: number;
+  time: string;
   status: string;
   cidMap: CidMap;
   ratingMap: TrainerRatingMap;
@@ -41,6 +41,9 @@ function ratingNames(cid: number, map: TrainerRatingMap): string {
   if (e?.center) {
     ratings.push("Center");
   }
+  if (ratings.length === 7) {
+    return "All";
+  }
   if (ratings.length > 0) {
     return ratings.join(", ");
   }
@@ -48,11 +51,10 @@ function ratingNames(cid: number, map: TrainerRatingMap): string {
 }
 
 export function SessionInfo(props: SessionInfoProps) {
-  const time = props.time.toString().padStart(4, "0");
   return (
     <button className="block p-3 mb-1 w-full max-w-3xl border rounded-lg shadow bg-gray-800 border-gray-700 hover:bg-gray-700">
       <h5 className="mb-2 text-2xl font-bold tracking-tight text-white">
-        {time.toString().substring(0, 2)}:{time.toString().substring(2)}
+        {props.time}
       </h5>
       <div className="font-normal text-gray-400">
         <p>

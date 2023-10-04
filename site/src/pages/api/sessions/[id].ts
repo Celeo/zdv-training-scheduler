@@ -7,8 +7,8 @@ import {
 } from "../../../util/auth";
 import { DB } from "../../../data/db";
 import { SESSION_STATUS } from "../../../util/contants";
-import { dateToDateStr } from "../../../util/date";
 import { InformTypes, informUser } from "../../../util/inform";
+import { DateTime } from "luxon";
 
 type UpdatePayload = {
   action: "ACCEPT" | "UNACCEPT" | "UPDATE_NOTES";
@@ -39,7 +39,10 @@ export async function PUT(
   if (!record) {
     return new Response(`Could not find record with id ${id}`, { status: 404 });
   }
-  if (new Date(record.date) < new Date(dateToDateStr(new Date()))) {
+  const recordDate = DateTime.fromISO(`${record.date}T00:00:00`, {
+    zone: "utc",
+  });
+  if (recordDate < DateTime.utc()) {
     return new Response("You cannot edit a session in the past", {
       status: 400,
     });
@@ -129,7 +132,10 @@ export async function DELETE(
   if (!record) {
     return new Response(`Could not find record with id ${id}`, { status: 404 });
   }
-  if (new Date(record.date) < new Date(dateToDateStr(new Date()))) {
+  const recordDate = DateTime.fromISO(`${record.date}T00:00:00`, {
+    zone: "utc",
+  });
+  if (recordDate < DateTime.utc()) {
     return new Response("You cannot edit a session in the past", {
       status: 400,
     });

@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import type { APIContext } from "astro";
 import { DB } from "../../../data/db";
 import { RequiredPermission, checkAuth } from "../../../util/auth";
@@ -22,14 +23,13 @@ export async function GET(
   if (!dateStr) {
     return new Response('Missing "date"', { status: 400 });
   }
-  const date = new Date(dateStr);
-  date.setDate(date.getDate() + 1); // come up with a better fix
+  const date = DateTime.fromISO(`${dateStr}T00:00:00`, { zone: "utc" });
 
   const sessions = await DB.trainingSession.findMany({
     where: { date: dateStr },
   });
   const schedules = await DB.trainingSchedule.findMany({
-    where: { dayOfWeek: date.getDay() },
+    where: { dayOfWeek: date.weekday },
   });
   const schedulesWithoutSessions = schedules.filter(
     (schedule) =>
@@ -47,8 +47,8 @@ export async function GET(
       time: schedule.timeOfDay,
       status: SESSION_STATUS.OPEN,
       notes: "~~ Scheduled ~~",
-      createdAt: date,
-      updatedAt: date,
+      createdAt: date.toJSDate(),
+      updatedAt: date.toJSDate(),
     }))
     .forEach((s) => sessions.push(s));
 
