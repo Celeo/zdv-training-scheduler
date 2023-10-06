@@ -1,10 +1,10 @@
 ---
 import Main from "../../layouts/Main.astro";
 import { getAuthorizationUrl } from "../../util/auth";
-import { ssoState } from "../../data";
+import { addOAuthState } from "../../data";
 
 const authUrl = await getAuthorizationUrl();
-ssoState.set(authUrl.state);
+addOAuthState(authUrl.state);
 ---
 
 <Main title="Redirecting">

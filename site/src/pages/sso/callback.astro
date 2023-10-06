@@ -1,7 +1,7 @@
 ---
 import Main from "../../layouts/Main.astro";
 import { createJwt, getAccessToken, getUserInfo } from "../../util/auth";
-import { ssoState } from "../../data";
+import { checkOAuthState, StateLookupResponse } from "../../data";
 
 let loginError = null;
 let jwt = null;
@@ -12,12 +12,18 @@ if (!code) {
   loginError = 'missing "code" parameter in URL';
 }
 const urlState = searchParams.get("state");
-if (urlState !== ssoState.value) {
+if (!urlState) {
   loginError = 'the given "state" parameter does not match the expected value';
+} else {
+  const lookup = checkOAuthState(urlState);
+  if (lookup === StateLookupResponse.NotPresent) {
+    loginError = 'no "state" value stored on the server; please try again';
+  } else if (lookup === StateLookupResponse.Expired) {
+    loginError = "the login has expired; please try again";
+  }
 }
 
 if (loginError === null) {
-  ssoState.set(null);
   const token = await getAccessToken(code!);
   const userInfo = await getUserInfo(token.accessToken);
   if (userInfo) {
@@ -42,8 +48,8 @@ if (loginError === null) {
           Something went wrong: {loginError}
         </p>
         <p class="text-center text-xl pt-10">
-          You can try again, but you'll probably need to notify the WM in
-          Discord or{" "}
+          If you think this response is in error, you can contact the ZDV WM in
+          Discord or via
           <a href="mailto:wm@zdvartcc.org" class="underline text-blue-300">
             email
           </a>

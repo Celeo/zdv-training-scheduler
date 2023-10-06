@@ -104,7 +104,7 @@ export async function getAuthorizationUrl(): Promise<{
   url: string;
   state: string;
 }> {
-  const state = nanoid();
+  const state = nanoid(64);
   const config = await loadConfig();
   const url = getOAuth(config).getAuthorizeUrl({
     redirect_uri: config.oauth.redirectUri,
