@@ -65,7 +65,11 @@ export function SessionInfo(props: SessionInfoProps) {
           <span className="font-bold">Positions</span>:{" "}
           {ratingNames(props.instructor, props.ratingMap)}
         </p>
-        {/* TODO: notes */}
+        {props.notes && (
+          <p>
+            <strong>Notes</strong>: {notes}
+          </p>
+        )}
       </div>
     </button>
   );

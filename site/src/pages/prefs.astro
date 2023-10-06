@@ -6,3 +6,9 @@ import Main from "../layouts/Main.astro";
   <h2 class="text-2xl">Preferences</h2>
   <!-- TODO -->
 </Main>
+
+<script>
+  if (localStorage.getItem("jwt") === null) {
+    window.location.href = "/";
+  }
+</script>
