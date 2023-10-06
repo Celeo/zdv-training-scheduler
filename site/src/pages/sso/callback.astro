@@ -1,7 +1,7 @@
 ---
 import Main from "../../layouts/Main.astro";
 import { createJwt, getAccessToken, getUserInfo } from "../../util/auth";
-import { ssoState } from "../../data/stores";
+import { ssoState } from "../../data";
 
 let loginError = null;
 let jwt = null;

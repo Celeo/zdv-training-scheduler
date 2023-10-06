@@ -1,6 +1,6 @@
 import type { APIContext } from "astro";
 import { checkAuth } from "../../util/auth";
-import { DB } from "../../data/db";
+import { DB } from "../../data";
 import type { TeacherRating } from "@prisma/client";
 
 type TrainerRatingEntry = Omit<

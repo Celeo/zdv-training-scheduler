@@ -1,6 +1,6 @@
 import type { APIContext } from "astro";
 import { RequiredPermission, checkAuth } from "../../util/auth";
-import { DB } from "../../data/db";
+import { DB } from "../../data";
 
 /**
  * Get all schedules.

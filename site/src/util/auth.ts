@@ -2,7 +2,7 @@ import axios from "axios";
 import { nanoid } from "nanoid";
 import liboauth, { OAuth2 } from "oauth";
 import * as jose from "jose";
-import { DB } from "../data/db";
+import { DB } from "../data";
 import { loadConfig, type Config } from "./config";
 
 /**

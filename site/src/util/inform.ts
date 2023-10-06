@@ -1,4 +1,4 @@
-import { DB } from "../data/db";
+import { DB } from "../data";
 import { getUserInfoFromCid } from "./auth";
 import { loadConfig } from "./config";
 import * as nodemailer from "nodemailer";
