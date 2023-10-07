@@ -12,6 +12,9 @@ module.exports = {
         "accent-3": "#7bb7df",
       },
     },
+    fontFamily: {
+      sans: ["Nunito", "sans-serif"],
+    },
   },
   plugins: [],
 };
