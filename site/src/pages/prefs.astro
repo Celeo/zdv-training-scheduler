@@ -1,10 +1,10 @@
 ---
 import Main from "../layouts/Main.astro";
+import { Preferences as Component } from "../components/Preferences";
 ---
 
-<Main title="Page not found">
-  <h2 class="text-2xl">Preferences</h2>
-  <!-- TODO -->
+<Main title="Preferences">
+  <Component client:only />
 </Main>
 
 <script>

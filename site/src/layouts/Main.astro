@@ -10,7 +10,7 @@ const { title } = Astro.props;
 ---
 
 <Site title={title}>
-  <nav>
+  <nav class="pt-1">
     <div
       class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto pt-1 px-2"
     >
@@ -23,7 +23,7 @@ const { title } = Astro.props;
     </div>
   </nav>
 
-  <div class="container mx-auto pt-4">
+  <div class="container mx-auto pt-6">
     <slot />
   </div>
 
