@@ -68,8 +68,8 @@ sequenceDiagram
   actor T as Trainer
 
   U->>A: Open calendar
-  A->>A: Fetch records
-  A->>U: Show existing sessions
+  A->>A: Fetch records (sessions and schedules)
+  A->>U: Show available sessions
   U->>A: Accept a session
   A->>U: Show confirmation
   A->>T: Notify of accepted session
