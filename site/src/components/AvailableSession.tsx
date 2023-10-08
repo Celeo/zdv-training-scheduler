@@ -1,8 +1,9 @@
 import { useState } from "react";
 import type { CidMap } from "../pages/api/cid_map";
 import type { TrainerRatingMap } from "../pages/api/ratings_map";
+import { FRIENDLY_POSITION_NAME_MAP, type Positions } from "../util/constants";
 
-export type SessionInfoProps = {
+export type AvailableSessionProps = {
   id: number;
   scheduleId: number | null;
   instructor: number;
@@ -19,44 +20,44 @@ function trainerName(cid: number, map: CidMap): string {
   return `${e?.first_name} ${e?.last_name} (${e?.operating_initials})`;
 }
 
-function ratings(cid: number, map: TrainerRatingMap): Array<[string, string]> {
+function ratings(cid: number, map: TrainerRatingMap): Array<Positions> {
   const e = map[cid];
-  const ratings: Array<[string, string]> = [];
+  const ratings = [];
   if (e?.minorGround) {
-    ratings.push(["minorGround", "Minor Ground"]);
+    ratings.push("minorGround");
   }
   if (e?.majorGround) {
-    ratings.push(["majorGround", "Major Ground"]);
+    ratings.push("majorGround");
   }
   if (e?.minorTower) {
-    ratings.push(["minorTower", "Minor Tower"]);
+    ratings.push("minorTower");
   }
   if (e?.majorTower) {
-    ratings.push(["majorTower", "Major Tower"]);
+    ratings.push("majorTower");
   }
   if (e?.minorApproach) {
-    ratings.push(["minorApproach", "Minor Approach"]);
+    ratings.push("minorApproach");
   }
   if (e?.majorApproach) {
-    ratings.push(["majorApproach", "Major Approach"]);
+    ratings.push("majorApproach");
   }
   if (e?.center) {
-    ratings.push(["center", "Center"]);
+    ratings.push("center");
   }
-  return ratings;
+  return ratings as Array<Positions>;
 }
 
-function ratingsToPrintout(ratings: Array<[string, string]>): string {
+function ratingsToPrintout(ratings: Array<Positions>): string {
   if (ratings.length === 0) {
     return "None";
   }
   if (ratings.length === 7) {
     return "All";
   }
-  return ratings.map((pair) => pair[1]).join(", ");
+  return ratings.map((pos) => FRIENDLY_POSITION_NAME_MAP[pos]).join(", ");
 }
 
-export function SessionInfo(props: SessionInfoProps) {
+export function AvailableSession(props: AvailableSessionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -76,6 +77,7 @@ export function SessionInfo(props: SessionInfoProps) {
         body: JSON.stringify({
           action: "ACCEPT",
           scheduleId: props.scheduleId,
+          selectedPosition,
         }),
       });
       const text = await resp.text();
@@ -91,9 +93,9 @@ export function SessionInfo(props: SessionInfoProps) {
   };
 
   const dropdownOptions = isOpen
-    ? ratings(props.instructor, props.ratingMap).map(([key, value]) => (
-        <option key={key} value={key}>
-          {value}
+    ? ratings(props.instructor, props.ratingMap).map((pos) => (
+        <option key={pos} value={pos}>
+          {FRIENDLY_POSITION_NAME_MAP[pos]}
         </option>
       ))
     : [];
@@ -107,7 +109,7 @@ export function SessionInfo(props: SessionInfoProps) {
         onClick={() => close()}
       >
         <div
-          className="relative top-20 mx-auto py-5 px-12 border w-4/12 shadow-lg rounded-md z-40"
+          className="relative top-20 mx-auto py-5 px-12 border w-3/12 shadow-lg rounded-md z-40"
           style={{ backgroundColor: "#3a4a6b" }}
           onClick={(e) => {
             e.stopPropagation();
@@ -127,15 +129,13 @@ export function SessionInfo(props: SessionInfoProps) {
             </p>
           )}
           <label htmlFor="position" className="block mb-1">
-            <span className="font-bold">Training position</span>:
+            <span className="font-bold">Position</span>:
           </label>
           <select
             name="position"
             id="position"
-            className="block border text-sm rounded-lg w-1/3 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
-            onChange={(e) => {
-              setSelectedPosition(e.target.value);
-            }}
+            className="block border text-sm rounded-lg w-1/2 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
+            onChange={(e) => setSelectedPosition(e.target.value)}
             value={selectedPosition}
           >
             <option value="" disabled></option>

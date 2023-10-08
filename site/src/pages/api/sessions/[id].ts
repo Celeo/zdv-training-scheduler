@@ -12,6 +12,7 @@ import { DateTime } from "luxon";
 
 type UpdatePayload = {
   action: "ACCEPT" | "UNACCEPT" | "UPDATE_NOTES";
+  selectedPosition: string;
   notes: string | undefined;
 };
 
@@ -64,7 +65,11 @@ export async function PUT(
     }
     await DB.trainingSession.update({
       where: { id: record.id },
-      data: { student: payload!.info.cid, status: SESSION_STATUS.ACCEPTED },
+      data: {
+        student: payload!.info.cid,
+        status: SESSION_STATUS.ACCEPTED,
+        selectedPosition: body.selectedPosition,
+      },
     });
     await informUser(record.instructor, InformTypes.ACCEPTED_SESSION, {
       first_name: payload?.info.first_name,

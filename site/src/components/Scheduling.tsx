@@ -3,9 +3,10 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import type { Value } from "../util/calendarTypes.ts";
 import type { TrainingSession } from "@prisma/client";
-import { SessionInfo } from "./SessionInfo.tsx";
+import { AvailableSession } from "./AvailableSession.tsx";
 import type { CidMap } from "../pages/api/cid_map.ts";
 import { DateTime } from "luxon";
+import { PendingSession } from "./PendingSession.tsx";
 
 export function Scheduling() {
   const [selectedDate, setSelectedDate] = useState<Value>(null);
@@ -72,7 +73,7 @@ export function Scheduling() {
         <h3 className="text-xl pb-3">Open sessions</h3>
         {sessions.length > 0 ? (
           sessions.map((session) => (
-            <SessionInfo
+            <AvailableSession
               key={session.id}
               {...session}
               cidMap={cidMap}
@@ -87,10 +88,15 @@ export function Scheduling() {
   }
 
   return (
-    <div className="mx-auto pt-10">
-      {/* TODO format these */}
-      {mySessions.length > 0 &&
-        mySessions.map((s) => <p id={s.id.toString()}>{JSON.stringify(s)}</p>)}
+    <div className="mx-auto">
+      {mySessions.length > 0 && (
+        <div className="pb-5 border-b-1 border-white">
+          <h2 className="text-xl">Pending sessions</h2>
+          {mySessions.map((session) => (
+            <PendingSession key={session.id} cidMap={cidMap} {...session} />
+          ))}
+        </div>
+      )}
 
       <div className="flex justify-between items-start space-x-10">
         <div className="text-black flex-none">
