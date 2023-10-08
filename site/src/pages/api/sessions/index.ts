@@ -46,7 +46,7 @@ export async function GET(
       date: dateStr,
       time: schedule.timeOfDay,
       status: SESSION_STATUS.OPEN,
-      notes: "~~ Scheduled ~~",
+      notes: "",
       createdAt: date.toJSDate(),
       updatedAt: date.toJSDate(),
     }))

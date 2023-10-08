@@ -46,10 +46,20 @@ export async function informUser(
     }
   }
   if (userPrefs.receiveDiscordMessages) {
-    await queueDiscordMessage(cid, message);
+    try {
+      console.log(`Queuing Discord notification for ${cid}`);
+      await queueDiscordMessage(cid, message);
+    } catch (err) {
+      console.error(`Could not enqueue Discord notification for ${cid}`);
+    }
   }
   if (userPrefs.receiveEmails) {
-    await sendEmail(cid, message);
+    try {
+      console.log(`Sending email notification for ${cid}`);
+      await sendEmail(cid, message);
+    } catch (err) {
+      console.error(`Could not send email notification for ${cid}`);
+    }
   }
 }
 
