@@ -143,7 +143,22 @@ sequenceDiagram
 
 ### Deploying
 
-WIP.
+#### Site
+
+These steps will create a Docker image, push it to your server, push a [systemd](https://en.wikipedia.org/wiki/Systemd) service file to the server, load the service into systemd, start it, and enable it starting on server start.
+
+1. Create & fill out a ".config.toml" file
+1. `docker build -t zdv-training-scheduler .`
+1. `docker save -o image.bin zdv-training-scheduler`
+1. `rsync -avz --process image.bin <your_ssh_target>/srv`
+1. `ssh <your_ssh_target`
+1. `docker load -i image.bin`
+1. Push the "systemd.service" file to your server at `/etc/systemd/system/zdv-training-scheduler.service`
+1. On the server, run `systemctl daemon-reload && systemctl enable --now zdv-training-scheduler.service`
+
+#### Bot
+
+TBD
 
 ## Contribution
 
