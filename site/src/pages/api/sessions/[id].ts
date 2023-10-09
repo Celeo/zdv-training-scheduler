@@ -39,7 +39,7 @@ export async function PUT(
   const record = await DB.trainingSession.findFirst({ where: { id } });
   if (!record) {
     // TODO support session from schedule
-    return new Response(`Could not find record with id ${id}`, { status: 404 });
+    return new Response(`Could not find record with id ${id}`, { status: 400 });
   }
   const recordDate = DateTime.fromISO(`${record.date}T${record.time}`, {
     zone: "utc",
@@ -136,7 +136,7 @@ export async function DELETE(
 
   const record = await DB.trainingSession.findFirst({ where: { id } });
   if (!record) {
-    return new Response(`Could not find record with id ${id}`, { status: 404 });
+    return new Response(`Could not find record with id ${id}`, { status: 400 });
   }
   const recordDate = DateTime.fromISO(`${record.date}T00:00:00`, {
     zone: "utc",

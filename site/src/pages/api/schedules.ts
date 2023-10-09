@@ -62,7 +62,7 @@ export async function DELETE(
     where: { id: body.id },
   });
   if (record === null) {
-    return new Response("Could not find schedule", { status: 404 });
+    return new Response("Could not find schedule", { status: 400 });
   }
   if (record.instructor !== payload?.info.cid) {
     return new Response("You cannot delete someone else's schedule", {

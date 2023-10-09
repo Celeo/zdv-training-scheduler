@@ -285,7 +285,7 @@ export async function checkAuth(
 
     /*
      * Since JWTs live on the user's browser, there needs to be some way to
-     * prevent their access of the site if needed, like for dismissals,
+     * prevent their access to the site if needed, like for dismissals,
      * abuse, or mandate of the ATM/DATM/TA.
      */
     const blocked = await DB.userBlocklist.findFirst({

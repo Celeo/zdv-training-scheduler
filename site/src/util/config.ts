@@ -9,6 +9,8 @@ const { readFile } = promises;
 export type Config = {
   /** Signing secret for JWTs */
   jwtSecret: string;
+  /** Secret for Discord bot site access */
+  discordSecret: string;
   /** ZDV SSO data */
   oauth: {
     clientId: string;
