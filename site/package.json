@@ -8,7 +8,9 @@
     "build_": "astro check && tsc --noEmit && astro build",
     "build": "astro build",
     "astro": "astro",
-    "format": "prettier --write \"src/**/*.{ts,tsx,astro}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx,astro}\"",
+    "docker:build": "docker build -t celeo/zdv-training-scheduler .",
+    "docker:push": "docker push celeo/zdv-training-scheduler:latest"
   },
   "dependencies": {
     "@astrojs/check": "^0.2.0",
