@@ -7,13 +7,16 @@
     "dev": "bun run src/index.ts"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "@types/luxon": "^3.3.2",
+    "bun-types": "latest",
+    "prettier": "^3.0.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
     "croner": "^7.0.2",
-    "discord.js": "^14.13.0"
+    "discord.js": "^14.13.0",
+    "luxon": "^3.4.3"
   }
 }
