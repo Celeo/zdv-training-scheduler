@@ -1,4 +1,5 @@
 import { Client, Events } from "discord.js";
+import { Cron } from "croner";
 
 const SITE_URL_ENV_VAR = "SITE_URL";
 const SITE_TOKEN_ENV_VAR = "SITE_TOKEN";
@@ -90,19 +91,15 @@ async function checkForMessages(): Promise<void> {
   }
 }
 
-/**
- * Enter an async loop, processing messages every 1 minute.
- */
-async function checkForMessagesLoop(): Promise<void> {
-  // warm up
-  await sleep(15_000);
+// check pending messages and deliver
+Cron("* * * * *", async () => {
+  await checkForMessages();
+});
 
-  // loop continuously
-  while (true) {
-    await checkForMessages();
-    await sleep(60_000);
-  }
-}
+// session reminders, 1 hour before
+Cron("0 * * * *", async () => {
+  // TODO
+});
 
 /*
  * Entrypoint.
@@ -114,6 +111,5 @@ if (import.meta.main) {
       process.exit(1);
     }
   }
-  checkForMessagesLoop();
   await main();
 }

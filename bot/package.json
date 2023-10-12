@@ -13,6 +13,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "croner": "^7.0.2",
     "discord.js": "^14.13.0"
   }
 }
