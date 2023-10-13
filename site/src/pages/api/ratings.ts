@@ -1,14 +1,16 @@
 import type { APIContext } from "astro";
-import { checkAuth } from "../../util/auth.ts";
+import { RequiredPermission, checkAuth } from "../../util/auth.ts";
 import { DB } from "../../data.ts";
 import type { TeacherRating } from "@prisma/client";
 
-type TrainerRatingEntry = Omit<
+export type TrainerRatingEntry = Omit<
   TeacherRating,
   "cid" | "createdAt" | "updatedAt"
 >;
 
 export type TrainerRatingMap = Record<number, TrainerRatingEntry>;
+
+type UpdatePayload = Omit<TeacherRating, "createdAt" | "updatedAt">;
 
 /**
  * Get the stored trainer ratings, returned as a map from CID.
@@ -34,4 +36,30 @@ export async function GET(
     };
   }
   return new Response(JSON.stringify(map));
+}
+
+/**
+ * Update the stored trainer ratings for the CID.
+ */
+export async function PUT(
+  context: APIContext<Record<string, any>>,
+): Promise<Response> {
+  const { shortCircuit } = await checkAuth(
+    context.request,
+    RequiredPermission.ADMIN,
+  );
+  if (shortCircuit) {
+    return shortCircuit;
+  }
+  const body: UpdatePayload = await context.request.json();
+  const ratings = await DB.teacherRating.findFirst({
+    where: { cid: body.cid },
+  });
+  if (ratings === undefined) {
+    return new Response(`Could not find ratings for cid ${body.cid}`, {
+      status: 400,
+    });
+  }
+  await DB.teacherRating.update({ where: { cid: body.cid }, data: body });
+  return new Response("Updated");
 }
