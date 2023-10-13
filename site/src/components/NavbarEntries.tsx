@@ -4,7 +4,6 @@ import * as jose from "jose";
 
 function Link(props: { href: string; name: string }): JSX.Element {
   const onPage = window.location.pathname === props.href;
-  console.log(window.location.pathname, props.href, onPage);
   return (
     <li>
       <a

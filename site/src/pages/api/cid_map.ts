@@ -10,9 +10,6 @@ type ZdvRosterEntry = {
   operating_initials: string;
 };
 
-/**
- * CID to name mapping
- */
 export type CidMap = Record<number, Omit<ZdvRosterEntry, "cid">>;
 
 /**

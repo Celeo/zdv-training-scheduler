@@ -49,15 +49,22 @@ export function Scheduling() {
           { path: "/api/cid_map", f: setCidMap },
           { path: "/api/ratings", f: setRatingMap },
         ].map(async ({ path, f }) => {
-          const resp = await fetch(path, {
-            headers: {
-              authorization: `Bearer ${localStorage.getItem("jwt")}`,
-            },
-          });
-          const data = await resp.json();
-          f(data);
+          try {
+            const resp = await fetch(path, {
+              headers: {
+                authorization: `Bearer ${localStorage.getItem("jwt")}`,
+              },
+            });
+            const data = await resp.json();
+            f(data);
+          } catch (err) {
+            console.error(`Could not get data from server: ${err}`);
+            setError("Could not get initial data from server");
+            return;
+          }
         }),
       );
+      setError(null);
     })();
     // no args - called only on mount
   }, []);
