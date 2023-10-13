@@ -104,6 +104,22 @@ sequenceDiagram
   end
 ```
 
+Also, Discord will send notifications to users 1 hour before their session.
+
+```mermaid
+sequenceDiagram
+  participant A as This site
+  participant B as Discord bot
+  actor U as User
+
+  A->>A: Every hour
+  A->>B: Fetch sessions
+  B->>A: Return sessions
+  alt upcoming session
+    A->>U: Send notification
+  end
+```
+
 ### Update trainer permissions
 
 Only the TA (and (D)ATM) can update permissions for Mentors and Instructors on which permissions they are allowed
