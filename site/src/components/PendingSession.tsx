@@ -71,7 +71,7 @@ export function PendingSession(props: PendingSessionProps) {
           )}
         </div>
       </div>
-      <ul className="list-disc list-inside">
+      <ul className="list-disc list-inside text-base">
         <li className="text-blue-200">
           {props.date} at {props.time} with {instructor?.first_name}{" "}
           {instructor?.last_name} ({instructor?.operating_initials}) for{" "}

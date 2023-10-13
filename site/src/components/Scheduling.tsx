@@ -70,7 +70,7 @@ export function Scheduling() {
   } else {
     body = (
       <>
-        <h3 className="text-xl pb-3">Open sessions</h3>
+        <h3 className="text-xl pb-2">Open sessions</h3>
         {sessions.length > 0 ? (
           sessions.map((session) => (
             <AvailableSession

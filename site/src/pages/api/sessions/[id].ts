@@ -14,6 +14,8 @@ import { LOGGER } from "../../../util/log";
 type UpdatePayload = {
   action: "ACCEPT" | "UNACCEPT" | "UPDATE_NOTES";
   selectedPosition: string;
+  date: string | null;
+  scheduleId: number | null;
   notes: string | undefined;
 };
 
@@ -37,10 +39,38 @@ export async function PUT(
     return shortCircuit;
   }
 
+  const body: UpdatePayload = await context.request.json();
   const record = await DB.trainingSession.findFirst({ where: { id } });
   if (!record) {
-    // TODO support session from schedule
-    return new Response(`Could not find record with id ${id}`, { status: 400 });
+    if (body.scheduleId === null || body.date === null) {
+      return new Response(
+        `Unknown record ${id} and missing schedule ID and/or date`,
+        { status: 400 },
+      );
+    }
+
+    const schedule = await DB.trainingSchedule.findFirst({
+      where: { id: body.scheduleId },
+    });
+    if (schedule === null) {
+      return new Response(`Unknown schedule ${body.scheduleId}`, {
+        status: 400,
+      });
+    }
+
+    await DB.trainingSession.create({
+      data: {
+        scheduleId: body.scheduleId,
+        instructor: schedule.instructor,
+        student: payload?.info.cid!,
+        selectedPosition: body.selectedPosition,
+        date: body.date!,
+        time: schedule.timeOfDay,
+        status: SESSION_STATUS.ACCEPTED,
+      },
+    });
+
+    return new Response("Accepted");
   }
   const recordDate = DateTime.fromISO(`${record.date}T${record.time}`, {
     zone: "utc",
@@ -51,7 +81,6 @@ export async function PUT(
     });
   }
 
-  const body: UpdatePayload = await context.request.json();
   if (body.action === "ACCEPT") {
     if (record.student !== null) {
       return new Response(

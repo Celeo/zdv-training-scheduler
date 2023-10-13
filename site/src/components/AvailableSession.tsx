@@ -78,6 +78,7 @@ export function AvailableSession(props: AvailableSessionProps) {
           action: "ACCEPT",
           scheduleId: props.scheduleId,
           selectedPosition,
+          date: props.date,
         }),
       });
       const text = await resp.text();
