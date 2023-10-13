@@ -151,11 +151,19 @@ sequenceDiagram
 
 ## Building
 
+### Site
+
 1. Install Node 16.12.0 or later
-1. Clone the repo
 1. Run `npm ci` to install dependencies
 1. Prepare the configuration by copying ".config.example.toml" to ".config.toml" and populate
 1. Run `npm run dev` to run the dev server
+
+### Bot
+
+1. Install [Bun](https://bun.sh/)
+1. Create a [Discord bot](https://discord.com/developers/applications)
+1. Create a ".env" file or otherwise supply "SITE_URL", "SITE_TOKEN", and "DISCORD_BOT_TOKEN" env vars
+1. Run with `bun run dev`
 
 ### Deploying
 
