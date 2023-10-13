@@ -5,7 +5,6 @@ import { checkOAuthState, StateLookupResponse } from "../../data";
 
 let loginError = null;
 let jwt = null;
-let userInfo;
 
 const searchParams = new URL(Astro.request.url).searchParams;
 const code = searchParams.get("code");
@@ -26,7 +25,7 @@ if (!urlState) {
 
 if (loginError === null) {
   const token = await getAccessToken(code!);
-  userInfo = await getUserInfo(token.accessToken);
+  const userInfo = await getUserInfo(token.accessToken);
   if (userInfo) {
     jwt = await createJwt(token.accessToken, userInfo);
   } else {
@@ -42,12 +41,6 @@ if (loginError === null) {
         <h2 class="text-center text-2xl pt-4">Log in successful</h2>
         <h3 class="text-center text-xl pt-10">Redirecting ...</h3>
         <input class="hidden" type="text" id="jwt" value={jwt} />
-        <input
-          class="hidden"
-          type="text"
-          id="roles"
-          value={userInfo?.roles.join(",")}
-        />
       </>
     ) : (
       <>
@@ -70,12 +63,6 @@ if (loginError === null) {
   const jwt = (document.getElementById("jwt") as HTMLInputElement).value;
   if (jwt) {
     localStorage.setItem("jwt", jwt);
-  }
-  const roles = (document.getElementById("roles") as HTMLInputElement).value;
-  if (roles) {
-    localStorage.setItem("roles", roles);
-  }
-  if (jwt || roles) {
     setTimeout(() => {
       window.location.href = "/";
     }, 1000);
