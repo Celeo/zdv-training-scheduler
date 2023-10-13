@@ -32,3 +32,6 @@ export const FRIENDLY_POSITION_NAME_MAP: Record<Positions, string> = {
   majorApproach: "Major Approach",
   center: "Center",
 };
+
+export const TRAINER_ROLES = ["mtr", "ins"];
+export const ADMIN_ROLES = ["atm", "datm", "ta", "wm"];

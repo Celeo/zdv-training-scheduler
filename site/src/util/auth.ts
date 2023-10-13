@@ -5,6 +5,7 @@ import * as jose from "jose";
 import { DB } from "../data";
 import { loadConfig, type Config } from "./config";
 import { LOGGER } from "./log";
+import { ADMIN_ROLES, TRAINER_ROLES } from "./constants";
 
 /**
  * Token data back from ZDV SSO.
@@ -57,9 +58,6 @@ export enum RequiredPermission {
   TRAINER,
   ADMIN,
 }
-
-const TRAINER_ROLES = ["mtr", "ins"];
-const ADMIN_ROLES = ["atm", "datm", "ta", "wm"];
 
 const GATE_TO_ROLES = {
   [RequiredPermission.TRAINER]: TRAINER_ROLES,

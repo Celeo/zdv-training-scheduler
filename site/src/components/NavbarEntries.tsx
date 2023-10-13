@@ -1,5 +1,12 @@
+import { ADMIN_ROLES } from "../util/constants";
+
 export function NavbarEntries() {
   const isLoggedIn = localStorage.getItem("jwt") !== null;
+  const roles = localStorage.getItem("roles");
+  let isAdmin = false;
+  if (roles) {
+    isAdmin = roles.split(",").some((r) => ADMIN_ROLES.includes(r));
+  }
 
   return (
     <ul className="flex flex-row space-x-8">
@@ -23,6 +30,16 @@ export function NavbarEntries() {
               Preferences
             </a>
           </li>
+          {isAdmin && (
+            <li>
+              <a
+                href="/admin"
+                className="block p-0 rounded hover:text-blue-500"
+              >
+                Admin
+              </a>
+            </li>
+          )}
           <li>
             <a
               href="/sso/logout"
