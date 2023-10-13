@@ -1,8 +1,14 @@
 ---
 import Main from "../layouts/Main.astro";
+import { Admin as Component } from '../components/Admin.tsx'
 ---
 
-<Main title="Logging out">
-  <h2 class="text-2xl pt-5">Admin</h2>
-  <!-- TODO -->
+<Main title="Admin">
+  <Component client:only />
 </Main>
+
+<script>
+  if (localStorage.getItem("jwt") === null) {
+    window.location.href = "/";
+  }
+</script>
