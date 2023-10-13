@@ -81,14 +81,14 @@ export function Scheduling() {
             />
           ))
         ) : (
-          <p className="text-md">No sessions available on this date</p>
+          <p className="text-md">No available sessions on this date</p>
         )}
       </>
     );
   }
 
   return (
-    <div className="mx-auto pt-5">
+    <div className="mx-auto max-w-6xl pt-5">
       {mySessions.length > 0 && (
         <div className="pb-5 border-b-1 border-white">
           <h2 className="text-xl">Pending sessions</h2>

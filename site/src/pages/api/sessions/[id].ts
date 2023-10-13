@@ -9,6 +9,7 @@ import { DB } from "../../../data";
 import { SESSION_STATUS } from "../../../util/constants";
 import { InformTypes, informUser } from "../../../util/inform";
 import { DateTime } from "luxon";
+import { LOGGER } from "../../../util/log";
 
 type UpdatePayload = {
   action: "ACCEPT" | "UNACCEPT" | "UPDATE_NOTES";
@@ -63,6 +64,9 @@ export async function PUT(
         status: 400,
       });
     }
+    LOGGER.info(
+      `${payload?.info.first_name} ${payload?.info.last_name} (${payload?.info.oi}) accepted session ${id}`,
+    );
     await DB.trainingSession.update({
       where: { id: record.id },
       data: {
@@ -86,6 +90,9 @@ export async function PUT(
         { status: 400 },
       );
     }
+    LOGGER.info(
+      `${payload?.info.first_name} ${payload?.info.last_name} (${payload?.info.oi}) unaccepted session ${id}`,
+    );
     await DB.trainingSession.update({
       where: { id: record.id },
       data: { student: null, status: SESSION_STATUS.OPEN },
@@ -108,6 +115,9 @@ export async function PUT(
     if (!canBeTrainer(payload.info)) {
       return new Response("You are not a trainer", { status: 403 });
     }
+    LOGGER.info(
+      `${payload?.info.first_name} ${payload?.info.last_name} (${payload?.info.oi}) updated notes for ${id}`,
+    );
     await DB.trainingSession.update({
       where: { id: record.id },
       data: { notes: body.notes ?? "" },

@@ -143,6 +143,12 @@ export function AvailableSession(props: AvailableSessionProps) {
           </select>
           <div className="flex justify-between pt-5">
             <button
+              className="text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center bg-red-400 hover:bg-red-300"
+              onClick={() => close()}
+            >
+              Cancel
+            </button>
+            <button
               className={`text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center ${
                 selectedPosition === "" || isLoading || response !== ""
                   ? "bg-gray-500"
@@ -152,12 +158,6 @@ export function AvailableSession(props: AvailableSessionProps) {
               onClick={() => confirm()}
             >
               Confirm
-            </button>
-            <button
-              className="text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center bg-red-400 hover:bg-red-300"
-              onClick={() => close()}
-            >
-              Cancel
             </button>
           </div>
           {response && (

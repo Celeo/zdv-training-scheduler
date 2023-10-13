@@ -50,16 +50,16 @@ export function PendingSession(props: PendingSessionProps) {
           </h3>
           <div className="flex justify-between pt-5">
             <button
-              className="text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center bg-red-400 hover:bg-red-300"
-              onClick={() => cancelReservation()}
-            >
-              Cancel reservation
-            </button>
-            <button
               className="text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center bg-green-400 hover:bg-green-300"
               onClick={() => setShowModal(false)}
             >
               Do not cancel
+            </button>
+            <button
+              className="text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center bg-red-400 hover:bg-red-300"
+              onClick={() => cancelReservation()}
+            >
+              Cancel reservation
             </button>
           </div>
           {error && (
