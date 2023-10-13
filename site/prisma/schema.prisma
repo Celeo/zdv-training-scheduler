@@ -55,8 +55,8 @@ model UserBlocklist {
 
 model UserPreference {
   cid                    Int     @id
-  receiveEmails          Boolean @default(true)
-  receiveDiscordMessages Boolean @default(false)
+  receiveEmails          Boolean @default(false)
+  receiveDiscordMessages Boolean @default(true)
 }
 
 model DiscordMessage {
@@ -65,10 +65,4 @@ model DiscordMessage {
   message     String
   createdAt   DateTime  @default(now())
   completedAt DateTime?
-}
-
-model Log {
-  id      Int      @id @default(autoincrement())
-  message String
-  date    DateTime @default(now())
 }

@@ -9,7 +9,7 @@ export type PendingSessionProps = {
   date: string;
   time: string;
   notes: string;
-  selectedPosition: Positions | null;
+  selectedPosition: string | null;
   cidMap: CidMap;
 };
 
@@ -75,7 +75,7 @@ export function PendingSession(props: PendingSessionProps) {
         <li className="text-blue-200">
           {props.date} at {props.time} with {instructor?.first_name}{" "}
           {instructor?.last_name} ({instructor?.operating_initials}) for{" "}
-          {FRIENDLY_POSITION_NAME_MAP[props.selectedPosition!]}
+          {FRIENDLY_POSITION_NAME_MAP[props.selectedPosition! as Positions]}
           {props.notes}
           <button
             className="focus:outline-none focus:ring-4 font-medium rounded-full text-sm px-2 py-1 text-center mr-2 mb-2 text-red-500 hover:text-white hover:bg-red-700 focus:ring-red-900"

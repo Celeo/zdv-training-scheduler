@@ -88,7 +88,7 @@ export function Scheduling() {
   }
 
   return (
-    <div className="mx-auto">
+    <div className="mx-auto pt-5">
       {mySessions.length > 0 && (
         <div className="pb-5 border-b-1 border-white">
           <h2 className="text-xl">Pending sessions</h2>

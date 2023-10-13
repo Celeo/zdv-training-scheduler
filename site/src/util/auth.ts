@@ -4,6 +4,7 @@ import liboauth, { OAuth2 } from "oauth";
 import * as jose from "jose";
 import { DB } from "../data";
 import { loadConfig, type Config } from "./config";
+import { LOGGER } from "./log";
 
 /**
  * Token data back from ZDV SSO.
@@ -135,7 +136,7 @@ export async function getAccessToken(code: string): Promise<ZdvAccessData> {
         },
       );
     } catch (err) {
-      console.log(`Error getting OAuth token: ${err}`);
+      LOGGER.warn(`Error getting OAuth token`, err);
       reject(err);
     }
   });
@@ -162,11 +163,9 @@ export async function getUserInfo(
     where: { cid: data.user.cid },
   });
   if (block !== null) {
-    await DB.log.create({
-      data: {
-        message: `${data.user.firstname} ${data.user.lastname} (${data.user.oi.oi}, ${data.user.cid.cid}) has been prevented from logging in: ${block.reason}`,
-      },
-    });
+    LOGGER.info(
+      `${data.user.firstname} ${data.user.lastname} (${data.user.oi.oi}, ${data.user.cid.cid}) has been prevented from logging in: ${block.reason}`,
+    );
     return null;
   }
 
@@ -199,11 +198,9 @@ export async function getUserInfo(
   }
 
   // log it
-  await DB.log.create({
-    data: {
-      message: `${userInfo.first_name} ${userInfo.last_name} (${userInfo.oi}, ${userInfo.cid}) has logged in`,
-    },
-  });
+  LOGGER.info(
+    `${userInfo.first_name} ${userInfo.last_name} (${userInfo.oi}, ${userInfo.cid}) has logged in`,
+  );
 
   return userInfo;
 }
@@ -292,11 +289,9 @@ export async function checkAuth(
       where: { cid: auth.info.cid },
     });
     if (blocked) {
-      await DB.log.create({
-        data: {
-          message: `${auth.info.first_name} ${auth.info.last_name} (${auth.info.oi}, ${auth.info.cid}) was blocked from accessing the site`,
-        },
-      });
+      LOGGER.info(
+        `${auth.info.first_name} ${auth.info.last_name} (${auth.info.oi}, ${auth.info.cid}) was blocked from accessing the site`,
+      );
       return {
         payload: null,
         shortCircuit: new Response(
@@ -312,9 +307,7 @@ export async function checkAuth(
     };
   } catch (err) {
     // singing issue / tampered with / different secret / something weird
-    await DB.log.create({
-      data: { message: `Could not verify JWT from user: ${err}` },
-    });
+    LOGGER.warn(`Could not verify JWT from user: ${err}`);
     return {
       payload: null,
       shortCircuit: new Response("Could not verify JWT", { status: 400 }),

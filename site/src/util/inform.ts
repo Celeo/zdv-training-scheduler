@@ -2,6 +2,7 @@ import { DB } from "../data";
 import { getUserInfoFromCid } from "./auth";
 import { loadConfig } from "./config";
 import * as nodemailer from "nodemailer";
+import { LOGGER } from "./log";
 
 /**
  * Triggering events that warrant async communication to the user.
@@ -47,33 +48,18 @@ export async function informUser(
   }
   if (userPrefs.receiveDiscordMessages) {
     try {
-      console.log(`Queuing Discord notification for ${cid}`);
-      await queueDiscordMessage(cid, message);
+      await DB.discordMessage.create({ data: { cid, message } });
     } catch (err) {
-      console.error(`Could not enqueue Discord notification for ${cid}`);
+      LOGGER.error(`Could not enqueue Discord notification for ${cid}`, err);
     }
   }
   if (userPrefs.receiveEmails) {
     try {
-      console.log(`Sending email notification for ${cid}`);
       await sendEmail(cid, message);
     } catch (err) {
-      console.error(`Could not send email notification for ${cid}`);
+      LOGGER.error(`Could not send email notification for ${cid}`, err);
     }
   }
-}
-
-/**
- * Queue a message for the Discord bot to retrieve.
- */
-async function queueDiscordMessage(
-  cid: number,
-  message: string,
-): Promise<void> {
-  await DB.log.create({
-    data: { message: `Enqueuing Discord message: ${message}` },
-  });
-  await DB.discordMessage.create({ data: { cid, message } });
 }
 
 /**
@@ -100,5 +86,5 @@ async function sendEmail(cid: number, text: string): Promise<void> {
     subject: "ZDV Training Notification",
     text,
   });
-  await DB.log.create({ data: { message: `Sent email to ${userInfo.email}` } });
+  LOGGER.info(`Sent email to ${userInfo.email}`);
 }
