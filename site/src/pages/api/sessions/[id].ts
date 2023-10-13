@@ -4,12 +4,12 @@ import {
   canBeTrainer,
   checkAuth,
   getUserInfoFromCid,
-} from "../../../util/auth";
-import { DB } from "../../../data";
-import { SESSION_STATUS } from "../../../util/constants";
-import { InformTypes, informUser } from "../../../util/inform";
+} from "../../../util/auth.ts";
+import { DB } from "../../../data.ts";
+import { SESSION_STATUS } from "../../../util/constants.ts";
+import { InformTypes, informUser } from "../../../util/inform.ts";
 import { DateTime } from "luxon";
-import { LOGGER } from "../../../util/log";
+import { LOGGER } from "../../../util/log.ts";
 
 type UpdatePayload = {
   action: "ACCEPT" | "UNACCEPT" | "UPDATE_NOTES";

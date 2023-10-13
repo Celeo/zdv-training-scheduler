@@ -1,6 +1,9 @@
 import { useState } from "react";
-import type { CidMap } from "../pages/api/cid_map";
-import { FRIENDLY_POSITION_NAME_MAP, type Positions } from "../util/constants";
+import type { CidMap } from "../pages/api/cid_map.ts";
+import {
+  FRIENDLY_POSITION_NAME_MAP,
+  type Positions,
+} from "../util/constants.ts";
 
 export type PendingSessionProps = {
   id: number;

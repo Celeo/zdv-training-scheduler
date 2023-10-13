@@ -47,7 +47,7 @@ export function Scheduling() {
         [
           { path: "/api/sessions/mine?pending=true", f: setMySessions },
           { path: "/api/cid_map", f: setCidMap },
-          { path: "/api/ratings_map", f: setRatingMap },
+          { path: "/api/ratings", f: setRatingMap },
         ].map(async ({ path, f }) => {
           const resp = await fetch(path, {
             headers: {

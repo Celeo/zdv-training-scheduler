@@ -1,7 +1,7 @@
 import type { APIContext } from "astro";
-import { checkAuth } from "../../../util/auth";
-import { DB } from "../../../data";
-import { SESSION_STATUS } from "../../../util/constants";
+import { checkAuth } from "../../../util/auth.ts";
+import { DB } from "../../../data.ts";
+import { SESSION_STATUS } from "../../../util/constants.ts";
 import { DateTime } from "luxon";
 
 /**

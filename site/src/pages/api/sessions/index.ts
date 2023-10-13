@@ -1,8 +1,8 @@
 import { DateTime } from "luxon";
 import type { APIContext } from "astro";
-import { DB } from "../../../data";
-import { RequiredPermission, checkAuth } from "../../../util/auth";
-import { SESSION_STATUS } from "../../../util/constants";
+import { DB } from "../../../data.ts";
+import { RequiredPermission, checkAuth } from "../../../util/auth.ts";
+import { SESSION_STATUS } from "../../../util/constants.ts";
 
 /**
  * Get all sessions. 'date' is a require query param.

@@ -1,6 +1,6 @@
 import type { APIContext } from "astro";
-import { loadConfig } from "../../util/config";
-import { DB } from "../../data";
+import { loadConfig } from "../../util/config.ts";
+import { DB } from "../../data.ts";
 
 /**
  * Check the auth header for the Discord bot's token.

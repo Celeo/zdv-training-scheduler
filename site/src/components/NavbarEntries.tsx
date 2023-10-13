@@ -1,5 +1,5 @@
-import type { JwtPayload } from "../util/auth";
-import { ADMIN_ROLES } from "../util/constants";
+import type { JwtPayload } from "../util/auth.ts";
+import { ADMIN_ROLES } from "../util/constants.ts";
 import * as jose from "jose";
 
 function Link(props: { href: string; name: string }): JSX.Element {

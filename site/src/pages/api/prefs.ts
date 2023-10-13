@@ -1,6 +1,6 @@
 import type { APIContext } from "astro";
-import { DB } from "../../data";
-import { checkAuth } from "../../util/auth";
+import { DB } from "../../data.ts";
+import { checkAuth } from "../../util/auth.ts";
 
 type UpdatePayload = {
   discord: boolean;

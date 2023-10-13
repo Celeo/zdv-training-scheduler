@@ -1,8 +1,8 @@
-import { DB } from "../data";
-import { getUserInfoFromCid } from "./auth";
-import { loadConfig } from "./config";
+import { DB } from "../data.ts";
+import { getUserInfoFromCid } from "./auth.ts";
+import { loadConfig } from "./config.ts";
 import * as nodemailer from "nodemailer";
-import { LOGGER } from "./log";
+import { LOGGER } from "./log.ts";
 
 /**
  * Triggering events that warrant async communication to the user.

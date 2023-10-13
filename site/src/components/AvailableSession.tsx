@@ -1,7 +1,10 @@
 import { useState } from "react";
-import type { CidMap } from "../pages/api/cid_map";
-import type { TrainerRatingMap } from "../pages/api/ratings_map";
-import { FRIENDLY_POSITION_NAME_MAP, type Positions } from "../util/constants";
+import type { CidMap } from "../pages/api/cid_map.ts";
+import type { TrainerRatingMap } from "../pages/api/ratings.ts";
+import {
+  FRIENDLY_POSITION_NAME_MAP,
+  type Positions,
+} from "../util/constants.ts";
 
 export type AvailableSessionProps = {
   id: number;

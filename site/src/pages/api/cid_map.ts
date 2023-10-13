@@ -1,7 +1,7 @@
 import type { APIContext } from "astro";
-import { loadConfig } from "../../util/config";
+import { loadConfig } from "../../util/config.ts";
 import axios from "axios";
-import { checkAuth } from "../../util/auth";
+import { checkAuth } from "../../util/auth.ts";
 
 type ZdvRosterEntry = {
   cid: number;

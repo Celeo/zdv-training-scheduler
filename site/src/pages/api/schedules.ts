@@ -1,6 +1,6 @@
 import type { APIContext } from "astro";
-import { RequiredPermission, checkAuth } from "../../util/auth";
-import { DB } from "../../data";
+import { RequiredPermission, checkAuth } from "../../util/auth.ts";
+import { DB } from "../../data.ts";
 
 /**
  * Get all schedules.
