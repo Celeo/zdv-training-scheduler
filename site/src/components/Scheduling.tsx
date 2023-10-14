@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import { useEffect, useState } from "react";
 import type { Value } from "../util/calendarTypes.ts";
 import type { TrainingSession } from "@prisma/client";
 import { AvailableSession } from "./AvailableSession.tsx";
 import type { CidMap } from "../pages/api/cid_map.ts";
 import { DateTime } from "luxon";
 import { PendingSession } from "./PendingSession.tsx";
+import * as jose from "jose";
+import type { JwtPayload } from "../util/auth.ts";
+import { TRAINER_ROLES } from "../util/constants.ts";
 
 export function Scheduling() {
   const [selectedDate, setSelectedDate] = useState<Value>(null);
@@ -16,6 +19,7 @@ export function Scheduling() {
   const [error, setError] = useState<string | null>(null);
   const [cidMap, setCidMap] = useState<CidMap>({});
   const [ratingMap, setRatingMap] = useState<{}>({});
+  const [isTrainer, setIsTrainer] = useState(false);
 
   // called when the user selects a date on the calendar
   const selectDay = async (val: Value) => {
@@ -65,6 +69,15 @@ export function Scheduling() {
         }),
       );
       setError(null);
+
+      const jwt = localStorage.getItem("jwt");
+      if (jwt) {
+        const claims = jose.decodeJwt(jwt) as JwtPayload;
+        setIsTrainer(
+          claims.info.roles.includes("wm") ||
+            claims.info.roles.some((r) => TRAINER_ROLES.includes(r)),
+        );
+      }
     })();
     // no args - called only on mount
   }, []);
@@ -77,6 +90,17 @@ export function Scheduling() {
   } else {
     body = (
       <>
+        {isTrainer && (
+          <div className="flex flex-items justify-center mb-3">
+            {/* TODO time picker dropdown */}
+            <button
+              className="ml-5 text-black focus:ring-4 focus:outline-none rounded-md w-1/3 text-sm px-5 py-1 text-center bg-secondary hover:bg-accent"
+              onClick={() => {}}
+            >
+              Create new
+            </button>
+          </div>
+        )}
         <h3 className="text-xl pb-2">Open sessions</h3>
         {sessions.length > 0 ? (
           sessions.map((session) => (
@@ -96,6 +120,14 @@ export function Scheduling() {
 
   return (
     <div className="mx-auto max-w-6xl pt-5">
+      {isTrainer && (
+        <>
+          <h2 className="text-xl">Schedules</h2>
+          <p>TODO</p>
+          <hr className="mt-5 pb-5" />
+        </>
+      )}
+
       {mySessions.length > 0 && (
         <div className="pb-5 border-b-1 border-white">
           <h2 className="text-xl">Pending sessions</h2>

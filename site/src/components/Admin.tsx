@@ -11,14 +11,26 @@ function Row(props: {
   ratings: TrainerRatingMap;
   cid: number;
 }): JSX.Element {
-  if (Object.keys(props.cidMap).length === 0) {
-    return <></>;
-  }
-
-  const [ratings, setRatings] = useState<TrainerRatingEntry>(
-    props.ratings[props.cid]!,
-  );
+  const [ratings, setRatings] = useState<TrainerRatingEntry | null>(null);
   const [dirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    if (props.ratings !== null) {
+      setRatings(props.ratings[props.cid]!);
+    }
+  }, [props.ratings]);
+
+  useEffect(() => {
+    let delta = false;
+    for (const k of Object.keys(ratings ?? {})) {
+      const key = k as Positions;
+      if ((ratings ?? {})[key] !== props.ratings[props.cid]![key]) {
+        delta = true;
+        break;
+      }
+    }
+    setDirty(delta);
+  }, [ratings]);
 
   const save = async (): Promise<void> => {
     try {
@@ -36,49 +48,44 @@ function Row(props: {
         );
         return;
       }
-      // TODO improve to not need full-page reload
       window.location.reload();
     } catch (err) {
       console.error(`Error updating ratings for ${props.cid}: ${err}`);
     }
   };
 
-  useEffect(() => {
-    let delta = false;
-    for (const k of Object.keys(ratings)) {
-      const key = k as Positions;
-      if (ratings[key] !== props.ratings[props.cid]![key]) {
-        delta = true;
-        break;
-      }
-    }
-    setDirty(delta);
-  }, [ratings]);
-
-  const user = props.cidMap[props.cid]!;
+  const user = props.cidMap[props.cid];
+  if (user === undefined) {
+    return <></>;
+  }
   return (
     <div>
       <p className="text-base pt-2">
         {user.first_name} {user.last_name} ({user.operating_initials})
       </p>
       <div className="flex flex-row justify-between text-sm">
-        {Object.keys(ratings).map((n) => {
-          const name = n as Positions;
-          return (
-            <div key={name} className="flex items-center">
-              <input
-                id={name}
-                type="checkbox"
-                checked={ratings[name]}
-                onChange={() => setRatings((r) => ({ ...r, [name]: !r[name] }))}
-                className="w-4 h-4 text-blue-600 rounded ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600"
-              />
-              <label htmlFor={name} className="ml-2 text-sm font-medium">
-                {FRIENDLY_POSITION_NAME_MAP[name]}
-              </label>
-            </div>
-          );
-        })}
+        {ratings &&
+          Object.keys(ratings).map((n) => {
+            const name = n as Positions;
+            return (
+              <div key={name} className="flex items-center">
+                <input
+                  id={name}
+                  type="checkbox"
+                  checked={ratings[name]}
+                  onChange={() =>
+                    setRatings((r) =>
+                      r === null ? null : { ...r, [name]: !r[name] },
+                    )
+                  }
+                  className="w-4 h-4 text-blue-600 rounded ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600"
+                />
+                <label htmlFor={name} className="ml-2 text-sm font-medium">
+                  {FRIENDLY_POSITION_NAME_MAP[name]}
+                </label>
+              </div>
+            );
+          })}
         <button
           className={`text-black focus:ring-4 focus:outline-none rounded-2xl text-sm w-auto px-3 py-1 text-center ${
             dirty ? "bg-green-400 hover:bg-green-300" : "bg-gray-500"

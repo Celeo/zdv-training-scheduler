@@ -12,7 +12,6 @@ export async function GET(
   if (shortCircuit) {
     return shortCircuit;
   }
-
   return new Response(JSON.stringify(await DB.trainingSchedule.findMany()));
 }
 

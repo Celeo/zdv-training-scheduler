@@ -34,7 +34,9 @@ export function NavbarEntries() {
      * gratuitous.
      */
     const claims = jose.decodeJwt(jwt) as JwtPayload;
-    isAdmin = claims.info.roles.some((r) => ADMIN_ROLES.includes(r));
+    isAdmin =
+      claims.info.roles.includes("wm") ||
+      claims.info.roles.some((r) => ADMIN_ROLES.includes(r));
   }
 
   return (
