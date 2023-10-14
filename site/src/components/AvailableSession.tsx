@@ -172,6 +172,7 @@ export function AvailableSession(props: AvailableSessionProps) {
           )}
         </div>
       </div>
+      {/* TODO cancel button if it's the trainers own session */}
       <button
         className="block p-3 mb-1 w-full max-w-3xl border rounded-lg shadow bg-gray-800 border-gray-700 hover:bg-gray-700"
         onClick={() => setIsOpen(true)}
