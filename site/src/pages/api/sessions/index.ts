@@ -4,6 +4,12 @@ import { DB } from "../../../data.ts";
 import { RequiredPermission, checkAuth } from "../../../util/auth.ts";
 import { SESSION_STATUS } from "../../../util/constants.ts";
 
+type UpdatePayload = {
+  date: string;
+  time: string;
+  notes: string;
+};
+
 /**
  * Get all sessions. 'date' is a require query param.
  *
@@ -52,11 +58,14 @@ export async function GET(
     }))
     .forEach((s) => sessions.push(s));
 
-  return new Response(
-    JSON.stringify(
-      sessions.filter((session) => session.status === SESSION_STATUS.OPEN),
-    ),
+  const open = sessions.filter(
+    (session) => session.status === SESSION_STATUS.OPEN,
   );
+  open.sort(
+    (a, b) => parseInt(a.time.split(":")[0]!) - parseInt(b.time.split(":")[0]!),
+  );
+
+  return new Response(JSON.stringify(open));
 }
 
 /**
@@ -73,13 +82,14 @@ export async function POST(
     return shortCircuit;
   }
 
-  const body = await context.request.json();
+  const body: UpdatePayload = await context.request.json();
   await DB.trainingSession.create({
     data: {
       instructor: payload!.info.cid,
       date: body.date,
       time: body.time,
+      notes: body.notes,
     },
   });
-  return new Response(null, { status: 201 });
+  return new Response("Created", { status: 201 });
 }

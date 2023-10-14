@@ -13,18 +13,22 @@ import { TRAINER_ROLES } from "../util/constants.ts";
 
 export function Scheduling() {
   const [selectedDate, setSelectedDate] = useState<Value>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [sessions, setSessions] = useState<Array<TrainingSession>>([]);
   const [mySessions, setMySessions] = useState<Array<TrainingSession>>([]);
   const [error, setError] = useState<string | null>(null);
   const [cidMap, setCidMap] = useState<CidMap>({});
   const [ratingMap, setRatingMap] = useState<{}>({});
   const [isTrainer, setIsTrainer] = useState(false);
+  const [newSessionTime, setNewSessionTime] = useState("");
+  const [newSessionNotes, setNewSessionNotes] = useState("");
 
-  // called when the user selects a date on the calendar
-  const selectDay = async (val: Value) => {
+  /**
+   * Called when the user selects a date on the calendar.
+   */
+  const selectDay = async (val: Value): Promise<void> => {
     setSelectedDate(val);
-    setIsLoading(true);
+    setNewSessionTime("");
+    setNewSessionNotes("");
     const date = val as Date;
     try {
       const dt = DateTime.fromJSDate(date);
@@ -41,7 +45,36 @@ export function Scheduling() {
       console.error(`Error getting sessions for ${date}: ${err}`);
       setError("Could not get sessions");
     }
-    setIsLoading(false);
+  };
+
+  /**
+   * Called to create a new session by a trainer.
+   */
+  const createNewSession = async (): Promise<void> => {
+    try {
+      const dt = DateTime.fromJSDate(selectedDate as Date);
+      const ds = `${dt.year}-${dt.month.toString().padStart(2, "0")}-${dt.day
+        .toString()
+        .padStart(2, "0")}`;
+      const resp = await fetch("/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({
+          date: ds,
+          time: newSessionTime,
+          notes: newSessionNotes,
+        }),
+        headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
+      });
+      if (!resp.ok) {
+        console.error(`Error response from saving new session`);
+        setError("Could not create session");
+        return;
+      }
+      await selectDay(selectedDate);
+    } catch (err) {
+      console.error(`Error creating new session: ${err}`);
+      setError("Could not create session");
+    }
   };
 
   // retrieve schedules and the current user's pending sessions
@@ -83,21 +116,42 @@ export function Scheduling() {
   }, []);
 
   let body;
-  if (isLoading) {
-    body = <p className="italic text-lg text-gray-300">Loading ...</p>;
-  } else if (selectedDate === null) {
+  if (selectedDate === null) {
     body = <h3 className="text-xl">Select a date on the calendar</h3>;
   } else {
     body = (
       <>
         {isTrainer && (
-          <div className="flex flex-items justify-center mb-3">
-            {/* TODO time picker dropdown */}
-            <button
-              className="ml-5 text-black focus:ring-4 focus:outline-none rounded-md w-1/3 text-sm px-5 py-1 text-center bg-secondary hover:bg-accent"
-              onClick={() => {}}
+          <div className="flex flex-items justify-center gap-x-5 mb-3">
+            <select
+              name="time"
+              id="time"
+              className="block border text-sm rounded-lg w-1/4 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
+              onChange={(e) => setNewSessionTime(e.target.value)}
+              value={newSessionTime == null ? "" : newSessionTime.toString()}
             >
-              Create new
+              <option value="" disabled></option>
+              {[...Array(24).keys()].map((i) => {
+                const time = i.toString().padStart(2, "0") + ":00";
+                return (
+                  <option key={time} value={time}>
+                    {time}
+                  </option>
+                );
+              })}
+            </select>
+            <input
+              type="text"
+              placeholder="Notes (optional)"
+              className="border text-sm rounded-lg block w-1/4 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+              value={newSessionNotes}
+              onChange={(e) => setNewSessionNotes(e.target.value)}
+            />
+            <button
+              className="text-black focus:ring-4 focus:outline-none rounded-md w-1/4 text-sm px-5 py-1 text-center bg-secondary hover:bg-accent"
+              onClick={createNewSession}
+            >
+              New session
             </button>
           </div>
         )}
@@ -123,7 +177,7 @@ export function Scheduling() {
       {isTrainer && (
         <>
           <h2 className="text-xl">Schedules</h2>
-          <p>TODO</p>
+          {/* TODO */}
           <hr className="mt-5 pb-5" />
         </>
       )}
