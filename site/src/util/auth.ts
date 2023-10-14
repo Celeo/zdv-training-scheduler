@@ -266,7 +266,7 @@ export async function checkAuth(
     const auth = await verifyJwt(authHeader.substring(7));
 
     // per-page permissions gating
-    if (gate !== RequiredPermission.ALL) {
+    if (gate !== RequiredPermission.ALL && !auth.info.roles.includes("wm")) {
       const sufficient = auth.info.roles.find((role) =>
         GATE_TO_ROLES[gate].includes(role),
       );
