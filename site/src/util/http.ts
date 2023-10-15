@@ -3,20 +3,20 @@
  *
  * Automatically sets the "authorization" header from `localStorage`.
  */
-export async function callEndpoint(
+export async function callEndpoint<T = unknown>(
   path: string,
-  args: {
-    method?: string;
+  args?: {
+    method?: "GET" | "POST" | "PUT" | "DELETE";
     body?: unknown;
-    setHook?: React.Dispatch<React.SetStateAction<unknown>>;
+    setHook?: React.Dispatch<React.SetStateAction<any>>;
     returnData?: boolean;
   },
-): Promise<unknown | null> {
-  const method = args.method ?? "GET";
-  const body = args.body
-    ? typeof args.body == "string"
-      ? args.body
-      : JSON.stringify(args.body)
+): Promise<T | undefined> {
+  const method = args?.method ?? "GET";
+  const body = args?.body
+    ? typeof args?.body == "string"
+      ? args?.body
+      : JSON.stringify(args?.body)
     : null;
 
   try {
@@ -33,17 +33,17 @@ export async function callEndpoint(
       throw new Error(msg);
     }
 
-    if (args.setHook !== undefined || args.returnData) {
+    if (args?.setHook !== undefined || args?.returnData) {
       const data = await resp.json();
-      if (args.setHook) {
-        args.setHook(data);
+      if (args?.setHook) {
+        args?.setHook(data);
       }
-      if (args.returnData) {
+      if (args?.returnData) {
         return data;
       }
     }
 
-    return null;
+    return undefined;
   } catch (err) {
     const msg = `Could not send ${method} request${
       body ? " with body" : ""

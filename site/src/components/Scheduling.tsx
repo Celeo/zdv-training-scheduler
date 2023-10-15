@@ -10,6 +10,7 @@ import { PendingSession } from "./PendingSession.tsx";
 import * as jose from "jose";
 import type { JwtPayload } from "../util/auth.ts";
 import { TRAINER_ROLES } from "../util/constants.ts";
+import { callEndpoint } from "../util/http.ts";
 
 export function Scheduling() {
   const [selectedDate, setSelectedDate] = useState<Value>(null);
@@ -35,12 +36,7 @@ export function Scheduling() {
       const ds = `${dt.year}-${dt.month.toString().padStart(2, "0")}-${dt.day
         .toString()
         .padStart(2, "0")}`;
-      const resp = await fetch(`/api/sessions?date=${ds}`, {
-        headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
-      });
-      const data: Array<TrainingSession> = await resp.json();
-      setSessions(data);
-      setError(null);
+      await callEndpoint(`/api/sessions?date=${ds}`, { setHook: setSessions });
     } catch (err) {
       console.error(`Error getting sessions for ${date}: ${err}`);
       setError("Could not get sessions");
@@ -56,20 +52,14 @@ export function Scheduling() {
       const ds = `${dt.year}-${dt.month.toString().padStart(2, "0")}-${dt.day
         .toString()
         .padStart(2, "0")}`;
-      const resp = await fetch("/api/sessions", {
+      await callEndpoint("/api/sessions", {
         method: "POST",
-        body: JSON.stringify({
+        body: {
           date: ds,
           time: newSessionTime,
           notes: newSessionNotes,
-        }),
-        headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
+        },
       });
-      if (!resp.ok) {
-        console.error(`Error response from saving new session`);
-        setError("Could not create session");
-        return;
-      }
       await selectDay(selectedDate);
     } catch (err) {
       console.error(`Error creating new session: ${err}`);
@@ -80,27 +70,13 @@ export function Scheduling() {
   // retrieve schedules and the current user's pending sessions
   useEffect(() => {
     (async () => {
-      await Promise.all(
-        [
-          { path: "/api/sessions/mine?pending=true", f: setMySessions },
-          { path: "/api/cid_map", f: setCidMap },
-          { path: "/api/ratings", f: setRatingMap },
-        ].map(async ({ path, f }) => {
-          try {
-            const resp = await fetch(path, {
-              headers: {
-                authorization: `Bearer ${localStorage.getItem("jwt")}`,
-              },
-            });
-            const data = await resp.json();
-            f(data);
-          } catch (err) {
-            console.error(`Could not get data from server: ${err}`);
-            setError("Could not get initial data from server");
-            return;
-          }
+      await Promise.all([
+        callEndpoint("/api/sessions/mine?pending=true", {
+          setHook: setMySessions,
         }),
-      );
+        callEndpoint("/api/cid_map", { setHook: setCidMap }),
+        callEndpoint("/api/ratings", { setHook: setRatingMap }),
+      ]);
       setError(null);
 
       const jwt = localStorage.getItem("jwt");

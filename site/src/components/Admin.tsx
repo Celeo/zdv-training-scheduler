@@ -100,10 +100,7 @@ export function Admin() {
 
   const getRatings = async (): Promise<void> => {
     try {
-      const resp = await fetch("/api/ratings", {
-        headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
-      });
-      setRatings(await resp.json());
+      await callEndpoint("/api/ratings", { setHook: setRatings });
     } catch (err) {
       console.error(`could not get ratings: ${err}`);
       setError(true);
@@ -112,10 +109,7 @@ export function Admin() {
 
   const getCidMap = async (): Promise<void> => {
     try {
-      const resp = await fetch("/api/cid_map", {
-        headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
-      });
-      setCidMap(await resp.json());
+      await callEndpoint("/api/cid_map", { setHook: setCidMap });
     } catch (err) {
       console.error(`could not get CID mapping: ${err}`);
       setError(true);

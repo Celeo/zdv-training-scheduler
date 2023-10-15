@@ -4,6 +4,7 @@ import {
   FRIENDLY_POSITION_NAME_MAP,
   type Positions,
 } from "../util/constants.ts";
+import { callEndpoint } from "../util/http.ts";
 
 export type PendingSessionProps = {
   id: number;
@@ -22,10 +23,9 @@ export function PendingSession(props: PendingSessionProps) {
 
   const cancelReservation = async (): Promise<void> => {
     try {
-      await fetch(`/api/sessions/${props.id}`, {
+      await callEndpoint(`/api/sessions/${props.id}`, {
         method: "PUT",
-        body: JSON.stringify({ action: "UNACCEPT" }),
-        headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
+        body: { action: "UNACCEPT" },
       });
       window.location.reload();
     } catch (err) {

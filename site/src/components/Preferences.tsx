@@ -1,18 +1,23 @@
 import { useEffect, useState } from "react";
+import { callEndpoint } from "../util/http";
+
+type EndpointData = {
+  receiveEmails: boolean;
+  receiveDiscordMessages: boolean;
+};
 
 export function Preferences() {
   const [email, setEmail] = useState(false);
   const [discord, setDiscord] = useState(false);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     (async () => {
-      const resp = await fetch("/api/prefs", {
-        headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
+      const data = await callEndpoint<EndpointData>("/api/prefs", {
+        returnData: true,
       });
-      const data = await resp.json();
-      setEmail(data.receiveEmails);
-      setDiscord(data.receiveDiscordMessages);
+      setEmail(data!.receiveEmails);
+      setDiscord(data!.receiveDiscordMessages);
     })();
     // no args - called only on mount
   }, []);
@@ -22,17 +27,11 @@ export function Preferences() {
   ): Promise<void> => {
     event.preventDefault();
     try {
-      const resp = await fetch("/api/prefs", {
-        headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
+      await callEndpoint("/api/prefs", {
         method: "PUT",
-        body: JSON.stringify({ email, discord }),
+        body: { email, discord },
       });
-      if (resp.status !== 200) {
-        console.error(`Error saving preferences, response code ${resp.status}`);
-        setError(`could not save preferences`);
-      } else {
-        window.location.reload();
-      }
+      window.location.reload();
     } catch (err) {
       console.error(`Error saving preferences: ${err}`);
       setError(`could not save preferences`);

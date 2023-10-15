@@ -5,6 +5,7 @@ import {
   FRIENDLY_POSITION_NAME_MAP,
   type Positions,
 } from "../util/constants.ts";
+import { callEndpoint } from "../util/http.ts";
 
 export type AvailableSessionProps = {
   id: number;
@@ -74,22 +75,16 @@ export function AvailableSession(props: AvailableSessionProps) {
   const confirm = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      const resp = await fetch(`/api/sessions/${props.id}`, {
-        headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
+      await callEndpoint(`/api/sessions/${props.id}`, {
         method: "PUT",
-        body: JSON.stringify({
+        body: {
           action: "ACCEPT",
           scheduleId: props.scheduleId,
           selectedPosition,
           date: props.date,
-        }),
+        },
       });
-      const text = await resp.text();
-      if (resp.status === 200 && text === "Accepted") {
-        window.location.reload();
-      } else {
-        setResponse("");
-      }
+      window.location.reload();
     } catch (err) {
       console.error(`Error confirming session: ${err}`);
       setResponse("There was an error confirming your session");
