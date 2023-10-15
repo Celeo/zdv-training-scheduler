@@ -4,12 +4,6 @@ import { DB } from "../../../data.ts";
 import { RequiredPermission, checkAuth } from "../../../util/auth.ts";
 import { SESSION_STATUS } from "../../../util/constants.ts";
 
-type UpdatePayload = {
-  date: string;
-  time: string;
-  notes: string;
-};
-
 /**
  * Get all sessions. 'date' is a require query param.
  *
@@ -24,6 +18,8 @@ export async function GET(
   if (shortCircuit) {
     return shortCircuit;
   }
+
+  // 'date' URL parameter is required
   const urlParams = new URL(context.request.url).searchParams;
   const dateStr = urlParams.get("date");
   if (!dateStr) {
@@ -31,6 +27,7 @@ export async function GET(
   }
   const date = DateTime.fromISO(`${dateStr}T00:00:00`, { zone: "utc" });
 
+  // find the sessions on the date and the schedules on the day of the week
   const sessions = await DB.trainingSession.findMany({
     where: { date: dateStr },
   });
@@ -38,11 +35,17 @@ export async function GET(
     where: { dayOfWeek: date.weekday },
     include: { trainingScheduleException: true },
   });
+
+  // for those schedules, filter down to those that don't have a session on this date
   const schedulesWithoutSessions = schedules.filter(
     (schedule) =>
       sessions.find((session) => session.scheduleId === schedule.id) ===
       undefined,
   );
+
+  // for schedules that should "tick" on this date, filter to those that
+  // the owner hasn't expressly cancelled (deleted), and add those to
+  // the list of sessions to show to the user (with a mock id of -1)
   schedulesWithoutSessions
     .filter(
       (schedule) =>
@@ -65,6 +68,9 @@ export async function GET(
     }))
     .forEach((s) => sessions.push(s));
 
+  // Now filter to sessions that are open. This cannot have been done as part of the DB
+  // query, since we needed to know _all_ the sessions on the date to determine
+  // which schedules should "tick".
   const open = sessions.filter(
     (session) => session.status === SESSION_STATUS.OPEN,
   );
@@ -74,6 +80,12 @@ export async function GET(
 
   return new Response(JSON.stringify(open));
 }
+
+type UpdatePayload = {
+  date: string;
+  time: string;
+  notes: string;
+};
 
 /**
  * Create a new session. Trainers only.

@@ -2,11 +2,6 @@ import type { APIContext } from "astro";
 import { DB } from "../../data.ts";
 import { checkAuth } from "../../util/auth.ts";
 
-type UpdatePayload = {
-  discord: boolean;
-  email: boolean;
-};
-
 /**
  * Get the user's preferences.
  */
@@ -17,11 +12,16 @@ export async function GET(
   if (shortCircuit) {
     return shortCircuit;
   }
-  const prefs = await DB.userPreference.findFirst({
+  const preferences = await DB.userPreference.findFirst({
     where: { cid: payload!.info.cid },
   });
-  return new Response(JSON.stringify(prefs));
+  return new Response(JSON.stringify(preferences));
 }
+
+type UpdatePayload = {
+  discord: boolean;
+  email: boolean;
+};
 
 /**
  * Update the user's preferences.

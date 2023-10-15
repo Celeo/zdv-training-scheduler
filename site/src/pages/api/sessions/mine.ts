@@ -36,6 +36,7 @@ export async function GET(
     });
     return new Response(JSON.stringify(records));
   }
+
   return new Response(
     JSON.stringify(
       await DB.trainingSession.findMany({

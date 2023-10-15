@@ -68,12 +68,14 @@ export async function DELETE(
       status: 400,
     });
   }
-  // disconnect existing sessions
+
+  // disconnect existing sessions, but don't delete them
   await DB.trainingSession.updateMany({
     where: { scheduleId: body.id },
     data: { scheduleId: null },
   });
   // delete the schedule
   await DB.trainingSchedule.delete({ where: { id: body.id } });
-  return new Response(null, { status: 200 });
+
+  return new Response("Deleted", { status: 200 });
 }

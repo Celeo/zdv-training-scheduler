@@ -26,10 +26,7 @@ export async function informUser(
   type: InformTypes,
   data: Record<string, any>,
 ): Promise<void> {
-  let userPrefs = await DB.userPreference.findFirst({ where: { cid } });
-  if (userPrefs === null) {
-    userPrefs = await DB.userPreference.create({ data: { cid } });
-  }
+  // construct message
   let message = "";
   switch (type) {
     case InformTypes.JOINED_SITE: {
@@ -46,14 +43,17 @@ export async function informUser(
       break;
     }
   }
-  if (userPrefs.receiveDiscordMessages) {
+
+  // based on the user's preferences, send them the message over Discord and/or email (or neither)
+  let userPrefs = await DB.userPreference.findFirst({ where: { cid } });
+  if (userPrefs?.receiveDiscordMessages) {
     try {
       await DB.discordMessage.create({ data: { cid, message } });
     } catch (err) {
       LOGGER.error(`Could not enqueue Discord notification for ${cid}`, err);
     }
   }
-  if (userPrefs.receiveEmails) {
+  if (userPrefs?.receiveEmails) {
     try {
       await sendEmail(cid, message);
     } catch (err) {
@@ -68,6 +68,8 @@ export async function informUser(
 async function sendEmail(cid: number, text: string): Promise<void> {
   const config = await loadConfig();
   const userInfo = await getUserInfoFromCid(cid);
+
+  // use the ZDV email servers, as the zdvartcc.org site does
   const transporter = nodemailer.createTransport({
     host: config.email.host,
     port: config.email.port,

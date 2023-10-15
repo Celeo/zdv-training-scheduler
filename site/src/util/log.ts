@@ -1,7 +1,7 @@
 import { createLogger, format, transports } from "winston";
 
 /**
- * App logging.
+ * Backend app logging to console and file.
  */
 export const LOGGER = createLogger({
   level: "info",

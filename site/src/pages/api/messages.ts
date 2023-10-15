@@ -5,6 +5,10 @@ import { loadConfig } from "../../util/config.ts";
 /**
  * Check the auth header for the Discord bot's token.
  *
+ * This is different from the authentication on the rest
+ * of the site, since I don't want to bother with the bot
+ * having to get a dynamic token from somewhere.
+ *
  * Return an error `Response` if the header isn't present
  * or the value is incorrect.
  */
@@ -21,7 +25,7 @@ async function checkHeader(request: Request): Promise<Response | null> {
 }
 
 /**
- * Discord bot getting pending Discord messages.
+ * Discord bot retrieving pending Discord messages.
  */
 export async function GET(
   context: APIContext<Record<string, any>>,
@@ -37,7 +41,7 @@ export async function GET(
 }
 
 /**
- * Discord bot successfully sent a message; update DB.
+ * Discord bot reporting having sent the message.
  */
 export async function PUT(
   context: APIContext<Record<string, any>>,

@@ -19,24 +19,19 @@ type UpdatePayload = {
   notes?: string;
 };
 
-type DeletePayload = {
-  scheduleId?: number;
-  date: string;
-};
-
 /**
  * Edit a session.
  *
- * Trainers can edit any of their sessions.
+ * Trainers can edit any of their sessions. Students will use this endpoint
+ * to accept an available session.
  *
- * Students will use this endpoint to accept an
- * available session.
+ * This function is quite long, as it handles several different user interactions.
  */
 export async function PUT(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
   if (!context.params.id) {
-    return new Response(null, { status: 404 });
+    return new Response('Missing "id" URL parameter', { status: 404 });
   }
   const id = parseInt(context.params.id);
   const { payload, shortCircuit } = await checkAuth(context.request);
@@ -47,6 +42,8 @@ export async function PUT(
   const body: UpdatePayload = await context.request.json();
   const record = await DB.trainingSession.findFirst({ where: { id } });
   if (!record) {
+    /* could not find the session by id */
+
     if (body.scheduleId === null || body.date === null) {
       return new Response(
         `Unknown record ${id} and missing schedule ID and/or date`,
@@ -58,6 +55,7 @@ export async function PUT(
       where: { id: body.scheduleId },
     });
     if (schedule === null) {
+      // unknown session, unknown schedule
       return new Response(`Unknown schedule ${body.scheduleId}`, {
         status: 400,
       });
@@ -74,33 +72,30 @@ export async function PUT(
         status: SESSION_STATUS.ACCEPTED,
       },
     });
-
     return new Response("Accepted");
   }
+
+  /* found the session by id */
+
   const recordDate = DateTime.fromISO(`${record.date}T${record.time}`, {
     zone: "utc",
   });
   if (recordDate < DateTime.utc()) {
-    return new Response("You cannot edit a session in the past", {
-      status: 400,
-    });
+    return new Response("Cannot edit a session in the past", { status: 400 });
   }
 
   if (body.action === "ACCEPT") {
     if (record.student !== null) {
-      return new Response(
-        "You cannot accept this session - it's already taken",
-        { status: 400 },
-      );
+      return new Response("Session already taken", { status: 400 });
     }
     if (record.instructor === payload?.info.cid) {
-      return new Response("You cannot accept your own session", {
-        status: 400,
-      });
+      return new Response("Cannot accept your own session", { status: 400 });
     }
     LOGGER.info(
       `${payload?.info.first_name} ${payload?.info.last_name} (${payload?.info.oi}) accepted session ${id}`,
     );
+
+    // accept the session and inform the trainer
     await DB.trainingSession.update({
       where: { id: record.id },
       data: {
@@ -127,6 +122,8 @@ export async function PUT(
     LOGGER.info(
       `${payload?.info.first_name} ${payload?.info.last_name} (${payload?.info.oi}) unaccepted session ${id}`,
     );
+
+    // open the session back up and inform the trainer
     await DB.trainingSession.update({
       where: { id: record.id },
       data: { student: null, status: SESSION_STATUS.OPEN },
@@ -140,14 +137,16 @@ export async function PUT(
     });
     return new Response("Un-accepted");
   } else {
+    /* update notes */
+
+    if (!canBeTrainer(payload!.info)) {
+      return new Response("You are not a trainer", { status: 403 });
+    }
     if (record.instructor !== payload?.info.cid) {
       return new Response(
         "You cannot edit the notes on someone else's session",
         { status: 400 },
       );
-    }
-    if (!canBeTrainer(payload.info)) {
-      return new Response("You are not a trainer", { status: 403 });
     }
     LOGGER.info(
       `${payload?.info.first_name} ${payload?.info.last_name} (${payload?.info.oi}) updated notes for ${id}`,
@@ -160,6 +159,11 @@ export async function PUT(
   }
 }
 
+type DeletePayload = {
+  scheduleId?: number;
+  date: string;
+};
+
 /**
  * Delete a session. Trainers only.
  */
@@ -167,7 +171,7 @@ export async function DELETE(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
   if (!context.params.id) {
-    return new Response(null, { status: 404 });
+    return new Response('Missing "id" URL parameter', { status: 404 });
   }
   const id = parseInt(context.params.id);
   const { payload, shortCircuit } = await checkAuth(
@@ -187,6 +191,8 @@ export async function DELETE(
         { status: 400 },
       );
     }
+
+    // create an exception for the schedule on this date
     await DB.trainingScheduleException.create({
       data: { scheduleId: body.scheduleId, date: body.date },
     });
@@ -205,6 +211,8 @@ export async function DELETE(
       status: 400,
     });
   }
+
+  // if a student already accepted the session, inform them that it's cancelled
   if (record.student !== null) {
     const instructor = await getUserInfoFromCid(record.instructor);
     await informUser(record.student, InformTypes.TRAINER_CANCELLED_SESSION, {
@@ -215,6 +223,7 @@ export async function DELETE(
       time: record.time,
     });
   }
+
   await DB.trainingSession.delete({ where: { id: record.id } });
   return new Response("Session deleted");
 }

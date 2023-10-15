@@ -13,7 +13,7 @@ export type TrainerRatingMap = Record<number, TrainerRatingEntry>;
 type UpdatePayload = Omit<TeacherRating, "createdAt" | "updatedAt">;
 
 /**
- * Get the stored trainer ratings, returned as a map from CID.
+ * Get the stored trainer ratings as a map of CID to ratings.
  */
 export async function GET(
   context: APIContext<Record<string, any>>,

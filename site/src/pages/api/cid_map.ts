@@ -3,7 +3,7 @@ import axios from "axios";
 import { checkAuth } from "../../util/auth.ts";
 import { loadConfig } from "../../util/config.ts";
 
-type ZdvRosterEntry = {
+export type ZdvRosterEntry = {
   cid: number;
   first_name: string;
   last_name: string;
@@ -13,7 +13,7 @@ type ZdvRosterEntry = {
 export type CidMap = Record<number, Omit<ZdvRosterEntry, "cid">>;
 
 /**
- * Get the ARTCC roster, mapping CID to name.
+ * Get the ARTCC roster, mapping CID to name and OIs.
  */
 export async function GET(
   context: APIContext<Record<string, any>>,

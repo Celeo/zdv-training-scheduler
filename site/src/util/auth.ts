@@ -192,6 +192,7 @@ export async function getUserInfo(
     where: { cid: userInfo.cid },
   });
   if (userPrefs === null) {
+    // preference defaults are set in the table schema; just need CID to create
     await DB.userPreference.create({ data: { cid: userInfo.cid } });
   }
 
@@ -331,6 +332,8 @@ export async function getUserInfoFromCid(cid: number): Promise<ZdvUserInfo> {
   if (!controller) {
     throw new Error(`Could not find controller with CID ${cid}`);
   }
+
+  // don't need everything; just what's useful for this site
   return {
     cid: controller.cid as number,
     email: controller.email as string,
