@@ -1,5 +1,5 @@
 [Unit]
-Description=ZDV Training Schduler Docker container
+Description=ZDV Training Schduler Site
 After=network.target
 
 [Service]
