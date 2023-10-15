@@ -16,7 +16,12 @@ type UpdatePayload = {
   selectedPosition: string;
   date: string | null;
   scheduleId: number | null;
-  notes: string | undefined;
+  notes?: string;
+};
+
+type DeletePayload = {
+  scheduleId?: number;
+  date: string;
 };
 
 /**
@@ -173,9 +178,19 @@ export async function DELETE(
     return shortCircuit;
   }
 
+  const body: DeletePayload = await context.request.json();
   const record = await DB.trainingSession.findFirst({ where: { id } });
   if (!record) {
-    return new Response(`Could not find record with id ${id}`, { status: 400 });
+    if (body.scheduleId === undefined) {
+      return new Response(
+        `Could not find record with id ${id} and no schedule ID supplied`,
+        { status: 400 },
+      );
+    }
+    await DB.trainingScheduleException.create({
+      data: { scheduleId: body.scheduleId, date: body.date },
+    });
+    return new Response("Schedule exception created");
   }
   const recordDate = DateTime.fromISO(`${record.date}T00:00:00`, {
     zone: "utc",

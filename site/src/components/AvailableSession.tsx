@@ -101,6 +101,10 @@ export function AvailableSession(props: AvailableSessionProps) {
     try {
       await callEndpoint(`/api/sessions/${props.session.id}`, {
         method: "DELETE",
+        body: {
+          date: props.session.date,
+          scheduleId: props.session.scheduleId,
+        },
       });
       window.location.reload();
     } catch (err) {

@@ -36,6 +36,7 @@ export async function GET(
   });
   const schedules = await DB.trainingSchedule.findMany({
     where: { dayOfWeek: date.weekday },
+    include: { trainingScheduleException: true },
   });
   const schedulesWithoutSessions = schedules.filter(
     (schedule) =>
@@ -43,6 +44,12 @@ export async function GET(
       undefined,
   );
   schedulesWithoutSessions
+    .filter(
+      (schedule) =>
+        !schedule.trainingScheduleException.some(
+          (except) => except.date === dateStr,
+        ),
+    )
     .map((schedule) => ({
       id: -1,
       scheduleId: schedule.id,
