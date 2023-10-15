@@ -38,7 +38,6 @@ export function Scheduling() {
         .toString()
         .padStart(2, "0")}`;
 
-      // TODO show trainers their sessions, open or accepted, so they can cancel them
       await callEndpoint(`/api/sessions?date=${ds}`, { setHook: setSessions });
     } catch (err) {
       console.error(`Error getting sessions for ${date}: ${err}`);

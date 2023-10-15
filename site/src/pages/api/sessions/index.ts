@@ -1,7 +1,12 @@
+import type { TrainingSession } from "@prisma/client";
 import type { APIContext } from "astro";
 import { DateTime } from "luxon";
 import { DB } from "../../../data.ts";
-import { RequiredPermission, checkAuth } from "../../../util/auth.ts";
+import {
+  RequiredPermission,
+  canBeTrainer,
+  checkAuth,
+} from "../../../util/auth.ts";
 import { SESSION_STATUS } from "../../../util/constants.ts";
 
 /**
@@ -14,7 +19,7 @@ import { SESSION_STATUS } from "../../../util/constants.ts";
 export async function GET(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { shortCircuit } = await checkAuth(context.request);
+  const { payload, shortCircuit } = await checkAuth(context.request);
   if (shortCircuit) {
     return shortCircuit;
   }
@@ -68,17 +73,34 @@ export async function GET(
     }))
     .forEach((s) => sessions.push(s));
 
-  // Now filter to sessions that are open. This cannot have been done as part of the DB
-  // query, since we needed to know _all_ the sessions on the date to determine
-  // which schedules should "tick".
-  const open = sessions.filter(
-    (session) => session.status === SESSION_STATUS.OPEN,
-  );
-  open.sort(
+  let ret: Array<TrainingSession> = [];
+
+  if (canBeTrainer(payload!.info)) {
+    // For trainers, their response includes all open sessions (as even trainers need
+    // training sometimes), but also include their sessions on the date in case they
+    // need to cancel them.
+    sessions
+      .filter(
+        (session) =>
+          session.status === SESSION_STATUS.OPEN ||
+          session.instructor === payload?.info.cid,
+      )
+      .forEach((session) => ret.push(session));
+  } else {
+    // Now filter to sessions that are open. This cannot have been done as part of the DB
+    // query, since we needed to know _all_ the sessions on the date to determine
+    // which schedules should "tick".
+    sessions
+      .filter((session) => session.status === SESSION_STATUS.OPEN)
+      .forEach((session) => ret.push(session));
+  }
+
+  // sort by time of day for better UX
+  ret.sort(
     (a, b) => parseInt(a.time.split(":")[0]!) - parseInt(b.time.split(":")[0]!),
   );
 
-  return new Response(JSON.stringify(open));
+  return new Response(JSON.stringify(ret));
 }
 
 type UpdatePayload = {
