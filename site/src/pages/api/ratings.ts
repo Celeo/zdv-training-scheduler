@@ -10,8 +10,6 @@ export type TrainerRatingEntry = Omit<
 
 export type TrainerRatingMap = Record<number, TrainerRatingEntry>;
 
-type UpdatePayload = Omit<TeacherRating, "createdAt" | "updatedAt">;
-
 /**
  * Get the stored trainer ratings as a map of CID to ratings.
  */
@@ -23,6 +21,7 @@ export async function GET(
     return shortCircuit;
   }
   const ratings = await DB.teacherRating.findMany();
+  ratings.sort((a, b) => a.cid - b.cid);
   const map: Record<number, TrainerRatingEntry> = {};
   for (const rating of ratings) {
     map[rating.cid] = {
@@ -37,6 +36,8 @@ export async function GET(
   }
   return new Response(JSON.stringify(map));
 }
+
+type UpdatePayload = Omit<TeacherRating, "createdAt" | "updatedAt">;
 
 /**
  * Update the stored trainer ratings for the CID.
