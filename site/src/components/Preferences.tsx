@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { sendAlert, type AlertLevel } from "../data";
 import { callEndpoint } from "../util/http";
 
 type EndpointData = {
@@ -30,7 +31,7 @@ export function Preferences() {
         method: "PUT",
         body: { email, discord },
       });
-      window.location.reload();
+      sendAlert("INFO", "Preferences saved");
     } catch (err) {
       console.error(`Error saving preferences: ${err}`);
       setError(`could not save preferences`);

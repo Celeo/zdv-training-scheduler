@@ -55,3 +55,22 @@ export function checkOAuthState(state: string): StateLookupResponse {
   }
   return StateLookupResponse.Accepted;
 }
+
+export type AlertLevel = "INFO" | "WARN" | "ERROR";
+export type Alert = {
+  level: AlertLevel;
+  message: string;
+};
+
+/**
+ * Cross-React-component communication for displaying alerts
+ * on the UI.
+ */
+export const alertStore = atom<Array<Alert>>([]);
+
+/**
+ * Append a new alert to show the user.
+ */
+export function sendAlert(level: AlertLevel, message: string): void {
+  alertStore.set([...alertStore.get(), { level, message }]);
+}
