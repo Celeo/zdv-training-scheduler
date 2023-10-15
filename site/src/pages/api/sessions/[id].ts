@@ -1,14 +1,14 @@
 import type { APIContext } from "astro";
+import { DateTime } from "luxon";
+import { DB } from "../../../data.ts";
 import {
   RequiredPermission,
   canBeTrainer,
   checkAuth,
   getUserInfoFromCid,
 } from "../../../util/auth.ts";
-import { DB } from "../../../data.ts";
 import { SESSION_STATUS } from "../../../util/constants.ts";
 import { InformTypes, informUser } from "../../../util/inform.ts";
-import { DateTime } from "luxon";
 import { LOGGER } from "../../../util/log.ts";
 
 type UpdatePayload = {
@@ -185,7 +185,6 @@ export async function DELETE(
       status: 400,
     });
   }
-
   if (record.instructor !== payload?.info.cid) {
     return new Response("You cannot delete someone else's session", {
       status: 400,

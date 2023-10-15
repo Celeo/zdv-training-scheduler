@@ -1,11 +1,11 @@
 import axios from "axios";
+import * as jose from "jose";
 import { nanoid } from "nanoid";
 import liboauth, { OAuth2 } from "oauth";
-import * as jose from "jose";
 import { DB } from "../data.ts";
 import { loadConfig, type Config } from "./config.ts";
-import { LOGGER } from "./log.ts";
 import { ADMIN_ROLES, TRAINER_ROLES } from "./constants.ts";
+import { LOGGER } from "./log.ts";
 
 /**
  * Token data back from ZDV SSO.

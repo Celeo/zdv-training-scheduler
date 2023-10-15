@@ -1,6 +1,6 @@
-import * as toml from "toml";
-import memoize from "memoizee";
 import { promises } from "fs";
+import memoize from "memoizee";
+import * as toml from "toml";
 const { readFile } = promises;
 
 /**

@@ -1,7 +1,7 @@
+import * as nodemailer from "nodemailer";
 import { DB } from "../data.ts";
 import { getUserInfoFromCid } from "./auth.ts";
 import { loadConfig } from "./config.ts";
-import * as nodemailer from "nodemailer";
 import { LOGGER } from "./log.ts";
 
 /**

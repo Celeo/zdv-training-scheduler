@@ -1,8 +1,8 @@
 import type { APIContext } from "astro";
-import { checkAuth } from "../../../util/auth.ts";
-import { DB } from "../../../data.ts";
-import { SESSION_STATUS } from "../../../util/constants.ts";
 import { DateTime } from "luxon";
+import { DB } from "../../../data.ts";
+import { checkAuth } from "../../../util/auth.ts";
+import { SESSION_STATUS } from "../../../util/constants.ts";
 
 /**
  * Get the sessions that the current user is a student of.
