@@ -5,11 +5,13 @@ import type {
   TrainerRatingMap,
 } from "../pages/api/ratings";
 import { FRIENDLY_POSITION_NAME_MAP, type Positions } from "../util/constants";
+import { callEndpoint } from "../util/http";
 
 function Row(props: {
   cidMap: CidMap;
   ratings: TrainerRatingMap;
   cid: number;
+  refresh: () => void;
 }): JSX.Element {
   const [ratings, setRatings] = useState<TrainerRatingEntry | null>(null);
   const [dirty, setDirty] = useState(false);
@@ -17,6 +19,7 @@ function Row(props: {
   useEffect(() => {
     if (props.ratings !== null) {
       setRatings(props.ratings[props.cid]!);
+      setDirty(false);
     }
   }, [props.ratings]);
 
@@ -34,21 +37,11 @@ function Row(props: {
 
   const save = async (): Promise<void> => {
     try {
-      const resp = await fetch("/api/ratings", {
+      await callEndpoint("/api/ratings", {
         method: "PUT",
-        body: JSON.stringify({
-          cid: props.cid,
-          ...ratings,
-        }),
-        headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
+        body: { cid: props.cid, ...ratings },
       });
-      if (resp.status !== 200) {
-        console.error(
-          `Got status ${resp.status} from server for updating ${props.cid}`,
-        );
-        return;
-      }
-      window.location.reload();
+      props.refresh();
     } catch (err) {
       console.error(`Error updating ratings for ${props.cid}: ${err}`);
     }
@@ -105,30 +98,34 @@ export function Admin() {
   const [ratings, setRatings] = useState<TrainerRatingMap>([]);
   const [error, setError] = useState(false);
 
-  // retrieve user and ratings info
+  const getRatings = async (): Promise<void> => {
+    try {
+      const resp = await fetch("/api/ratings", {
+        headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
+      });
+      setRatings(await resp.json());
+    } catch (err) {
+      console.error(`could not get ratings: ${err}`);
+      setError(true);
+    }
+  };
+
+  const getCidMap = async (): Promise<void> => {
+    try {
+      const resp = await fetch("/api/cid_map", {
+        headers: { authorization: `Bearer ${localStorage.getItem("jwt")}` },
+      });
+      setCidMap(await resp.json());
+    } catch (err) {
+      console.error(`could not get CID mapping: ${err}`);
+      setError(true);
+    }
+  };
+
+  // retrieve ratings and user info
   useEffect(() => {
     (async () => {
-      await Promise.all(
-        [
-          { path: "/api/cid_map", f: setCidMap },
-          { path: "/api/ratings", f: setRatings },
-        ].map(async ({ path, f }) => {
-          try {
-            const resp = await fetch(path, {
-              headers: {
-                authorization: `Bearer ${localStorage.getItem("jwt")}`,
-              },
-            });
-            const data = await resp.json();
-            f(data);
-          } catch (err) {
-            console.error(`Could not get data from server: ${err}`);
-            setError(true);
-            return;
-          }
-        }),
-      );
-      setError(false);
+      await Promise.all([getRatings(), getCidMap()]);
     })();
     // no args - called only on mount
   }, []);
@@ -137,7 +134,13 @@ export function Admin() {
     <div className="mx-auto max-w-6xl pt-5">
       <h2 className="text-2xl pb-3">Training ratings management</h2>
       {Object.keys(ratings).map((cid) => (
-        <Row key={cid} cidMap={cidMap} ratings={ratings} cid={parseInt(cid)} />
+        <Row
+          key={cid}
+          cidMap={cidMap}
+          ratings={ratings}
+          cid={parseInt(cid)}
+          refresh={() => getRatings()}
+        />
       ))}
       {error && (
         <p>
