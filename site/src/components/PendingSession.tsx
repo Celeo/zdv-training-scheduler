@@ -81,7 +81,7 @@ export function PendingSession(props: PendingSessionProps) {
           {FRIENDLY_POSITION_NAME_MAP[props.selectedPosition! as Positions]}
           {props.notes}
           <button
-            className="focus:outline-none focus:ring-4 font-medium rounded-full text-sm px-2 py-1 text-center mr-2 mb-2 text-red-500 hover:text-white hover:bg-red-700 focus:ring-red-900"
+            className="focus:outline-none focus:ring-4 font-medium rounded-full text-sm px-2 py-1 text-center mb-2 ml-2 text-red-500 hover:text-white hover:bg-red-700 focus:ring-red-900"
             onClick={() => {
               setShowModal(true);
             }}

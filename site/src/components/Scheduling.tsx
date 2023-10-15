@@ -1,15 +1,17 @@
-import type { TrainingSession } from "@prisma/client";
+import type { TrainingSchedule, TrainingSession } from "@prisma/client";
 import * as jose from "jose";
 import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import { sendAlert } from "../data.ts";
 import type { CidMap } from "../pages/api/cid_map.ts";
 import type { JwtPayload } from "../util/auth.ts";
 import type { Value } from "../util/calendarTypes.ts";
 import { TRAINER_ROLES } from "../util/constants.ts";
 import { callEndpoint } from "../util/http.ts";
 import { AvailableSession } from "./AvailableSession.tsx";
+import { ExistingSchedule } from "./ExistingSchedule.tsx";
 import { PendingSession } from "./PendingSession.tsx";
 
 export function Scheduling() {
@@ -22,7 +24,12 @@ export function Scheduling() {
   const [isTrainer, setIsTrainer] = useState(false);
   const [newSessionTime, setNewSessionTime] = useState("");
   const [newSessionNotes, setNewSessionNotes] = useState("");
+  const [newScheduleDayOfWeek, setNewScheduleDayOfWeek] = useState(-1);
+  const [newScheduleTimeOfDay, setNewScheduleTimeOfDay] = useState("");
   const [currentUserCid, setCurrentUserCid] = useState(-1);
+  const [userSchedules, setUserSchedules] = useState<Array<TrainingSchedule>>(
+    [],
+  );
 
   /**
    * Called when the user selects a date on the calendar.
@@ -65,7 +72,27 @@ export function Scheduling() {
       await selectDay(selectedDate);
     } catch (err) {
       console.error(`Error creating new session: ${err}`);
-      setError("Could not create session");
+      sendAlert("ERROR", "Could not create new session");
+    }
+  };
+
+  /**
+   * Called to create a new schedule by a trainer.
+   */
+  const createNewSchedule = async (): Promise<void> => {
+    try {
+      await callEndpoint("/api/schedules", {
+        method: "POST",
+        body: {
+          dayOfWeek: newScheduleDayOfWeek,
+          timeOfDay: newScheduleTimeOfDay,
+        },
+      });
+      sendAlert("INFO", "Schedule created");
+      await callEndpoint("/api/schedules", { setHook: setUserSchedules });
+    } catch (err) {
+      console.error(`Error creating new schedule: ${err}`);
+      sendAlert("ERROR", "Could not create new schedule");
     }
   };
 
@@ -84,31 +111,34 @@ export function Scheduling() {
       const jwt = localStorage.getItem("jwt");
       if (jwt) {
         const claims = jose.decodeJwt(jwt) as JwtPayload;
-        setIsTrainer(
+        const isTrainer =
           claims.info.roles.includes("wm") ||
-            claims.info.roles.some((r) => TRAINER_ROLES.includes(r)),
-        );
+          claims.info.roles.some((r) => TRAINER_ROLES.includes(r));
+        if (isTrainer) {
+          await callEndpoint("/api/schedules", { setHook: setUserSchedules });
+        }
+        setIsTrainer(isTrainer);
         setCurrentUserCid(claims.info.cid);
       }
     })();
   }, []);
 
-  let body;
+  let sessionsBody;
   if (selectedDate === null) {
-    body = <h3 className="text-xl">Select a date on the calendar</h3>;
+    sessionsBody = <h3 className="text-xl">Select a date on the calendar</h3>;
   } else {
-    body = (
+    sessionsBody = (
       <>
         {isTrainer && (
           <div className="flex flex-items justify-center gap-x-5 mb-3">
             <select
-              name="time"
-              id="time"
               className="block border text-sm rounded-lg w-1/4 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
               onChange={(e) => setNewSessionTime(e.target.value)}
-              value={newSessionTime == null ? "" : newSessionTime.toString()}
+              value={newSessionTime}
             >
-              <option value="" disabled></option>
+              <option value="" disabled>
+                Time
+              </option>
               {[...Array(24).keys()].map((i) => {
                 const time = i.toString().padStart(2, "0") + ":00";
                 return (
@@ -126,7 +156,12 @@ export function Scheduling() {
               onChange={(e) => setNewSessionNotes(e.target.value)}
             />
             <button
-              className="text-black focus:ring-4 focus:outline-none rounded-md w-1/4 text-sm px-5 py-1 text-center bg-secondary hover:bg-accent"
+              className={`text-black focus:ring-4 focus:outline-none rounded-md w-1/4 text-sm px-5 py-1 text-center ${
+                newSessionTime === ""
+                  ? "bg-gray-500"
+                  : "bg-secondary hover:bg-accent"
+              }`}
+              disabled={newSessionTime === ""}
               onClick={createNewSession}
             >
               Create session
@@ -152,18 +187,77 @@ export function Scheduling() {
     );
   }
 
+  const schedules = isTrainer && (
+    <>
+      <h2 className="text-xl">Schedules</h2>
+      <div className="flex">
+        <ul className="list-disc list-inside basis-4/12">
+          {userSchedules.map((schedule) => (
+            <ExistingSchedule key={schedule.id} schedule={schedule} />
+          ))}
+        </ul>
+        <div className="flex-1">
+          <div className="flex flex-items justify-center gap-x-5 mb-3">
+            <select
+              className="block border text-sm rounded-lg w-1/4 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
+              onChange={(e) =>
+                setNewScheduleDayOfWeek(parseInt(e.target.value))
+              }
+              value={newScheduleDayOfWeek}
+            >
+              <option value={-1} disabled>
+                Day of week
+              </option>
+              <option value={0}>Sundays</option>
+              <option value={1}>Mondays</option>
+              <option value={2}>Tuesdays</option>
+              <option value={3}>Wednesdays</option>
+              <option value={4}>Thursdays</option>
+              <option value={5}>Fridays</option>
+              <option value={6}>Saturdays</option>
+            </select>
+            <select
+              className="block border text-sm rounded-lg w-1/4 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
+              onChange={(e) => setNewScheduleTimeOfDay(e.target.value)}
+              value={newScheduleTimeOfDay}
+            >
+              <option value="" disabled>
+                Time of day
+              </option>
+              {[...Array(24).keys()].map((i) => {
+                const time = i.toString().padStart(2, "0") + ":00";
+                return (
+                  <option key={time} value={time}>
+                    {time}
+                  </option>
+                );
+              })}
+            </select>
+            <button
+              className={`text-black focus:ring-4 focus:outline-none rounded-md w-1/4 text-sm px-5 py-1 text-center ${
+                newScheduleTimeOfDay === "" || newScheduleDayOfWeek === -1
+                  ? "bg-gray-500"
+                  : "bg-secondary hover:bg-accent"
+              }`}
+              disabled={
+                newScheduleTimeOfDay === "" || newScheduleDayOfWeek === -1
+              }
+              onClick={createNewSchedule}
+            >
+              Create schedule
+            </button>
+          </div>
+        </div>
+      </div>
+      <hr className="mt-2 pb-2" />
+    </>
+  );
+
   return (
     <div className="mx-auto max-w-6xl pt-5">
-      {isTrainer && (
-        <>
-          <h2 className="text-xl">Schedules</h2>
-          {/* TODO */}
-          <hr className="mt-5 pb-5" />
-        </>
-      )}
-
+      {schedules}
       {mySessions.length > 0 && (
-        <div className="pb-5 border-b-1 border-white">
+        <div className="pb-3 border-b-1 border-white">
           <h2 className="text-xl">Pending sessions</h2>
           {mySessions.map((session) => (
             <PendingSession key={session.id} cidMap={cidMap} {...session} />
@@ -184,7 +278,7 @@ export function Scheduling() {
             next2Label={null}
           />
         </div>
-        <div className="flex-1">{body}</div>
+        <div className="flex-1">{sessionsBody}</div>
       </div>
 
       {error && (
