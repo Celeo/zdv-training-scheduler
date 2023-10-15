@@ -138,7 +138,7 @@ export function Admin() {
       ))}
       {error && (
         <p>
-          <span className="font-bold text-red-400">
+          <span className="font-bold text-red-500">
             There was an error communicating with the server
           </span>
         </p>

@@ -127,7 +127,7 @@ export function Scheduling() {
               className="text-black focus:ring-4 focus:outline-none rounded-md w-1/4 text-sm px-5 py-1 text-center bg-secondary hover:bg-accent"
               onClick={createNewSession}
             >
-              New session
+              Create session
             </button>
           </div>
         )}
@@ -139,6 +139,7 @@ export function Scheduling() {
               {...session}
               cidMap={cidMap}
               ratingMap={ratingMap}
+              pendingSessions={mySessions.length}
             />
           ))
         ) : (
