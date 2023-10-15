@@ -1,16 +1,16 @@
+import type { TrainingSession } from "@prisma/client";
+import * as jose from "jose";
+import { DateTime } from "luxon";
+import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { useEffect, useState } from "react";
-import type { Value } from "../util/calendarTypes.ts";
-import type { TrainingSession } from "@prisma/client";
-import { AvailableSession } from "./AvailableSession.tsx";
 import type { CidMap } from "../pages/api/cid_map.ts";
-import { DateTime } from "luxon";
-import { PendingSession } from "./PendingSession.tsx";
-import * as jose from "jose";
 import type { JwtPayload } from "../util/auth.ts";
+import type { Value } from "../util/calendarTypes.ts";
 import { TRAINER_ROLES } from "../util/constants.ts";
 import { callEndpoint } from "../util/http.ts";
+import { AvailableSession } from "./AvailableSession.tsx";
+import { PendingSession } from "./PendingSession.tsx";
 
 export function Scheduling() {
   const [selectedDate, setSelectedDate] = useState<Value>(null);
@@ -22,6 +22,7 @@ export function Scheduling() {
   const [isTrainer, setIsTrainer] = useState(false);
   const [newSessionTime, setNewSessionTime] = useState("");
   const [newSessionNotes, setNewSessionNotes] = useState("");
+  const [currentUserCid, setCurrentUserCid] = useState(-1);
 
   /**
    * Called when the user selects a date on the calendar.
@@ -36,6 +37,8 @@ export function Scheduling() {
       const ds = `${dt.year}-${dt.month.toString().padStart(2, "0")}-${dt.day
         .toString()
         .padStart(2, "0")}`;
+
+      // TODO show trainers their sessions, open or accepted, so they can cancel them
       await callEndpoint(`/api/sessions?date=${ds}`, { setHook: setSessions });
     } catch (err) {
       console.error(`Error getting sessions for ${date}: ${err}`);
@@ -86,6 +89,7 @@ export function Scheduling() {
           claims.info.roles.includes("wm") ||
             claims.info.roles.some((r) => TRAINER_ROLES.includes(r)),
         );
+        setCurrentUserCid(claims.info.cid);
       }
     })();
     // no args - called only on mount
@@ -136,10 +140,11 @@ export function Scheduling() {
           sessions.map((session) => (
             <AvailableSession
               key={session.id}
-              {...session}
+              session={session}
               cidMap={cidMap}
               ratingMap={ratingMap}
               pendingSessions={mySessions.length}
+              currentUserCid={currentUserCid}
             />
           ))
         ) : (

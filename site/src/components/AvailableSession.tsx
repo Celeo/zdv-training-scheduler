@@ -9,16 +9,20 @@ import {
 import { callEndpoint } from "../util/http.ts";
 
 export type AvailableSessionProps = {
-  id: number;
-  scheduleId: number | null;
-  instructor: number;
-  date: string;
-  time: string;
-  status: string;
+  session: {
+    id: number;
+    scheduleId: number | null;
+    instructor: number;
+    date: string;
+    time: string;
+    status: string;
+    notes: string;
+  };
+
   cidMap: CidMap;
   ratingMap: TrainerRatingMap;
-  notes: string;
   pendingSessions: number;
+  currentUserCid: number;
 };
 
 function trainerName(cid: number, map: CidMap): string {
@@ -77,13 +81,13 @@ export function AvailableSession(props: AvailableSessionProps) {
   const confirm = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      await callEndpoint(`/api/sessions/${props.id}`, {
+      await callEndpoint(`/api/sessions/${props.session.id}`, {
         method: "PUT",
         body: {
           action: "ACCEPT",
-          scheduleId: props.scheduleId,
+          scheduleId: props.session.scheduleId,
           selectedPosition,
-          date: props.date,
+          date: props.session.date,
         },
       });
       window.location.reload();
@@ -93,8 +97,20 @@ export function AvailableSession(props: AvailableSessionProps) {
     }
   };
 
+  const deleteSession = async (): Promise<void> => {
+    try {
+      await callEndpoint(`/api/sessions/${props.session.id}`, {
+        method: "DELETE",
+      });
+      window.location.reload();
+    } catch (err) {
+      console.error(`Error deleting session: ${err}`);
+      setError(true);
+    }
+  };
+
   const dropdownOptions = isOpen
-    ? ratings(props.instructor, props.ratingMap).map((pos) => (
+    ? ratings(props.session.instructor, props.ratingMap).map((pos) => (
         <option key={pos} value={pos}>
           {FRIENDLY_POSITION_NAME_MAP[pos]}
         </option>
@@ -118,15 +134,15 @@ export function AvailableSession(props: AvailableSessionProps) {
         >
           <h3 className="text-2xl mb-4 font-bold">Confirm registration</h3>
           <p>
-            <span className="font-bold">Time</span>: {props.time}
+            <span className="font-bold">Time</span>: {props.session.time}
           </p>
           <p>
             <span className="font-bold">Trainer</span>:{" "}
-            {trainerName(props.instructor, props.cidMap)}
+            {trainerName(props.session.instructor, props.cidMap)}
           </p>
-          {props.notes && (
+          {props.session.notes && (
             <p>
-              <strong>Notes</strong>: {props.notes}
+              <strong>Notes</strong>: {props.session.notes}
             </p>
           )}
           <label htmlFor="position" className="block mb-1">
@@ -145,10 +161,20 @@ export function AvailableSession(props: AvailableSessionProps) {
           <div className="flex justify-between pt-5">
             <button
               className="text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center bg-red-400 hover:bg-red-300"
-              onClick={() => close()}
+              onClick={close}
             >
               Cancel
             </button>
+
+            {props.currentUserCid === props.session.instructor && (
+              <button
+                className="text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center bg-orange-400 hover:bg-orange-300"
+                onClick={deleteSession}
+              >
+                Delete
+              </button>
+            )}
+
             <button
               className={`text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center ${
                 selectedPosition === "" ||
@@ -162,7 +188,7 @@ export function AvailableSession(props: AvailableSessionProps) {
                 selectedPosition === "" ||
                 props.pendingSessions >= MAXIMUM_PENDING_SESSIONS
               }
-              onClick={() => confirm()}
+              onClick={confirm}
             >
               Confirm
             </button>
@@ -180,30 +206,31 @@ export function AvailableSession(props: AvailableSessionProps) {
           )}
         </div>
       </div>
-      {/* TODO cancel button if it's the trainers own session */}
-      <button
-        className="block p-3 mb-1 w-full max-w-3xl border rounded-lg shadow bg-gray-800 border-gray-700 hover:bg-gray-700"
+      <div
+        className="block p-3 mb-1 w-full cursor-pointer max-w-3xl border rounded-lg shadow bg-gray-800 border-gray-700 hover:bg-gray-700 text-center"
         onClick={() => setIsOpen(true)}
       >
         <h5 className="mb-2 text-2xl font-bold tracking-tight text-white">
-          {props.time}
+          {props.session.time}
         </h5>
         <div className="font-normal text-gray-400">
           <p>
             <span className="font-bold">Trainer</span>:{" "}
-            {trainerName(props.instructor, props.cidMap)}
+            {trainerName(props.session.instructor, props.cidMap)}
           </p>
           <p>
             <span className="font-bold">Positions</span>:{" "}
-            {ratingsToPrintout(ratings(props.instructor, props.ratingMap))}
+            {ratingsToPrintout(
+              ratings(props.session.instructor, props.ratingMap),
+            )}
           </p>
-          {props.notes && (
+          {props.session.notes && (
             <p>
-              <strong>Notes</strong>: {props.notes}
+              <strong>Notes</strong>: {props.session.notes}
             </p>
           )}
         </div>
-      </button>
+      </div>
     </>
   );
 }
