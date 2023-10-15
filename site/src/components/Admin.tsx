@@ -9,85 +9,34 @@ import { callEndpoint } from "../util/http";
 
 function Row(props: {
   cidMap: CidMap;
-  ratings: TrainerRatingMap;
+  ratings: TrainerRatingEntry;
   cid: number;
-  refresh: () => void;
+  toggle: (cid: number, position: Positions) => void;
 }): JSX.Element {
-  const [ratings, setRatings] = useState<TrainerRatingEntry | null>(null);
-  const [dirty, setDirty] = useState(false);
-
-  useEffect(() => {
-    if (props.ratings !== null) {
-      setRatings(props.ratings[props.cid]!);
-      setDirty(false);
-    }
-  }, [props.ratings]);
-
-  useEffect(() => {
-    let delta = false;
-    for (const k of Object.keys(ratings ?? {})) {
-      const key = k as Positions;
-      if ((ratings ?? {})[key] !== props.ratings[props.cid]![key]) {
-        delta = true;
-        break;
-      }
-    }
-    setDirty(delta);
-  }, [ratings]);
-
-  const save = async (): Promise<void> => {
-    try {
-      await callEndpoint("/api/ratings", {
-        method: "PUT",
-        body: { cid: props.cid, ...ratings },
-      });
-      props.refresh();
-    } catch (err) {
-      console.error(`Error updating ratings for ${props.cid}: ${err}`);
-    }
-  };
-
-  const user = props.cidMap[props.cid];
-  if (user === undefined) {
-    return <></>;
-  }
   return (
-    <div className="pt-5">
-      <p>
-        {user.first_name} {user.last_name} ({user.operating_initials})
+    <div className="flex justify-between mt-1">
+      <p className="pt-2">
+        {props.cidMap[props.cid]!.first_name}{" "}
+        {props.cidMap[props.cid]!.last_name} (
+        {props.cidMap[props.cid]!.operating_initials})
       </p>
-      <div className="flex flex-row justify-between text-sm">
-        {ratings &&
-          Object.keys(ratings).map((n) => {
-            const name = n as Positions;
-            return (
-              <div key={name} className="flex items-center">
-                <input
-                  id={name}
-                  type="checkbox"
-                  checked={ratings[name]}
-                  onChange={() =>
-                    setRatings((r) =>
-                      r === null ? null : { ...r, [name]: !r[name] },
-                    )
-                  }
-                  className="w-4 h-4 text-blue-600 rounded ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600"
-                />
-                <label htmlFor={name} className="ml-2 text-sm font-medium">
-                  {FRIENDLY_POSITION_NAME_MAP[name]}
-                </label>
-              </div>
-            );
-          })}
-        <button
-          className={`text-black focus:ring-4 focus:outline-none rounded-2xl text-sm w-auto px-3 py-1 text-center ${
-            dirty ? "bg-green-400 hover:bg-green-300" : "bg-gray-500"
-          }`}
-          disabled={!dirty}
-          onClick={save}
-        >
-          Save
-        </button>
+      <div className="flex justify-center text-sm">
+        {Object.keys(props.ratings).map((n) => {
+          const name = n as Positions;
+          return (
+            <button
+              key={name}
+              className={`px-3 py-2 mx-0.5 rounded-none border-0 ${
+                props.ratings[name]
+                  ? "border-green-200 bg-green-400 bg-opacity-50 hover:bg-opacity-90 text-white"
+                  : "border-white bg-white bg-opacity-60 hover:bg-opacity-90 text-black"
+              }`}
+              onClick={() => props.toggle(props.cid, name)}
+            >
+              {FRIENDLY_POSITION_NAME_MAP[name]}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -95,47 +44,92 @@ function Row(props: {
 
 export function Admin() {
   const [cidMap, setCidMap] = useState<CidMap>({});
-  const [ratings, setRatings] = useState<TrainerRatingMap>([]);
+  const [ratings, setRatings] = useState<TrainerRatingMap>({});
+  const [serverRatings, setServerRatings] = useState<TrainerRatingMap>({});
   const [error, setError] = useState(false);
-
-  const getRatings = async (): Promise<void> => {
-    try {
-      await callEndpoint("/api/ratings", { setHook: setRatings });
-    } catch (err) {
-      console.error(`could not get ratings: ${err}`);
-      setError(true);
-    }
-  };
+  const [dirty, setDirty] = useState(false);
 
   const getCidMap = async (): Promise<void> => {
     try {
       await callEndpoint("/api/cid_map", { setHook: setCidMap });
     } catch (err) {
-      console.error(`could not get CID mapping: ${err}`);
+      console.error(`Could not get CID mapping: ${err}`);
       setError(true);
     }
   };
 
-  // retrieve ratings and user info
+  const getRatings = async (): Promise<void> => {
+    try {
+      const data = await callEndpoint<TrainerRatingMap>("/api/ratings", {
+        returnData: true,
+      });
+      setRatings(data!);
+      setServerRatings(data!);
+      setError(false);
+    } catch (err) {
+      console.error(`Could not get ratings: ${err}`);
+      setError(true);
+    }
+  };
+
+  const saveAll = async (): Promise<void> => {
+    for (const cidStr of Object.keys(ratings)) {
+      const cid = parseInt(cidStr);
+      if (JSON.stringify(ratings[cid]) === JSON.stringify(serverRatings[cid])) {
+        continue;
+      }
+      await callEndpoint("/api/ratings", {
+        method: "PUT",
+        body: { cid, ...ratings[cid] },
+      });
+    }
+    getRatings();
+  };
+
   useEffect(() => {
-    (async () => {
-      await Promise.all([getRatings(), getCidMap()]);
-    })();
-    // no args - called only on mount
+    setDirty(JSON.stringify(ratings) !== JSON.stringify(serverRatings));
+  }, [ratings]);
+
+  useEffect(() => {
+    getCidMap();
+    getRatings();
   }, []);
 
   return (
     <div className="mx-auto max-w-6xl pt-5">
-      <h2 className="text-2xl pb-3">Training ratings management</h2>
-      {Object.keys(ratings).map((cid) => (
-        <Row
-          key={cid}
-          cidMap={cidMap}
-          ratings={ratings}
-          cid={parseInt(cid)}
-          refresh={() => getRatings()}
-        />
-      ))}
+      <h2 className="text-2xl pb-5">Training ratings management</h2>
+      {Object.keys(cidMap).length > 0 && (
+        <>
+          {Object.keys(ratings).map((cid) => (
+            <Row
+              key={cid}
+              cidMap={cidMap}
+              ratings={ratings[parseInt(cid)]!}
+              cid={parseInt(cid)}
+              toggle={(cid, position) =>
+                setRatings((r) => ({
+                  ...r,
+                  [cid]: {
+                    ...r[cid]!,
+                    [position]: !r[cid]![position],
+                  },
+                }))
+              }
+            />
+          ))}
+          <div className="flex flex-center pt-10">
+            <button
+              className={`mx-auto w-6/12 text-black focus:ring-4 focus:outline-none rounded-full text-sm px-5 py-2.5 text-center ${
+                dirty ? "bg-green-400 hover:bg-green-300" : "bg-gray-500"
+              }`}
+              disabled={!dirty}
+              onClick={saveAll}
+            >
+              Save
+            </button>
+          </div>
+        </>
+      )}
       {error && (
         <p>
           <span className="font-bold text-red-500">
