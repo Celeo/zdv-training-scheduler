@@ -52,8 +52,8 @@ function Row(props: {
     return <></>;
   }
   return (
-    <div>
-      <p className="text-base pt-2">
+    <div className="pt-5">
+      <p>
         {user.first_name} {user.last_name} ({user.operating_initials})
       </p>
       <div className="flex flex-row justify-between text-sm">
