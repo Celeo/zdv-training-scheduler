@@ -28,7 +28,16 @@ model TrainingSchedule {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  trainingSessions TrainingSession[]
+  trainingSessions          TrainingSession[]
+  trainingScheduleException TrainingScheduleException[]
+}
+
+model TrainingScheduleException {
+  id         Int    @id @default(autoincrement())
+  scheduleId Int?
+  date       String
+
+  schedule TrainingSchedule? @relation(fields: [scheduleId], references: [id])
 }
 
 model TrainingSession {
