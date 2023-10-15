@@ -35,3 +35,9 @@ export const FRIENDLY_POSITION_NAME_MAP: Record<Positions, string> = {
 
 export const TRAINER_ROLES = ["mtr", "ins"];
 export const ADMIN_ROLES = ["atm", "datm", "ta", "wm"];
+
+/**
+ * The number of pending sessions any one student can have before
+ * being prevented from accepting more.
+ */
+export const MAXIMUM_PENDING_SESSIONS = 2;

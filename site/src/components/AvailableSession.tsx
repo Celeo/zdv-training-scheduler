@@ -3,6 +3,7 @@ import type { CidMap } from "../pages/api/cid_map.ts";
 import type { TrainerRatingMap } from "../pages/api/ratings.ts";
 import {
   FRIENDLY_POSITION_NAME_MAP,
+  MAXIMUM_PENDING_SESSIONS,
   type Positions,
 } from "../util/constants.ts";
 import { callEndpoint } from "../util/http.ts";
@@ -17,6 +18,7 @@ export type AvailableSessionProps = {
   cidMap: CidMap;
   ratingMap: TrainerRatingMap;
   notes: string;
+  pendingSessions: number;
 };
 
 function trainerName(cid: number, map: CidMap): string {
@@ -65,7 +67,7 @@ export function AvailableSession(props: AvailableSessionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [response, setResponse] = useState("");
+  const [error, setError] = useState(false);
 
   const close = (): void => {
     setIsOpen(false);
@@ -87,7 +89,7 @@ export function AvailableSession(props: AvailableSessionProps) {
       window.location.reload();
     } catch (err) {
       console.error(`Error confirming session: ${err}`);
-      setResponse("There was an error confirming your session");
+      setError(true);
     }
   };
 
@@ -149,20 +151,31 @@ export function AvailableSession(props: AvailableSessionProps) {
             </button>
             <button
               className={`text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center ${
-                selectedPosition === "" || isLoading || response !== ""
+                selectedPosition === "" ||
+                isLoading ||
+                error ||
+                props.pendingSessions >= MAXIMUM_PENDING_SESSIONS
                   ? "bg-gray-500"
                   : "bg-green-400 hover:bg-green-300"
               }`}
-              disabled={selectedPosition === ""}
+              disabled={
+                selectedPosition === "" ||
+                props.pendingSessions >= MAXIMUM_PENDING_SESSIONS
+              }
               onClick={() => confirm()}
             >
               Confirm
             </button>
           </div>
-          {response && (
-            <p>
-              <span className="font-bold">Response from the server</span>:{" "}
-              {response}
+          {props.pendingSessions >= MAXIMUM_PENDING_SESSIONS && (
+            <p className="text-orange-500 pt-5">
+              You have {props.pendingSessions} pending sessions and cannot
+              accept any more at this time.
+            </p>
+          )}
+          {error && (
+            <p className="text-red-500 pt-5">
+              There was an error communicating with the server
             </p>
           )}
         </div>
