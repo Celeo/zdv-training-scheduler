@@ -92,7 +92,6 @@ export function Scheduling() {
         setCurrentUserCid(claims.info.cid);
       }
     })();
-    // no args - called only on mount
   }, []);
 
   let body;

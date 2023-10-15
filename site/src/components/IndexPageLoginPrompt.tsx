@@ -5,7 +5,6 @@ export function IndexPageLoginPrompt() {
 
   useEffect(() => {
     setIsLoggedIn(localStorage.getItem("jwt") !== null);
-    // no args - called only on mount
   }, []);
 
   if (isLoggedIn) {

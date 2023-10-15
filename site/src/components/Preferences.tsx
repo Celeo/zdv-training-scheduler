@@ -19,7 +19,6 @@ export function Preferences() {
       setEmail(data!.receiveEmails);
       setDiscord(data!.receiveDiscordMessages);
     })();
-    // no args - called only on mount
   }, []);
 
   const submit = async (
