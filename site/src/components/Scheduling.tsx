@@ -18,7 +18,6 @@ export function Scheduling() {
   const [selectedDate, setSelectedDate] = useState<Value>(null);
   const [sessions, setSessions] = useState<Array<TrainingSession>>([]);
   const [mySessions, setMySessions] = useState<Array<TrainingSession>>([]);
-  const [error, setError] = useState<string | null>(null);
   const [cidMap, setCidMap] = useState<CidMap>({});
   const [ratingMap, setRatingMap] = useState<{}>({});
   const [isTrainer, setIsTrainer] = useState(false);
@@ -48,7 +47,7 @@ export function Scheduling() {
       await callEndpoint(`/api/sessions?date=${ds}`, { setHook: setSessions });
     } catch (err) {
       console.error(`Error getting sessions for ${date}: ${err}`);
-      setError("Could not get sessions");
+      sendAlert("ERROR", "Could not get sessions");
     }
   };
 
@@ -106,7 +105,6 @@ export function Scheduling() {
         callEndpoint("/api/cid_map", { setHook: setCidMap }),
         callEndpoint("/api/ratings", { setHook: setRatingMap }),
       ]);
-      setError(null);
 
       const jwt = localStorage.getItem("jwt");
       if (jwt) {
@@ -280,10 +278,6 @@ export function Scheduling() {
         </div>
         <div className="flex-1">{sessionsBody}</div>
       </div>
-
-      {error && (
-        <h2 className="text-2xl text-red-500 pt-3 text-center">{error}</h2>
-      )}
     </div>
   );
 }

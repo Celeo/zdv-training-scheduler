@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { sendAlert } from "../data.ts";
 import type { CidMap } from "../pages/api/cid_map.ts";
 import type { TrainerRatingMap } from "../pages/api/ratings.ts";
 import {
@@ -71,7 +72,6 @@ export function AvailableSession(props: AvailableSessionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(false);
 
   const close = (): void => {
     setIsOpen(false);
@@ -93,7 +93,7 @@ export function AvailableSession(props: AvailableSessionProps) {
       window.location.reload();
     } catch (err) {
       console.error(`Error confirming session: ${err}`);
-      setError(true);
+      sendAlert("ERROR", "Error confirming session");
     }
   };
 
@@ -109,7 +109,7 @@ export function AvailableSession(props: AvailableSessionProps) {
       window.location.reload();
     } catch (err) {
       console.error(`Error deleting session: ${err}`);
-      setError(true);
+      sendAlert("ERROR", "Error deleting session");
     }
   };
 
@@ -183,7 +183,6 @@ export function AvailableSession(props: AvailableSessionProps) {
               className={`text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center ${
                 selectedPosition === "" ||
                 isLoading ||
-                error ||
                 props.pendingSessions >= MAXIMUM_PENDING_SESSIONS
                   ? "bg-gray-500"
                   : "bg-green-400 hover:bg-green-300"
@@ -201,11 +200,6 @@ export function AvailableSession(props: AvailableSessionProps) {
             <p className="text-orange-500 pt-5">
               You have {props.pendingSessions} pending sessions and cannot
               accept any more at this time.
-            </p>
-          )}
-          {error && (
-            <p className="text-red-500 pt-5">
-              There was an error communicating with the server
             </p>
           )}
         </div>

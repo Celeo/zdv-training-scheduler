@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { sendAlert } from "../data";
 import type { CidMap } from "../pages/api/cid_map";
 import type {
   TrainerRatingEntry,
@@ -46,7 +47,6 @@ export function Admin() {
   const [cidMap, setCidMap] = useState<CidMap>({});
   const [ratings, setRatings] = useState<TrainerRatingMap>({});
   const [serverRatings, setServerRatings] = useState<TrainerRatingMap>({});
-  const [error, setError] = useState(false);
   const [dirty, setDirty] = useState(false);
 
   const getCidMap = async (): Promise<void> => {
@@ -54,7 +54,7 @@ export function Admin() {
       await callEndpoint("/api/cid_map", { setHook: setCidMap });
     } catch (err) {
       console.error(`Could not get CID mapping: ${err}`);
-      setError(true);
+      sendAlert("ERROR", "Could not get CID mapping from the server");
     }
   };
 
@@ -65,10 +65,9 @@ export function Admin() {
       });
       setRatings(data!);
       setServerRatings(data!);
-      setError(false);
     } catch (err) {
+      sendAlert("ERROR", "Could not get ratings from the server");
       console.error(`Could not get ratings: ${err}`);
-      setError(true);
     }
   };
 
@@ -82,6 +81,7 @@ export function Admin() {
         method: "PUT",
         body: { cid, ...ratings[cid] },
       });
+      sendAlert("INFO", "Ratings saved");
     }
     getRatings();
   };
@@ -129,13 +129,6 @@ export function Admin() {
             </button>
           </div>
         </>
-      )}
-      {error && (
-        <p>
-          <span className="font-bold text-red-500">
-            There was an error communicating with the server
-          </span>
-        </p>
       )}
     </div>
   );
