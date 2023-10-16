@@ -88,6 +88,8 @@ export function Scheduling() {
         },
       });
       sendAlert("INFO", "Schedule created");
+      setNewScheduleDayOfWeek(0);
+      setNewScheduleTimeOfDay("");
       await callEndpoint("/api/schedules", { setHook: setUserSchedules });
     } catch (err) {
       console.error(`Error creating new schedule: ${err}`);
