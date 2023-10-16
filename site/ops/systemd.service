@@ -5,8 +5,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/srv
-ExecStart=docker run --init -d --rm -p 80:4321 -v /srv/data:/data -v /srv/zdv-training-scheduler.config.toml:/app/.config.toml --name zdv-training-scheduler celeo/zdv-training-scheduler:latest
-ExecReload=docker stop celeo/zdv-training-scheduler
+ExecStart=docker run --init --rm -p 80:4321 -v /srv/data:/data -v /srv/zdv-training-scheduler.config.toml:/app/.config.toml --name zdv-training-scheduler celeo/zdv-training-scheduler:latest
 Restart=always
 
 [Install]
