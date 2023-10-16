@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { sendAlert } from "../data.ts";
 import type { CidMap } from "../pages/api/cid_map.ts";
-import type { TrainerRatingMap } from "../pages/api/ratings.ts";
+import type { TrainerRatingMap } from "../pages/api/ratings/index.ts";
 import {
   FRIENDLY_POSITION_NAME_MAP,
   MAXIMUM_PENDING_SESSIONS,

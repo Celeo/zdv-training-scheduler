@@ -86,6 +86,17 @@ export function Admin() {
     getRatings();
   };
 
+  const syncRoster = async (): Promise<void> => {
+    try {
+      await callEndpoint("/api/ratings/sync", { method: "POST" });
+      sendAlert("INFO", "Roster synchronized");
+      getRatings();
+    } catch (err) {
+      console.error(`Error syncing roster: ${err}`);
+      sendAlert("ERROR", "Could not sync roster");
+    }
+  };
+
   useEffect(() => {
     setDirty(JSON.stringify(ratings) !== JSON.stringify(serverRatings));
   }, [ratings]);
@@ -97,7 +108,15 @@ export function Admin() {
 
   return (
     <div className="mx-auto max-w-6xl pt-5">
-      <h2 className="text-2xl pb-5">Training ratings management</h2>
+      <div className="flex justify-between pb-5">
+        <h2 className="text-2xl">Training ratings management</h2>
+        <button
+          className="text-black focus:ring-4 focus:outline-none rounded-full text-sm px-5 py-2 text-center bg-green-400 hover:bg-green-300"
+          onClick={syncRoster}
+        >
+          Sync
+        </button>
+      </div>
       {Object.keys(cidMap).length > 0 && (
         <>
           {Object.keys(ratings).map((cid) => (
