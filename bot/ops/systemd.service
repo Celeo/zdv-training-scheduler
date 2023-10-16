@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/srv
-ExecStart=docker run --init --rm  -e SITE_URL=TODO -e SITE_TOKEN=TODO -e DISCORD_BOT_TOKEN=TODO --name zdv-training-scheduler-bot celeo/zdv-training-scheduler-bot:latest
+ExecStart=docker run --init --rm -e SITE_URL=TODO -e SITE_TOKEN=TODO -e DISCORD_BOT_TOKEN=TODO --name zdv-training-scheduler-bot celeo/zdv-training-scheduler-bot:latest
 Restart=always
 
 [Install]
