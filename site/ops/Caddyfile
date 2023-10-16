@@ -1,0 +1,7 @@
+:80 {
+	reverse_proxy :4321
+	handle_errors {
+		root * static
+		file_server
+	}
+}

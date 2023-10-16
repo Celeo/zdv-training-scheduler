@@ -9,7 +9,7 @@
     "build": "astro build",
     "astro": "astro",
     "format": "prettier --write \"src/**/*.{ts,tsx,astro}\"",
-    "docker:build": "docker build -t celeo/zdv-training-scheduler .",
+    "docker:build": "docker build -f ops/Dockerfile -t celeo/zdv-training-scheduler .",
     "docker:push": "docker push celeo/zdv-training-scheduler:latest",
     "script:import_roster": "tsx scripts/import_roster.ts"
   },

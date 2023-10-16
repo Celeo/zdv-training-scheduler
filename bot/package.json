@@ -5,7 +5,7 @@
   "module": "src/index.ts",
   "scripts": {
     "dev": "bun run src/index.ts",
-    "docker:build": "docker build -t celeo/zdv-training-scheduler-bot .",
+    "docker:build": "docker build -f ops/Dockerfile -t celeo/zdv-training-scheduler-bot .",
     "docker:push": "docker push celeo/zdv-training-scheduler-bot:latest"
   },
   "devDependencies": {
