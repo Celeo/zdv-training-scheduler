@@ -182,7 +182,13 @@ These steps will create a Docker image, push it to your server, push a [systemd]
 
 #### Bot
 
-TBD
+1. `bun run docker:build && bun run docker:push`
+1. `ssh <your_ssh_target`
+1. `docker pull <you>/zdv-training-scheduler-bot`
+1. Update the "systemd.service" file with your image name
+1. Push the "systemd.service" file to your server at `/etc/systemd/system/zdv-training-scheduler-bot.service`
+1. Fill out that new file on the server with the 3 required env vars
+1. On the server, run `systemctl daemon-reload && systemctl enable --now zdv-training-scheduler-bot.service`
 
 ## Contribution
 
