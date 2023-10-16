@@ -81,8 +81,8 @@ export function Admin() {
         method: "PUT",
         body: { cid, ...ratings[cid] },
       });
-      sendAlert("INFO", "Ratings saved");
     }
+    sendAlert("INFO", "Ratings saved");
     getRatings();
   };
 
