@@ -125,7 +125,7 @@ export function AvailableSession(props: AvailableSessionProps) {
         onClick={() => close()}
       >
         <div
-          className="relative top-20 mx-auto py-5 px-12 border w-3/12 shadow-lg rounded-md z-40"
+          className="relative top-20 mx-auto py-5 px-12 border w-3/12 shadow-lg rounded-xl z-40"
           style={{ backgroundColor: "#3a4a6b" }}
           onClick={(e) => {
             e.stopPropagation();
@@ -150,7 +150,7 @@ export function AvailableSession(props: AvailableSessionProps) {
           <select
             name="position"
             id="position"
-            className="block border text-sm rounded-lg w-1/2 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
+            className="block border text-sm rounded-md w-1/2 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
             onChange={(e) => setSelectedPosition(e.target.value)}
             value={selectedPosition}
           >
@@ -159,7 +159,7 @@ export function AvailableSession(props: AvailableSessionProps) {
           </select>
           <div className="flex justify-between pt-5">
             <button
-              className="text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center bg-red-400 hover:bg-red-300"
+              className="text-black focus:ring-4 focus:outline-none rounded-xl text-sm w-auto px-5 py-2.5 text-center bg-red-400 hover:bg-red-300"
               onClick={close}
             >
               Cancel
@@ -167,7 +167,7 @@ export function AvailableSession(props: AvailableSessionProps) {
 
             {props.currentUserCid === props.session.instructor && (
               <button
-                className="text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center bg-orange-400 hover:bg-orange-300"
+                className="text-black focus:ring-4 focus:outline-none rounded-xl text-sm w-auto px-5 py-2.5 text-center bg-orange-400 hover:bg-orange-300"
                 onClick={deleteSession}
               >
                 Delete
@@ -175,7 +175,7 @@ export function AvailableSession(props: AvailableSessionProps) {
             )}
 
             <button
-              className={`text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center ${
+              className={`text-black focus:ring-4 focus:outline-none rounded-xl text-sm w-auto px-5 py-2.5 text-center ${
                 selectedPosition === "" ||
                 isLoading ||
                 props.pendingSessions >= MAXIMUM_PENDING_SESSIONS
@@ -200,7 +200,7 @@ export function AvailableSession(props: AvailableSessionProps) {
         </div>
       </div>
       <div
-        className="block p-3 mb-1 w-full cursor-pointer max-w-3xl border rounded-lg shadow bg-gray-800 border-gray-700 hover:bg-gray-700 text-center"
+        className="block p-3 mb-1 w-full cursor-pointer max-w-3xl border rounded-xl shadow bg-gray-800 border-gray-700 hover:bg-gray-700 text-center"
         onClick={() => setIsOpen(true)}
       >
         <h5 className="mb-2 text-2xl font-bold tracking-tight text-white">

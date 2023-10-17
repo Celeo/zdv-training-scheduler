@@ -108,7 +108,7 @@ export function Admin() {
       <div className="flex justify-between pb-5">
         <h2 className="text-2xl">Training ratings management</h2>
         <button
-          className="text-black focus:ring-4 focus:outline-none rounded-full text-sm px-5 py-2 text-center bg-green-400 hover:bg-green-300"
+          className="text-black focus:ring-4 focus:outline-none rounded-xl text-sm px-5 py-2 text-center bg-green-400 hover:bg-green-300"
           onClick={syncRoster}
         >
           Sync
@@ -135,7 +135,7 @@ export function Admin() {
           ))}
           <div className="flex flex-center pt-10">
             <button
-              className={`mx-auto w-6/12 text-black focus:ring-4 focus:outline-none rounded-full text-sm px-5 py-2.5 text-center ${
+              className={`mx-auto w-6/12 text-black focus:ring-4 focus:outline-none rounded-xl text-sm px-5 py-2.5 text-center ${
                 dirty ? "bg-green-400 hover:bg-green-300" : "bg-gray-500"
               }`}
               disabled={!dirty}

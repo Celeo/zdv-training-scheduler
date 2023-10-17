@@ -132,7 +132,7 @@ export function Scheduling() {
         {isTrainer && (
           <div className="flex flex-items justify-center gap-x-5 mb-3">
             <select
-              className="block border text-sm rounded-lg w-1/4 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
+              className="block border text-sm rounded-md w-1/4 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
               onChange={(e) => setNewSessionTime(e.target.value)}
               value={newSessionTime}
             >
@@ -151,12 +151,12 @@ export function Scheduling() {
             <input
               type="text"
               placeholder="Notes (optional)"
-              className="border text-sm rounded-lg block w-1/4 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
+              className="border text-sm rounded-md block w-1/4 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
               value={newSessionNotes}
               onChange={(e) => setNewSessionNotes(e.target.value)}
             />
             <button
-              className={`text-black focus:ring-4 focus:outline-none rounded-md w-1/4 text-sm px-5 py-1 text-center ${
+              className={`text-black focus:ring-4 focus:outline-none rounded-xl w-1/4 text-sm px-5 py-1 text-center ${
                 newSessionTime === ""
                   ? "bg-gray-500"
                   : "bg-sky-400 hover:bg-sky-300"
@@ -199,7 +199,7 @@ export function Scheduling() {
         <div className="flex-1">
           <div className="flex flex-items justify-center gap-x-5 mb-3">
             <select
-              className="block border text-sm rounded-lg w-1/4 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
+              className="block border text-sm rounded-md w-1/4 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
               onChange={(e) =>
                 setNewScheduleDayOfWeek(parseInt(e.target.value))
               }
@@ -217,7 +217,7 @@ export function Scheduling() {
               <option value={6}>Saturdays</option>
             </select>
             <select
-              className="block border text-sm rounded-lg w-1/4 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
+              className="block border text-sm rounded-md w-1/4 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
               onChange={(e) => setNewScheduleTimeOfDay(e.target.value)}
               value={newScheduleTimeOfDay}
             >
@@ -234,7 +234,7 @@ export function Scheduling() {
               })}
             </select>
             <button
-              className={`text-black focus:ring-4 focus:outline-none rounded-md w-1/4 text-sm px-5 py-1 text-center ${
+              className={`text-black focus:ring-4 focus:outline-none rounded-xl w-1/4 text-sm px-5 py-1 text-center ${
                 newScheduleTimeOfDay === "" || newScheduleDayOfWeek === -1
                   ? "bg-gray-500"
                   : "bg-sky-400 hover:bg-sky-300"
