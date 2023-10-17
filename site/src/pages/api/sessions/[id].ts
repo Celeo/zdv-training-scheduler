@@ -6,11 +6,11 @@ import {
   canBeTrainer,
   checkAuth,
   getUserInfoFromCid,
-  infoToName,
 } from "../../../util/auth.ts";
 import { SESSION_STATUS } from "../../../util/constants.ts";
 import { InformTypes, informUser } from "../../../util/inform.ts";
 import { LOGGER } from "../../../util/log.ts";
+import { infoToName } from "../../../util/print.ts";
 
 type UpdatePayload = {
   action: "ACCEPT" | "UNACCEPT" | "UPDATE_NOTES";

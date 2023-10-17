@@ -1,12 +1,9 @@
 import type { TeacherRating } from "@prisma/client";
 import type { APIContext } from "astro";
 import { DB } from "../../../data.ts";
-import {
-  RequiredPermission,
-  checkAuth,
-  infoToName,
-} from "../../../util/auth.ts";
+import { RequiredPermission, checkAuth } from "../../../util/auth.ts";
 import { LOGGER } from "../../../util/log.ts";
+import { infoToName } from "../../../util/print.ts";
 
 export type TrainerRatingEntry = Omit<
   TeacherRating,

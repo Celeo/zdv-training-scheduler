@@ -5,9 +5,9 @@ import type {
   TrainerRatingEntry,
   TrainerRatingMap,
 } from "../pages/api/ratings";
-import { infoToName } from "../util/auth";
 import { FRIENDLY_POSITION_NAME_MAP, type Positions } from "../util/constants";
 import { callEndpoint } from "../util/http";
+import { infoToName } from "../util/print";
 
 function Row(props: {
   cidMap: CidMap;

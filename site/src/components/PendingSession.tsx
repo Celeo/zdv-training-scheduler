@@ -1,11 +1,11 @@
 import { useState } from "react";
 import type { CidMap } from "../pages/api/cid_map.ts";
-import { infoToName } from "../util/auth.ts";
 import {
   FRIENDLY_POSITION_NAME_MAP,
   type Positions,
 } from "../util/constants.ts";
 import { callEndpoint } from "../util/http.ts";
+import { infoToName } from "../util/print.ts";
 
 export type PendingSessionProps = {
   id: number;

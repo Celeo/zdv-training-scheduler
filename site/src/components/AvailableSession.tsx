@@ -2,13 +2,13 @@ import { useState } from "react";
 import { sendAlert } from "../data.ts";
 import type { CidMap } from "../pages/api/cid_map.ts";
 import type { TrainerRatingMap } from "../pages/api/ratings/index.ts";
-import { infoToName } from "../util/auth.ts";
 import {
   FRIENDLY_POSITION_NAME_MAP,
   MAXIMUM_PENDING_SESSIONS,
   type Positions,
 } from "../util/constants.ts";
 import { callEndpoint } from "../util/http.ts";
+import { infoToName } from "../util/print.ts";
 
 export type AvailableSessionProps = {
   session: {

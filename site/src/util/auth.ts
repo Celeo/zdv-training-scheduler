@@ -6,6 +6,7 @@ import { DB } from "../data.ts";
 import { loadConfig, type Config } from "./config.ts";
 import { ADMIN_ROLES, TRAINER_ROLES } from "./constants.ts";
 import { LOGGER } from "./log.ts";
+import { infoToName } from "./print.ts";
 
 /**
  * Token data back from ZDV SSO.
@@ -47,14 +48,6 @@ export type AuthStatus = {
   payload: JwtPayload | null;
   shortCircuit: Response | null;
 };
-
-/**
- * First name, last name, and OIs.
- */
-export type PrintableName = Pick<
-  ZdvUserInfo,
-  "first_name" | "last_name" | "operating_initials"
->;
 
 type OAuthInfoUri = {
   user: {
@@ -363,12 +356,4 @@ export async function getUserInfoFromCid(cid: number): Promise<ZdvUserInfo> {
     operating_initials: controller.operating_initials as string,
     roles: controller.roles as Array<string>,
   };
-}
-
-/**
- * Using a user or controller's info, format
- * their name for display and logging.
- */
-export function infoToName(info: PrintableName): string {
-  return `${info.first_name} ${info.last_name} (${info.operating_initials})`;
 }

@@ -1,8 +1,9 @@
 import * as nodemailer from "nodemailer";
 import { DB } from "../data.ts";
-import { getUserInfoFromCid, type PrintableName } from "./auth.ts";
+import { getUserInfoFromCid } from "./auth.ts";
 import { loadConfig } from "./config.ts";
 import { LOGGER } from "./log.ts";
+import type { PrintableName } from "./print.ts";
 
 /**
  * Triggering events that warrant async communication to the user.

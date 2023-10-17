@@ -1,10 +1,11 @@
 import type { APIContext } from "astro";
 import axios from "axios";
 import { DB } from "../../../data";
-import { RequiredPermission, checkAuth, infoToName } from "../../../util/auth";
+import { RequiredPermission, checkAuth } from "../../../util/auth";
 import { loadConfig } from "../../../util/config";
 import { TRAINER_ROLES } from "../../../util/constants";
 import { LOGGER } from "../../../util/log";
+import { infoToName } from "../../../util/print";
 
 type RosterData = Array<{
   cid: number;

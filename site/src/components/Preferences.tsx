@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sendAlert, type AlertLevel } from "../data";
+import { sendAlert } from "../data";
 import { callEndpoint } from "../util/http";
 
 type EndpointData = {
