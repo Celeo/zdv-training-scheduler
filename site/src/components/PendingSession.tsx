@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { sendAlert } from "../data.ts";
 import type { CidMap } from "../pages/api/cid_map.ts";
 import {
   FRIENDLY_POSITION_NAME_MAP,
@@ -20,7 +21,6 @@ export type PendingSessionProps = {
 
 export function PendingSession(props: PendingSessionProps) {
   const [showModal, setShowModal] = useState(false);
-  const [error, setError] = useState(false);
 
   const cancelReservation = async (): Promise<void> => {
     try {
@@ -31,7 +31,7 @@ export function PendingSession(props: PendingSessionProps) {
       window.location.reload();
     } catch (err) {
       console.error(`Could not cancel reservation: ${err}`);
-      setError(true);
+      sendAlert("ERROR", "Could not cancel reservation");
     }
   };
 
@@ -66,17 +66,10 @@ export function PendingSession(props: PendingSessionProps) {
               Cancel reservation
             </button>
           </div>
-          {error && (
-            <p>
-              <span className="font-bold text-red-500">
-                There was an error communicating with the server
-              </span>
-            </p>
-          )}
         </div>
       </div>
       <ul className="list-disc list-inside text-base">
-        <li className="text-blue-200">
+        <li className="text-sky-200">
           {props.date} at {props.time} with {infoToName(instructor!)} for{" "}
           {FRIENDLY_POSITION_NAME_MAP[props.selectedPosition! as Positions]}
           {props.notes}

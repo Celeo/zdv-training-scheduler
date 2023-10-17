@@ -151,7 +151,7 @@ export function Scheduling() {
             <input
               type="text"
               placeholder="Notes (optional)"
-              className="border text-sm rounded-lg block w-1/4 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+              className="border text-sm rounded-lg block w-1/4 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
               value={newSessionNotes}
               onChange={(e) => setNewSessionNotes(e.target.value)}
             />
@@ -159,7 +159,7 @@ export function Scheduling() {
               className={`text-black focus:ring-4 focus:outline-none rounded-md w-1/4 text-sm px-5 py-1 text-center ${
                 newSessionTime === ""
                   ? "bg-gray-500"
-                  : "bg-secondary hover:bg-accent"
+                  : "bg-sky-400 hover:bg-sky-300"
               }`}
               disabled={newSessionTime === ""}
               onClick={createNewSession}
@@ -237,7 +237,7 @@ export function Scheduling() {
               className={`text-black focus:ring-4 focus:outline-none rounded-md w-1/4 text-sm px-5 py-1 text-center ${
                 newScheduleTimeOfDay === "" || newScheduleDayOfWeek === -1
                   ? "bg-gray-500"
-                  : "bg-secondary hover:bg-accent"
+                  : "bg-sky-400 hover:bg-sky-300"
               }`}
               disabled={
                 newScheduleTimeOfDay === "" || newScheduleDayOfWeek === -1

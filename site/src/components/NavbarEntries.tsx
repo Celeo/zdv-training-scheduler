@@ -9,8 +9,8 @@ function Link(props: { href: string; name: string }): JSX.Element {
       <a
         href={props.href}
         className={
-          "block p-0 rounded hover:text-accent " +
-          (onPage ? "text-secondary" : "")
+          "block p-0 rounded hover:text-sky-300 " +
+          (onPage ? "text-violet-300" : "")
         }
       >
         {props.name}

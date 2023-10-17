@@ -10,7 +10,6 @@ type EndpointData = {
 export function Preferences() {
   const [email, setEmail] = useState(false);
   const [discord, setDiscord] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -34,7 +33,7 @@ export function Preferences() {
       sendAlert("INFO", "Preferences saved");
     } catch (err) {
       console.error(`Error saving preferences: ${err}`);
-      setError(`could not save preferences`);
+      sendAlert("ERROR", "Could not save preferences");
     }
   };
 
@@ -59,7 +58,7 @@ export function Preferences() {
                 type="checkbox"
                 checked={email}
                 onChange={() => setEmail(!email)}
-                className="w-4 h-4 text-blue-600  rounded  ring-offset-gray-800 focus:ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600"
+                className="w-4 h-4 rounded ring-offset-gray-800 focus:ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600"
               />
               <label htmlFor="alertsEmail" className="ml-2 text-sm font-medium">
                 Receive notifications over email
@@ -71,7 +70,7 @@ export function Preferences() {
                 type="checkbox"
                 checked={discord}
                 onChange={() => setDiscord(!discord)}
-                className="w-4 h-4 text-blue-600 rounded ring-offset-gray-800 focus:ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600"
+                className="w-4 h-4 rounded ring-offset-gray-800 focus:ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600"
               />
               <label
                 htmlFor="alertsDiscord"
@@ -85,12 +84,11 @@ export function Preferences() {
         <button
           type="submit"
           onClick={submit}
-          className="text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center bg-accent hover:bg-blue-300"
+          className="text-black focus:ring-4 focus:outline-none rounded-sm text-sm w-auto px-5 py-2.5 text-center bg-sky-400 hover:bg-sky-300"
         >
           Submit
         </button>
       </form>
-      {error && <p className="text-lg text-red-500 pt-10">Error: {error}</p>}
     </div>
   );
 }
