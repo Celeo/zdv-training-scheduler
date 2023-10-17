@@ -4,8 +4,6 @@
 export enum SESSION_STATUS {
   OPEN = "open",
   ACCEPTED = "accepted",
-  COMPLETE = "complete",
-  CANCELLED = "cancelled",
 }
 
 /**
@@ -34,7 +32,7 @@ export const FRIENDLY_POSITION_NAME_MAP: Record<Positions, string> = {
 };
 
 export const TRAINER_ROLES = ["mtr", "ins"];
-export const ADMIN_ROLES = ["atm", "datm", "ta", "wm"];
+export const ADMIN_ROLES = ["atm", "datm", "ta"];
 
 /**
  * The number of pending sessions any one student can have before
