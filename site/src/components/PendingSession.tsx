@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { CidMap } from "../pages/api/cid_map.ts";
+import { infoToName } from "../util/auth.ts";
 import {
   FRIENDLY_POSITION_NAME_MAP,
   type Positions,
@@ -76,8 +77,7 @@ export function PendingSession(props: PendingSessionProps) {
       </div>
       <ul className="list-disc list-inside text-base">
         <li className="text-blue-200">
-          {props.date} at {props.time} with {instructor?.first_name}{" "}
-          {instructor?.last_name} ({instructor?.operating_initials}) for{" "}
+          {props.date} at {props.time} with {infoToName(instructor!)} for{" "}
           {FRIENDLY_POSITION_NAME_MAP[props.selectedPosition! as Positions]}
           {props.notes}
           <button

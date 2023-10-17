@@ -1,6 +1,6 @@
 import * as nodemailer from "nodemailer";
 import { DB } from "../data.ts";
-import { getUserInfoFromCid } from "./auth.ts";
+import { getUserInfoFromCid, type PrintableName } from "./auth.ts";
 import { loadConfig } from "./config.ts";
 import { LOGGER } from "./log.ts";
 
@@ -8,7 +8,6 @@ import { LOGGER } from "./log.ts";
  * Triggering events that warrant async communication to the user.
  */
 export enum InformTypes {
-  JOINED_SITE,
   ACCEPTED_SESSION,
   STUDENT_CANCELLED_SESSION,
   TRAINER_CANCELLED_SESSION,
@@ -24,22 +23,18 @@ export enum InformTypes {
 export async function informUser(
   cid: number,
   type: InformTypes,
-  data: Record<string, any>,
+  data: PrintableName & { date: string; time: string },
 ): Promise<void> {
   // construct message
   let message = "";
   switch (type) {
-    case InformTypes.JOINED_SITE: {
-      message = "Welcome to the ZDV training site!";
-      break;
-    }
     case InformTypes.ACCEPTED_SESSION: {
-      message = `${data.first_name} ${data.last_name} (${data.oi}) has accepted your training session on ${data.date} at ${data.time}`;
+      message = `${data.first_name} ${data.last_name} (${data.operating_initials}) has accepted your training session on ${data.date} at ${data.time}`;
       break;
     }
     case InformTypes.STUDENT_CANCELLED_SESSION:
     case InformTypes.TRAINER_CANCELLED_SESSION: {
-      message = `${data.first_name} ${data.last_name} (${data.oi}) has cancelled the training session on ${data.date} at ${data.time}`;
+      message = `${data.first_name} ${data.last_name} (${data.operating_initials}) has cancelled the training session on ${data.date} at ${data.time}`;
       break;
     }
   }

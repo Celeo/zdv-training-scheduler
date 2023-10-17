@@ -1,7 +1,12 @@
 import type { TeacherRating } from "@prisma/client";
 import type { APIContext } from "astro";
 import { DB } from "../../../data.ts";
-import { RequiredPermission, checkAuth } from "../../../util/auth.ts";
+import {
+  RequiredPermission,
+  checkAuth,
+  infoToName,
+} from "../../../util/auth.ts";
+import { LOGGER } from "../../../util/log.ts";
 
 export type TrainerRatingEntry = Omit<
   TeacherRating,
@@ -45,7 +50,7 @@ type UpdatePayload = Omit<TeacherRating, "createdAt" | "updatedAt">;
 export async function PUT(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { shortCircuit } = await checkAuth(
+  const { payload, shortCircuit } = await checkAuth(
     context.request,
     RequiredPermission.ADMIN,
   );
@@ -61,6 +66,7 @@ export async function PUT(
       status: 400,
     });
   }
+  LOGGER.info(`${infoToName(payload!.info)} updated ratings for ${body.cid}`);
   await DB.teacherRating.update({ where: { cid: body.cid }, data: body });
   return new Response("Updated");
 }

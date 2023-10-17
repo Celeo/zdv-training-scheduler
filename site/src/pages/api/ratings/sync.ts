@@ -1,7 +1,7 @@
 import type { APIContext } from "astro";
 import axios from "axios";
 import { DB } from "../../../data";
-import { RequiredPermission, checkAuth } from "../../../util/auth";
+import { RequiredPermission, checkAuth, infoToName } from "../../../util/auth";
 import { loadConfig } from "../../../util/config";
 import { TRAINER_ROLES } from "../../../util/constants";
 import { LOGGER } from "../../../util/log";
@@ -24,9 +24,7 @@ export async function POST(
   const config = await loadConfig();
   const stored = await DB.teacherRating.findMany();
   const roster = [];
-  LOGGER.info(
-    `${payload?.info.first_name} ${payload?.info.last_name} (${payload?.info.oi}) is sync'ing the roster`,
-  );
+  LOGGER.info(`${infoToName(payload!.info)} is synchronizing the roster`);
 
   const resp = await axios.get<RosterData>(config.oauth.userRoster);
   for (const entry of resp.data) {

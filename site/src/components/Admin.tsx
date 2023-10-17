@@ -5,6 +5,7 @@ import type {
   TrainerRatingEntry,
   TrainerRatingMap,
 } from "../pages/api/ratings";
+import { infoToName } from "../util/auth";
 import { FRIENDLY_POSITION_NAME_MAP, type Positions } from "../util/constants";
 import { callEndpoint } from "../util/http";
 
@@ -16,11 +17,7 @@ function Row(props: {
 }): JSX.Element {
   return (
     <div className="flex justify-between mt-1">
-      <p className="pt-2">
-        {props.cidMap[props.cid]!.first_name}{" "}
-        {props.cidMap[props.cid]!.last_name} (
-        {props.cidMap[props.cid]!.operating_initials})
-      </p>
+      <p className="pt-2">{infoToName(props.cidMap[props.cid]!)}</p>
       <div className="flex justify-center text-sm">
         {Object.keys(props.ratings).map((n) => {
           const name = n as Positions;

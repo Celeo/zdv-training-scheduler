@@ -25,7 +25,7 @@ export type ZdvUserInfo = {
   email: string;
   first_name: string;
   last_name: string;
-  oi: string;
+  operating_initials: string;
   roles: Array<string>;
 };
 
@@ -46,6 +46,25 @@ export type JwtPayload = {
 export type AuthStatus = {
   payload: JwtPayload | null;
   shortCircuit: Response | null;
+};
+
+/**
+ * First name, last name, and OIs.
+ */
+export type PrintableName = Pick<
+  ZdvUserInfo,
+  "first_name" | "last_name" | "operating_initials"
+>;
+
+type OAuthInfoUri = {
+  user: {
+    cid: number;
+    email: string;
+    firstname: string;
+    lastname: string;
+    oi: string;
+    roles: Array<{ name: string }>;
+  };
 };
 
 const AUTHORIZATION_HEADER = "authorization";
@@ -149,23 +168,12 @@ export async function getUserInfo(
   access_token: string,
 ): Promise<ZdvUserInfo | null> {
   // make the authenticated call back to ZDV SSO
-  const { data } = await axios.get<any>(
+  const { data } = await axios.get<OAuthInfoUri>(
     (await loadConfig()).oauth.userInfoUri,
     {
       headers: { Authorization: `Bearer ${access_token}` },
     },
   );
-
-  // prevent logins if needed
-  const block = await DB.userBlocklist.findFirst({
-    where: { cid: data.user.cid },
-  });
-  if (block !== null) {
-    LOGGER.info(
-      `${data.user.firstname} ${data.user.lastname} (${data.user.oi.oi}, ${data.user.cid.cid}) has been prevented from logging in: ${block.reason}`,
-    );
-    return null;
-  }
 
   // data to be put into the JWT; only part of the available data
   const userInfo = {
@@ -173,9 +181,22 @@ export async function getUserInfo(
     email: data.user.email,
     first_name: data.user.firstname,
     last_name: data.user.lastname,
-    oi: data.user.oi,
-    roles: data.user.roles.map((role: { name: string }) => role.name),
+    operating_initials: data.user.oi,
+    roles: data.user.roles.map((role) => role.name),
   };
+
+  // prevent logins if needed
+  const block = await DB.userBlocklist.findFirst({
+    where: { cid: data.user.cid },
+  });
+  if (block !== null) {
+    LOGGER.info(
+      `${infoToName(userInfo)} (${
+        data.user.cid
+      }) has been prevented from logging in: ${block.reason}`,
+    );
+    return null;
+  }
 
   // create `TeacherRating` if is trainer and no existing record
   if (canBeTrainer(userInfo)) {
@@ -197,9 +218,7 @@ export async function getUserInfo(
   }
 
   // log it
-  LOGGER.info(
-    `${userInfo.first_name} ${userInfo.last_name} (${userInfo.oi}, ${userInfo.cid}) has logged in`,
-  );
+  LOGGER.info(`${infoToName(userInfo)} (${userInfo.cid}) has logged in`);
 
   return userInfo;
 }
@@ -289,7 +308,9 @@ export async function checkAuth(
     });
     if (blocked) {
       LOGGER.info(
-        `${auth.info.first_name} ${auth.info.last_name} (${auth.info.oi}, ${auth.info.cid}) was blocked from accessing the site`,
+        `${infoToName(auth.info)} (${
+          auth.info.cid
+        }) was blocked from accessing the site`,
       );
       return {
         payload: null,
@@ -339,7 +360,15 @@ export async function getUserInfoFromCid(cid: number): Promise<ZdvUserInfo> {
     email: controller.email as string,
     first_name: controller.first_name as string,
     last_name: controller.last_name as string,
-    oi: controller.operating_initials as string,
+    operating_initials: controller.operating_initials as string,
     roles: controller.roles as Array<string>,
   };
+}
+
+/**
+ * Using a user or controller's info, format
+ * their name for display and logging.
+ */
+export function infoToName(info: PrintableName): string {
+  return `${info.first_name} ${info.last_name} (${info.operating_initials})`;
 }

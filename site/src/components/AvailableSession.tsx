@@ -2,6 +2,7 @@ import { useState } from "react";
 import { sendAlert } from "../data.ts";
 import type { CidMap } from "../pages/api/cid_map.ts";
 import type { TrainerRatingMap } from "../pages/api/ratings/index.ts";
+import { infoToName } from "../util/auth.ts";
 import {
   FRIENDLY_POSITION_NAME_MAP,
   MAXIMUM_PENDING_SESSIONS,
@@ -19,17 +20,11 @@ export type AvailableSessionProps = {
     status: string;
     notes: string;
   };
-
   cidMap: CidMap;
   ratingMap: TrainerRatingMap;
   pendingSessions: number;
   currentUserCid: number;
 };
-
-function trainerName(cid: number, map: CidMap): string {
-  const e = map[cid];
-  return `${e?.first_name} ${e?.last_name} (${e?.operating_initials})`;
-}
 
 function ratings(cid: number, map: TrainerRatingMap): Array<Positions> {
   const e = map[cid];
@@ -142,7 +137,7 @@ export function AvailableSession(props: AvailableSessionProps) {
           </p>
           <p>
             <span className="font-bold">Trainer</span>:{" "}
-            {trainerName(props.session.instructor, props.cidMap)}
+            {infoToName(props.cidMap[props.session.instructor]!)}
           </p>
           {props.session.notes && (
             <p>
@@ -214,7 +209,7 @@ export function AvailableSession(props: AvailableSessionProps) {
         <div className="font-normal text-gray-400">
           <p>
             <span className="font-bold">Trainer</span>:{" "}
-            {trainerName(props.session.instructor, props.cidMap)}
+            {infoToName(props.cidMap[props.session.instructor]!)}
           </p>
           <p>
             <span className="font-bold">Positions</span>:{" "}

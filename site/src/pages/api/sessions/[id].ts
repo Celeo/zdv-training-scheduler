@@ -6,6 +6,7 @@ import {
   canBeTrainer,
   checkAuth,
   getUserInfoFromCid,
+  infoToName,
 } from "../../../util/auth.ts";
 import { SESSION_STATUS } from "../../../util/constants.ts";
 import { InformTypes, informUser } from "../../../util/inform.ts";
@@ -91,9 +92,7 @@ export async function PUT(
     if (record.instructor === payload?.info.cid) {
       return new Response("Cannot accept your own session", { status: 400 });
     }
-    LOGGER.info(
-      `${payload?.info.first_name} ${payload?.info.last_name} (${payload?.info.oi}) accepted session ${id}`,
-    );
+    LOGGER.info(`${infoToName(payload!.info)} accepted session ${id}`);
 
     // accept the session and inform the trainer
     await DB.trainingSession.update({
@@ -105,9 +104,9 @@ export async function PUT(
       },
     });
     await informUser(record.instructor, InformTypes.ACCEPTED_SESSION, {
-      first_name: payload?.info.first_name,
-      last_name: payload?.info.last_name,
-      oi: payload?.info.oi,
+      first_name: payload!.info.first_name,
+      last_name: payload!.info.last_name,
+      operating_initials: payload!.info.operating_initials,
       date: record.date,
       time: record.time,
     });
@@ -119,9 +118,7 @@ export async function PUT(
         { status: 400 },
       );
     }
-    LOGGER.info(
-      `${payload?.info.first_name} ${payload?.info.last_name} (${payload?.info.oi}) unaccepted session ${id}`,
-    );
+    LOGGER.info(`${infoToName(payload!.info)} unaccepted session ${id}`);
 
     // open the session back up and inform the trainer
     await DB.trainingSession.update({
@@ -129,9 +126,9 @@ export async function PUT(
       data: { student: null, status: SESSION_STATUS.OPEN },
     });
     await informUser(record.instructor, InformTypes.STUDENT_CANCELLED_SESSION, {
-      first_name: payload?.info.first_name,
-      last_name: payload?.info.last_name,
-      oi: payload?.info.oi,
+      first_name: payload!.info.first_name,
+      last_name: payload!.info.last_name,
+      operating_initials: payload!.info.operating_initials,
       date: record.date,
       time: record.time,
     });
@@ -148,9 +145,7 @@ export async function PUT(
         { status: 400 },
       );
     }
-    LOGGER.info(
-      `${payload?.info.first_name} ${payload?.info.last_name} (${payload?.info.oi}) updated notes for ${id}`,
-    );
+    LOGGER.info(`${infoToName(payload!.info)} updated notes for ${id}`);
     await DB.trainingSession.update({
       where: { id: record.id },
       data: { notes: body.notes ?? "" },
@@ -218,7 +213,7 @@ export async function DELETE(
     await informUser(record.student, InformTypes.TRAINER_CANCELLED_SESSION, {
       first_name: instructor.first_name,
       last_name: instructor.last_name,
-      oi: instructor.oi,
+      operating_initials: instructor.operating_initials,
       date: record.date,
       time: record.time,
     });
