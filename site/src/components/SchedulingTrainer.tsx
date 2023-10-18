@@ -1,4 +1,8 @@
-import type { TrainingSchedule, TrainingSession } from "@prisma/client";
+import type {
+  TrainingSchedule,
+  TrainingScheduleException,
+  TrainingSession,
+} from "@prisma/client";
 import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
@@ -14,7 +18,13 @@ export function SchedulingTrainer() {
   const [newSessionNotes, setNewSessionNotes] = useState("");
   const [newScheduleDayOfWeek, setNewScheduleDayOfWeek] = useState(-1);
   const [newScheduleTimeOfDay, setNewScheduleTimeOfDay] = useState("");
-  const [schedules, setSchedules] = useState<Array<TrainingSchedule>>([]);
+  const [schedules, setSchedules] = useState<
+    Array<
+      TrainingSchedule & {
+        trainingScheduleException: Array<TrainingScheduleException>;
+      }
+    >
+  >([]);
 
   useEffect(() => {
     (async () => {
@@ -95,8 +105,13 @@ export function SchedulingTrainer() {
             <p>No schedules</p>
           ) : (
             schedules.map((schedule) => (
-              // TODO show exclusion days
-              <ExistingSchedule key={schedule.id} schedule={schedule} />
+              <ExistingSchedule
+                key={schedule.id}
+                schedule={schedule}
+                updateTrigger={() =>
+                  callEndpoint("/api/schedules", { setHook: setSchedules })
+                }
+              />
             ))
           )}
         </ul>
@@ -160,7 +175,6 @@ export function SchedulingTrainer() {
         <p>No pending sessions</p>
       ) : (
         <ul className="list-disc list-inside basis-4/12 pb-5">
-          {/* TODO cancel buttons */}
           {sessions.map((s) => (
             <li key={s.id}>
               {s.student !== null
@@ -227,7 +241,7 @@ export function SchedulingTrainer() {
               disabled={selectedDate === null || newSessionTime === ""}
               onClick={createNewSession}
             >
-              Create session
+              Create
             </button>
           </div>
         </div>
