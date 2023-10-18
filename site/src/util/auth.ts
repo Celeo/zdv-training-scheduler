@@ -55,6 +55,7 @@ type OAuthInfoUri = {
     email: string;
     firstname: string;
     lastname: string;
+    controllerType: string;
     oi: string;
     roles: Array<{ name: string }>;
   };
@@ -163,9 +164,7 @@ export async function getUserInfo(
   // make the authenticated call back to ZDV SSO
   const { data } = await axios.get<OAuthInfoUri>(
     (await loadConfig()).oauth.userInfoUri,
-    {
-      headers: { Authorization: `Bearer ${access_token}` },
-    },
+    { headers: { Authorization: `Bearer ${access_token}` } },
   );
 
   // data to be put into the JWT; only part of the available data
@@ -177,6 +176,16 @@ export async function getUserInfo(
     operating_initials: data.user.oi,
     roles: data.user.roles.map((role) => role.name),
   };
+
+  // only home and visiting controllers can train
+  if (data.user.controllerType === "none") {
+    LOGGER.info(
+      `Non-member controller attempted to log in: ${infoToName(userInfo)} (${
+        data.user.cid
+      })`,
+    );
+    return null;
+  }
 
   // prevent logins if needed
   const block = await DB.userBlocklist.findFirst({

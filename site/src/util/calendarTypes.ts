@@ -1,4 +1,4 @@
-// the calendar lib doesn't export their types
+// the calendar lib doesn't export its types
 
 export type Range<T> = [T, T];
 export type ValuePiece = Date | null;

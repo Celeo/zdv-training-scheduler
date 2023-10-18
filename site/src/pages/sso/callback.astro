@@ -29,7 +29,7 @@ if (loginError === null) {
   if (userInfo) {
     jwt = await createJwt(token.accessToken, userInfo);
   } else {
-    loginError = "Your login to the site was blocked.";
+    loginError = "You were not permitted to log into this site.";
   }
 }
 ---
