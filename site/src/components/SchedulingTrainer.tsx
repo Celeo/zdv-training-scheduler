@@ -71,6 +71,21 @@ export function SchedulingTrainer() {
     }
   };
 
+  /**
+   * Trainer cancelling a session that may or may not
+   * have had a student accept.
+   */
+  const cancelSession = async (id: number): Promise<void> => {
+    try {
+      await callEndpoint(`/api/sessions/${id}`, { method: "DELETE" });
+      sendAlert("INFO", "Session deleted");
+      await callEndpoint("/api/sessions/instructor", { setHook: setSessions });
+    } catch (err) {
+      console.error(`Error deleting existing session: ${err}`);
+      sendAlert("ERROR", "Could not delete session");
+    }
+  };
+
   return (
     <>
       <div className="pb-5">
@@ -146,17 +161,21 @@ export function SchedulingTrainer() {
       ) : (
         <ul className="list-disc list-inside basis-4/12 pb-5">
           {/* TODO cancel buttons */}
-          {sessions.map((s) =>
-            s.student !== null ? (
-              <li key={s.id}>
-                {s.date} at {s.time} with {s.student} on {s.selectedPosition}
-              </li>
-            ) : (
-              <li key={s.id}>
-                {s.date} at {s.time} (unclaimed)
-              </li>
-            ),
-          )}
+          {sessions.map((s) => (
+            <li key={s.id}>
+              {s.student !== null
+                ? `${s.date} at ${s.time} with ${s.student} on ${s.selectedPosition}`
+                : `${s.date} at ${s.time} (unclaimed)`}
+              <button
+                className="focus:outline-none focus:ring-4 font-medium rounded-xl text-sm px-2 py-1 text-center mb-2 ml-2 text-red-500 hover:text-white hover:bg-red-700 focus:ring-red-900"
+                onClick={() => {
+                  cancelSession(s.id);
+                }}
+              >
+                Cancel
+              </button>
+            </li>
+          ))}
         </ul>
       )}
       <h3 className="text-lg pb-2">Create new session</h3>
