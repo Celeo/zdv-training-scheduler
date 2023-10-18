@@ -123,7 +123,11 @@ export async function PUT(
     // open the session back up and inform the trainer
     await DB.trainingSession.update({
       where: { id: record.id },
-      data: { student: null, status: SESSION_STATUS.OPEN },
+      data: {
+        student: null,
+        status: SESSION_STATUS.OPEN,
+        selectedPosition: null,
+      },
     });
     await informUser(record.instructor, InformTypes.STUDENT_CANCELLED_SESSION, {
       first_name: payload!.info.first_name,
