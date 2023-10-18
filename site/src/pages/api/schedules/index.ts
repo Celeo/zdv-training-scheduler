@@ -1,6 +1,8 @@
 import type { APIContext } from "astro";
 import { DB } from "../../../data.js";
 import { RequiredPermission, checkAuth } from "../../../util/auth.js";
+import { LOGGER } from "../../../util/log.js";
+import { infoToName } from "../../../util/print.js";
 
 /**
  * Get the user's schedules.
@@ -50,5 +52,10 @@ export async function POST(
       timeOfDay: body.timeOfDay,
     },
   });
+  LOGGER.info(
+    `${infoToName(payload!.info)} created schedule: ${body.dayOfWeek}, ${
+      body.timeOfDay
+    }`,
+  );
   return new Response(null, { status: 201 });
 }

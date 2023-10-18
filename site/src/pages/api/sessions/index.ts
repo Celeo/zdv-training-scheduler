@@ -8,6 +8,8 @@ import {
   checkAuth,
 } from "../../../util/auth.ts";
 import { SESSION_STATUS } from "../../../util/constants.ts";
+import { LOGGER } from "../../../util/log.ts";
+import { infoToName } from "../../../util/print.ts";
 
 /**
  * Get all sessions. 'date' is a require query param.
@@ -132,5 +134,10 @@ export async function POST(
       notes: body.notes,
     },
   });
+  LOGGER.info(
+    `${infoToName(payload!.info)} created a new session at ${body.date}T${
+      body.time
+    }`,
+  );
   return new Response("Created", { status: 201 });
 }

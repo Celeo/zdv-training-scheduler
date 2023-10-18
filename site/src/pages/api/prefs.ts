@@ -1,6 +1,8 @@
 import type { APIContext } from "astro";
 import { DB } from "../../data.ts";
 import { checkAuth } from "../../util/auth.ts";
+import { LOGGER } from "../../util/log.ts";
+import { infoToName } from "../../util/print.ts";
 
 /**
  * Get the user's preferences.
@@ -41,5 +43,10 @@ export async function PUT(
       receiveDiscordMessages: body.discord,
     },
   });
+  LOGGER.info(
+    `${infoToName(payload!.info)} updated their preferences: ${body.email}, ${
+      body.discord
+    }`,
+  );
   return new Response("Updated");
 }

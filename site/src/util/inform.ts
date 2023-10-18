@@ -65,6 +65,7 @@ async function sendEmail(cid: number, text: string): Promise<void> {
   const config = await loadConfig();
   const userInfo = await getUserInfoFromCid(cid);
 
+  LOGGER.debug(`Sending email to ${userInfo.email}`);
   // use the ZDV email servers, as the zdvartcc.org site does
   const transporter = nodemailer.createTransport({
     host: config.email.host,

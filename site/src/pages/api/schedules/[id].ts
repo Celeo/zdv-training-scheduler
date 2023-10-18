@@ -1,6 +1,8 @@
 import type { APIContext } from "astro";
 import { DB } from "../../../data";
 import { RequiredPermission, checkAuth } from "../../../util/auth";
+import { LOGGER } from "../../../util/log";
+import { infoToName } from "../../../util/print";
 
 /**
  * Delete a schedule. Trainers only. Only the
@@ -35,6 +37,7 @@ export async function DELETE(
     });
   }
 
+  LOGGER.info(`${infoToName(payload!.info)} deleted schedule ${id}`);
   // disconnect existing sessions, delete the exclusions, and delete the schedule
   await DB.trainingSession.updateMany({
     where: { scheduleId: id },

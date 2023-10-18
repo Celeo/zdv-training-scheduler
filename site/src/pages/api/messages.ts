@@ -1,6 +1,7 @@
 import type { APIContext } from "astro";
 import { DB } from "../../data.ts";
 import { loadConfig } from "../../util/config.ts";
+import { LOGGER } from "../../util/log.ts";
 
 /**
  * Check the auth header for the Discord bot's token.
@@ -37,6 +38,7 @@ export async function GET(
   const messages = await DB.discordMessage.findMany({
     where: { completedAt: null },
   });
+  LOGGER.debug(`Discord bot checking messages, found ${messages.length}`);
   return new Response(JSON.stringify(messages));
 }
 

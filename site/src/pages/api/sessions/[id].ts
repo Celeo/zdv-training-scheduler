@@ -73,6 +73,11 @@ export async function PUT(
         status: SESSION_STATUS.ACCEPTED,
       },
     });
+    LOGGER.info(
+      `${infoToName(payload!.info)} created a session from schedule ${
+        body.scheduleId
+      } for ${body.date}T${schedule.timeOfDay}`,
+    );
     return new Response("Accepted");
   }
 
@@ -110,6 +115,11 @@ export async function PUT(
       date: record.date,
       time: record.time,
     });
+    LOGGER.info(
+      `${infoToName(payload!.info)} accepted session ${id} for ${
+        body.selectedPosition
+      }`,
+    );
     return new Response("Accepted");
   } else if (body.action === "UNACCEPT") {
     if (record.student !== payload?.info.cid) {
@@ -118,7 +128,6 @@ export async function PUT(
         { status: 400 },
       );
     }
-    LOGGER.info(`${infoToName(payload!.info)} unaccepted session ${id}`);
 
     // open the session back up and inform the trainer
     await DB.trainingSession.update({
@@ -136,6 +145,7 @@ export async function PUT(
       date: record.date,
       time: record.time,
     });
+    LOGGER.info(`${infoToName(payload!.info)} unaccepted session ${id}`);
     return new Response("Un-accepted");
   } else {
     /* update notes */
@@ -149,18 +159,18 @@ export async function PUT(
         { status: 400 },
       );
     }
-    LOGGER.info(`${infoToName(payload!.info)} updated notes for ${id}`);
     await DB.trainingSession.update({
       where: { id: record.id },
       data: { notes: body.notes ?? "" },
     });
+    LOGGER.info(`${infoToName(payload!.info)} updated notes for ${id}`);
     return new Response("Notes updated");
   }
 }
 
 type DeletePayload = {
   scheduleId?: number;
-  date: string;
+  date?: string;
 };
 
 /**
@@ -181,10 +191,10 @@ export async function DELETE(
     return shortCircuit;
   }
 
-  const body: DeletePayload = await context.request.json();
   const record = await DB.trainingSession.findFirst({ where: { id } });
   if (!record) {
-    if (body.scheduleId === undefined) {
+    const body: DeletePayload = await context.request.json();
+    if (body.scheduleId === undefined || body.date === undefined) {
       return new Response(
         `Could not find record with id ${id} and no schedule ID supplied`,
         { status: 400 },
@@ -222,7 +232,7 @@ export async function DELETE(
       time: record.time,
     });
   }
-
   await DB.trainingSession.delete({ where: { id: record.id } });
+  LOGGER.info(`${infoToName(payload!.info)} deleted session ${id}`)
   return new Response("Session deleted");
 }
