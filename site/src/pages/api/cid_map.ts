@@ -12,6 +12,8 @@ export type ZdvRosterEntry = {
 
 export type CidMap = Record<number, Omit<ZdvRosterEntry, "cid">>;
 
+// TODO should I cache this?
+
 /**
  * Get the ARTCC roster, mapping CID to name and OIs.
  */
