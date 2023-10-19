@@ -233,6 +233,6 @@ export async function DELETE(
     });
   }
   await DB.trainingSession.delete({ where: { id: record.id } });
-  LOGGER.info(`${infoToName(payload!.info)} deleted session ${id}`)
+  LOGGER.info(`${infoToName(payload!.info)} deleted session ${id}`);
   return new Response("Session deleted");
 }

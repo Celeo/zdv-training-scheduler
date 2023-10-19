@@ -13,21 +13,28 @@ const config = await loadConfig();
     </p>
     <ul class="list-inside list-disc pl-2 py-2 text-lg">
       <li>Your VATSIM details (cid, name, email)</li>
-      <li>Your {config.facilityShort} site details (operating initials, roles)</li>
+      <li>
+        Your {config.facilityShort} site details (operating initials, roles)
+      </li>
     </ul>
     <p class="text-lg">
-      This information is not shared with any site other than VATSIM and {config.facilityShort}.
+      This information is not shared with any site other than VATSIM and {
+        config.facilityShort
+      }.
       <br />
        No information is sold, whatsoever.
       <br /><br />
-       This site does not allow for changing of any of your VATSIM or {config.facilityShort}
-      information. If you wish to do so, navigate to the settings areas of those
-      sites.
+       This site does not allow for changing of any of your VATSIM or {
+        config.facilityShort
+      }
+       information. If you wish to do so, navigate to the settings areas of
+      those sites.
       <br /><br />
        If you wish to have you data purged from this site, please email the
       <a
         href={`mailto:wm@${config.facilityDomain}`}
-        class="underline text-sky-300 hover:text-sky-200">{config.facilityShort} WM</a
+        class="underline text-sky-300 hover:text-sky-200"
+        >{config.facilityShort} WM</a
       >. You can also email that address with concerns (including those of
       security), feedback, and general questions.
     </p>
