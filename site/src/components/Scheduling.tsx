@@ -37,7 +37,7 @@ export function Scheduling() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl pt-5">
+    <div className="pt-5 px-5 lg:px-0 max-w-xl lg:max-w-3xl mx-auto">
       <div className="text-sm font-medium text-center border-b text-gray-400 border-gray-700 mb-5">
         <ul className="flex flex-wrap -mb-px">
           <li className="mr-2">

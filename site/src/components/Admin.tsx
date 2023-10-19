@@ -104,7 +104,7 @@ export function Admin() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-6xl pt-5">
+    <div className="pt-5 max-w-3xl lg:max-w-6xl mx-auto">
       <div className="flex justify-between pb-5">
         <h2 className="text-2xl">Training ratings management</h2>
         <button

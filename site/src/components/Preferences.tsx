@@ -33,16 +33,15 @@ export function Preferences() {
       sendAlert("INFO", "Preferences saved");
     } catch (err) {
       console.error(`Error saving preferences: ${err}`);
-      sendAlert("ERROR", "Could not save preferences");
+      sendAlert("ERROR", "Could not save your preferences");
     }
   };
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="pt-5 px-5 lg:px-0 max-w-1xl lg:max-w-3xl mx-auto">
       <h2 className="text-2xl pb-8">Preferences</h2>
       <p>
-        These notification preferences control where you will get notifications
-        on:
+        These notification preferences control where you will get notifications:
       </p>
       <ul className="list-disc list-inside pb-4 -ml-2">
         <li>A student accepting your session</li>
