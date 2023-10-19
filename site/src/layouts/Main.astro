@@ -18,8 +18,8 @@ const config = await loadConfig();
     <div
       class="max-w-screen-xl lg:max-w-screen-lg flex flex-wrap items-center justify-between mx-auto pt-1 px-4"
     >
-      <span class="self-center text-2xl font-semibold whitespace-nowrap"
-        >{config.facilityShort} Training Scheduler</span
+      <a href="/" class="hover:text-sky-300 text-2xl font-semibold"
+        >{config.facilityShort} Training Scheduler</a
       >
       <div class="w-auto">
         <NavbarEntries client:only />
@@ -27,7 +27,7 @@ const config = await loadConfig();
     </div>
   </nav>
 
-  <div class="container mx-auto pt-6">
+  <div class="pt-6">
     <slot />
   </div>
 

@@ -41,11 +41,10 @@ export function NavbarEntries() {
 
   return (
     <ul className="flex flex-row space-x-8">
-      <Link href="/" name="Home" />
       {jwt !== null ? (
         <>
           <Link href="/scheduling" name="Scheduling" />
-          <Link href="/prefs" name="Preferences" />
+          <Link href="/prefs" name="Prefs" />
           {isAdmin && <Link href="/admin" name="Admin" />}
           <Link href="/sso/logout" name="Log out" />
         </>
