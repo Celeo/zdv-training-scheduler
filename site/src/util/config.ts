@@ -7,6 +7,10 @@ const { readFile } = promises;
  * App configuration.
  */
 export type Config = {
+  /** ARTCC name to show in title and header */
+  facilityShort: string;
+  /** ARTCC site domain name */
+  facilityDomain: string;
   /** Signing secret for JWTs */
   jwtSecret: string;
   /** Secret for Discord bot site access */

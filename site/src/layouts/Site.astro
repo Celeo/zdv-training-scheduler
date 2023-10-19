@@ -1,21 +1,24 @@
 ---
+import { loadConfig } from '../util/config';
 interface Props {
   title: string;
 }
 
 const { title } = Astro.props;
+
+const config = await loadConfig();
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="ZDV Training Scheduler" />
+    <meta name="description" content={`${config.facilityShort} Training Scheduler`} />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>
-      {title ? `${title} | ZDV Training Scheduler` : "ZDV Training Scheduler"}
+      {title ? `${title} | ${config.facilityShort} Training Scheduler` : `${config.facilityShort} Training Scheduler`}
     </title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

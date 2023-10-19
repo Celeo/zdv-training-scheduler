@@ -82,7 +82,7 @@ async function sendEmail(cid: number, text: string): Promise<void> {
   await transporter.sendMail({
     from: config.email.from,
     to: userInfo.email,
-    subject: "ZDV Training Notification",
+    subject: `${config.facilityShort} Training Notification`,
     text,
   });
   LOGGER.info(`Sent email to ${userInfo.email}`);

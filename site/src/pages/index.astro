@@ -1,6 +1,9 @@
 ---
 import Main from "../layouts/Main.astro";
 import { IndexPageLoginPrompt } from "../components/IndexPageLoginPrompt.tsx";
+import { loadConfig } from "../util/config";
+
+const config = await loadConfig();
 ---
 
 <Main title="Home">
@@ -8,15 +11,15 @@ import { IndexPageLoginPrompt } from "../components/IndexPageLoginPrompt.tsx";
     <h1 class="text-2xl pb-5">What is this?</h1>
     <p class="text-lg">
       This site serves as <a
-        href="https://zdvartcc.org/"
+        href={`https://${config.facilityDomain}/`}
         target="_blank"
         class="underline text-sky-300 hover:text-sky-200"
-        >VATSIM Denver ARTCC's</a
+        >VATSIM {config.facilityShort} ARTCC's</a
       > training scheduler, where controllers can schedule time with trainers to
-      learn, review, and test as they rise through VATSIM's ATC ranks with ZDV.
+      learn, review, and test as they rise through VATSIM's ATC ranks with {config.facilityShort}.
     </p>
     <p class="text-lg pt-5">
-      For controllers who have trained in ZDV before, this site replaces
+      For controllers who have trained in {config.facilityShort} before, this site replaces
       Picktime.
     </p>
     <IndexPageLoginPrompt client:only />

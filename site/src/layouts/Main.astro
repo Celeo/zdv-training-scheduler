@@ -2,12 +2,14 @@
 import Site from "./Site.astro";
 import { NavbarEntries } from "../components/NavbarEntries.tsx";
 import { Alerts } from "../components/Alerts.tsx";
+import { loadConfig } from "../util/config";
 
 interface Props {
   title: string;
 }
 
 const { title } = Astro.props;
+const config = await loadConfig();
 ---
 
 <Site title={title}>
@@ -17,7 +19,7 @@ const { title } = Astro.props;
       class="max-w-screen-xl lg:max-w-screen-lg flex flex-wrap items-center justify-between mx-auto pt-1 px-4"
     >
       <span class="self-center text-2xl font-semibold whitespace-nowrap"
-        >ZDV Training Scheduler</span
+        >{config.facilityShort} Training Scheduler</span
       >
       <div class="w-auto">
         <NavbarEntries client:only />
@@ -46,9 +48,9 @@ const { title } = Astro.props;
       </li>
       <li>
         <a
-          href="https://zdvartcc.org/"
+          href={`https://${config.facilityDomain}/`}
           class="mr-4 hover:underline md:mr-6"
-          target="_blank">ZDV</a
+          target="_blank">{config.facilityShort}</a
         >
       </li>
       <li>

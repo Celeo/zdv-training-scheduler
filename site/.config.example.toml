@@ -1,19 +1,19 @@
+facilityShort = "ZDV"
+facilityDomain = "zdvartcc.org"
 jwtSecret = ""
 discordSecret = ""
 
 [oauth]
-
 clientId = ""
 clientSecret = ""
-baseUrl = ""
-authorizeEndpoint = ""
-tokenEndpoint = ""
-redirectUri = ""
-userInfoUri = ""
-userRoster = ""
+baseUrl = "https://auth.zdvartcc.org/"
+authorizeEndpoint = "oauth/authorize"
+tokenEndpoint = "oauth/token"
+redirectUri = "http://127.0.0.1:4321/sso/callback"
+userInfoUri = "https://auth.zdvartcc.org/v1/info"
+userRoster = "https://api.zdvartcc.org/v1/user/roster"
 
 [email]
-
 host = ""
 servername = ""
 port = 0
