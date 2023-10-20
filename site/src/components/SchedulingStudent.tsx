@@ -53,7 +53,16 @@ export function SchedulingStudent(props: { currentUserCid: number }) {
         <div className="pb-3 border-b-1 border-white">
           <h2 className="text-xl">Pending sessions</h2>
           {mySessions.map((session) => (
-            <PendingSession key={session.id} cidMap={cidMap} {...session} />
+            <PendingSession
+              key={session.id}
+              session={session}
+              cidMap={cidMap}
+              updateTrigger={() =>
+                callEndpoint("/api/sessions/mine?pending=true", {
+                  setHook: setMySessions,
+                })
+              }
+            />
           ))}
         </div>
       )}

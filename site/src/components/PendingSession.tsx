@@ -9,14 +9,18 @@ import { callEndpoint } from "../util/http.ts";
 import { infoToName } from "../util/print.ts";
 
 export type PendingSessionProps = {
-  id: number;
-  scheduleId: number | null;
-  instructor: number;
-  date: string;
-  time: string;
-  notes: string;
-  selectedPosition: string | null;
+  session: {
+    id: number;
+    scheduleId: number | null;
+    instructor: number;
+    date: string;
+    time: string;
+    notes: string;
+    selectedPosition: string | null;
+  };
+
   cidMap: CidMap;
+  updateTrigger: () => void;
 };
 
 export function PendingSession(props: PendingSessionProps) {
@@ -24,18 +28,18 @@ export function PendingSession(props: PendingSessionProps) {
 
   const cancelReservation = async (): Promise<void> => {
     try {
-      await callEndpoint(`/api/sessions/${props.id}`, {
+      await callEndpoint(`/api/sessions/${props.session.id}`, {
         method: "PUT",
         body: { action: "UNACCEPT" },
       });
-      window.location.reload();
+      props.updateTrigger();
     } catch (err) {
       console.error(`Could not cancel reservation: ${err}`);
       sendAlert("ERROR", "Could not cancel reservation");
     }
   };
 
-  const instructor = props.cidMap[props.instructor];
+  const instructor = props.cidMap[props.session.instructor];
   if (instructor === undefined) {
     return <></>;
   }
@@ -73,9 +77,14 @@ export function PendingSession(props: PendingSessionProps) {
       </div>
       <ul className="list-disc list-inside text-base">
         <li className="text-sky-200">
-          {props.date} at {props.time} with {infoToName(instructor!)} for{" "}
-          {FRIENDLY_POSITION_NAME_MAP[props.selectedPosition! as Positions]}
-          {props.notes}
+          {props.session.date} at {props.session.time} with{" "}
+          {infoToName(instructor!)} for{" "}
+          {
+            FRIENDLY_POSITION_NAME_MAP[
+              props.session.selectedPosition! as Positions
+            ]
+          }
+          {props.session.notes}
           <button
             className="focus:outline-none focus:ring-4 font-medium rounded-xl text-sm px-2 py-1 text-center mb-0 ml-2 text-red-500 hover:text-white hover:bg-red-700 focus:ring-red-900"
             onClick={() => {
