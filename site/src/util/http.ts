@@ -25,6 +25,7 @@ export async function callEndpoint<T = unknown>(
     if (jwt) {
       headers.set("authorization", `Bearer ${jwt}`);
     }
+    headers.set("timezone", Intl.DateTimeFormat().resolvedOptions().timeZone);
 
     const resp = await fetch(path, { method, body, headers });
     if (!resp.ok) {
