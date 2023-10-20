@@ -30,7 +30,10 @@ export async function GET(
   for (const schedule of data) {
     schedule.trainingScheduleException =
       schedule.trainingScheduleException.filter(
-        (excl) => DateTime.fromISO(`${excl.date}T${schedule.timeOfDay}`) >= now,
+        (excl) =>
+          DateTime.fromISO(`${excl.date}T${schedule.timeOfDay}`, {
+            zone: "utc",
+          }) >= now,
       );
   }
 
