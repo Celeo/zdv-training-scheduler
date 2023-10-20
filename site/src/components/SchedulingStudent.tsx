@@ -85,6 +85,14 @@ export function SchedulingStudent(props: { currentUserCid: number }) {
                     ratingMap={ratingMap}
                     pendingSessions={mySessions.length}
                     currentUserCid={props.currentUserCid}
+                    updateTrigger={() => {
+                      Promise.all([
+                        selectDay(selectedDate),
+                        callEndpoint("/api/sessions/mine?pending=true", {
+                          setHook: setMySessions,
+                        }),
+                      ]);
+                    }}
                   />
                 ))
               ) : (

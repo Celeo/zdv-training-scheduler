@@ -24,6 +24,7 @@ export type AvailableSessionProps = {
   ratingMap: TrainerRatingMap;
   pendingSessions: number;
   currentUserCid: number;
+  updateTrigger: () => void;
 };
 
 function ratings(cid: number, map: TrainerRatingMap): Array<Positions> {
@@ -85,7 +86,7 @@ export function AvailableSession(props: AvailableSessionProps) {
           date: props.session.date,
         },
       });
-      window.location.reload();
+      props.updateTrigger();
     } catch (err) {
       console.error(`Error confirming session: ${err}`);
       sendAlert("ERROR", "Error confirming session");
@@ -101,7 +102,7 @@ export function AvailableSession(props: AvailableSessionProps) {
           scheduleId: props.session.scheduleId,
         },
       });
-      window.location.reload();
+      props.updateTrigger();
     } catch (err) {
       console.error(`Error deleting session: ${err}`);
       sendAlert("ERROR", "Error deleting session");
