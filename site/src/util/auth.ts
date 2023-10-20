@@ -366,3 +366,27 @@ export async function getUserInfoFromCid(cid: number): Promise<ZdvUserInfo> {
     roles: controller.roles as Array<string>,
   };
 }
+
+/**
+ * Check the auth header for the Discord bot's token.
+ *
+ * This is different from the authentication on the rest
+ * of the site, since I don't want to bother with the bot
+ * having to get a dynamic token from somewhere.
+ *
+ * Return an error `Response` if the header isn't present
+ * or the value is incorrect.
+ */
+export async function checkDiscordHeader(
+  request: Request,
+): Promise<Response | null> {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader === null) {
+    return new Response(null, { status: 401 });
+  }
+  const config = await loadConfig();
+  if (`Bearer ${config.discordSecret}` !== authHeader) {
+    return new Response(null, { status: 403 });
+  }
+  return null;
+}

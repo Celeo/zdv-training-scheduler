@@ -1,29 +1,7 @@
 import type { APIContext } from "astro";
 import { DB } from "../../data.ts";
-import { loadConfig } from "../../util/config.ts";
+import { checkDiscordHeader } from "../../util/auth.ts";
 import { LOGGER } from "../../util/log.ts";
-
-/**
- * Check the auth header for the Discord bot's token.
- *
- * This is different from the authentication on the rest
- * of the site, since I don't want to bother with the bot
- * having to get a dynamic token from somewhere.
- *
- * Return an error `Response` if the header isn't present
- * or the value is incorrect.
- */
-async function checkHeader(request: Request): Promise<Response | null> {
-  const authHeader = request.headers.get("authorization");
-  if (authHeader === null) {
-    return new Response(null, { status: 401 });
-  }
-  const config = await loadConfig();
-  if (`Bearer ${config.discordSecret}` !== authHeader) {
-    return new Response(null, { status: 403 });
-  }
-  return null;
-}
 
 /**
  * Discord bot retrieving pending Discord messages.
@@ -31,7 +9,7 @@ async function checkHeader(request: Request): Promise<Response | null> {
 export async function GET(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const shortCircuit = await checkHeader(context.request);
+  const shortCircuit = await checkDiscordHeader(context.request);
   if (shortCircuit) {
     return shortCircuit;
   }
@@ -48,7 +26,7 @@ export async function GET(
 export async function PUT(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const shortCircuit = await checkHeader(context.request);
+  const shortCircuit = await checkDiscordHeader(context.request);
   if (shortCircuit) {
     return shortCircuit;
   }

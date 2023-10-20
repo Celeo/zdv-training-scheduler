@@ -1,6 +1,5 @@
 import { Client, Events } from "discord.js";
 import { Cron } from "croner";
-import { DateTime } from "luxon";
 
 const SITE_URL_ENV_VAR = "SITE_URL";
 const SITE_TOKEN_ENV_VAR = "SITE_TOKEN";
@@ -15,13 +14,8 @@ type MessagesResponse = Array<{
   message: string;
 }>;
 
-/**
- * Data from the site pending request.
- */
 type PendingSessionsResponse = Array<{
-  student?: number;
-  date: string;
-  time: string;
+  student: number;
 }>;
 
 /**
@@ -108,35 +102,32 @@ Cron("* * * * *", async () => {
 
 /**
  * Pull upcoming sessions from the site and send reminders
- * if they start in the next hour (and the user has Discord
- * notifications enabled).
+ * if they start in the next hour.
  */
 async function checkForReminders(): Promise<void> {
   try {
-    const siteUrl = process.env[SITE_URL_ENV_VAR];
-    let resp = await fetch(`${siteUrl}api/sessions/mine?pending=true`);
-    const pendingSessions: PendingSessionsResponse = await resp.json();
-    const now = DateTime.utc();
-    for (const session of pendingSessions) {
-      const recordDate = DateTime.fromISO(`${session.date}T${session.time}`, {
-        zone: "utc",
-      });
-      if (now < recordDate) {
-        const delta = now.toMillis() - recordDate.toMillis();
-        if (delta > 0 && delta <= 1_000 * 60 * 60) {
-          const discordUser = await getDiscordUserIdFromCid(session.student!);
-          if (discordUser === undefined) {
-            console.error(
-              `Could not send Discord message to cid ${session.student} - could not find Discord user id`
-            );
-            continue;
-          }
-          await client.users.send(
-            discordUser,
-            `Your training session starts in 1 hour.`
-          );
-        }
+    console.log("Checking for sessions in the next hour");
+    const resp = await fetch(
+      `${process.env[SITE_URL_ENV_VAR]}api/sessions/soon`,
+      {
+        headers: {
+          authorization: `Bearer ${process.env[SITE_TOKEN_ENV_VAR]}`,
+        },
       }
+    );
+    const pendingSessions: PendingSessionsResponse = await resp.json();
+    for (const session of pendingSessions) {
+      const discordUser = await getDiscordUserIdFromCid(session.student);
+      if (discordUser === undefined) {
+        console.error(
+          `Could not send Discord message to cid ${session.student} - could not find Discord user id`
+        );
+        continue;
+      }
+      await client.users.send(
+        discordUser,
+        `Your training session starts in 1 hour.`
+      );
     }
   } catch (err) {
     console.error(`Error getting upcoming sessions: ${err}`);
@@ -147,6 +138,10 @@ async function checkForReminders(): Promise<void> {
 Cron("0 * * * *", async () => {
   await checkForReminders();
 });
+
+setTimeout(() => {
+  checkForReminders();
+}, 5_000);
 
 /*
  * Entrypoint.
