@@ -15,17 +15,15 @@ type RosterData = Array<{
 export async function POST(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { payload, shortCircuit } = await checkAuth(
-    context.request,
-    RequiredPermission.ADMIN,
-  );
-  if (shortCircuit) {
-    return shortCircuit;
+  const auth = await checkAuth(context.request, RequiredPermission.ADMIN);
+  if (auth.kind === "invalid") {
+    return auth.data;
   }
+
   const config = await loadConfig();
   const stored = await DB.teacherRating.findMany();
   const roster = [];
-  LOGGER.info(`${infoToName(payload!.info)} is synchronizing the roster`);
+  LOGGER.info(`${infoToName(auth.data.info)} is synchronizing the roster`);
 
   const resp = await axios.get<RosterData>(config.oauth.userRoster);
   for (const entry of resp.data) {

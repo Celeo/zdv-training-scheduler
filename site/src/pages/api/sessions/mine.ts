@@ -12,9 +12,9 @@ import { SESSION_STATUS } from "../../../util/constants.ts";
 export async function GET(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { payload, shortCircuit } = await checkAuth(context.request);
-  if (shortCircuit) {
-    return shortCircuit;
+  const auth = await checkAuth(context.request);
+  if (auth.kind === "invalid") {
+    return auth.data;
   }
   const urlParams = new URL(context.request.url).searchParams;
   const pending = urlParams.get("pending");
@@ -23,7 +23,7 @@ export async function GET(
     const now = DateTime.utc();
     let records = await DB.trainingSession.findMany({
       where: {
-        student: payload!.info.cid,
+        student: auth.data.info.cid,
         status: SESSION_STATUS.ACCEPTED,
       },
     });
@@ -40,7 +40,7 @@ export async function GET(
   return new Response(
     JSON.stringify(
       await DB.trainingSession.findMany({
-        where: { student: payload!.info.cid },
+        where: { student: auth.data.info.cid },
       }),
     ),
   );

@@ -41,13 +41,20 @@ export type JwtPayload = {
   iat: number;
 };
 
+type ValidSession = {
+  kind: "valid";
+  data: JwtPayload;
+};
+
+type InvalidSession = {
+  kind: "invalid";
+  data: Response;
+};
+
 /**
  * Result of checking the user's JWT.
  */
-export type AuthStatus = {
-  payload: JwtPayload | null;
-  shortCircuit: Response | null;
-};
+type AuthStatus = ValidSession | InvalidSession;
 
 type OAuthInfoUri = {
   user: {
@@ -278,8 +285,8 @@ export async function checkAuth(
   if (authHeader === null) {
     // user is not logged in
     return {
-      payload: null,
-      shortCircuit: new Response(`Missing "${AUTHORIZATION_HEADER}" header`, {
+      kind: "invalid",
+      data: new Response(`Missing "${AUTHORIZATION_HEADER}" header`, {
         status: 401,
       }),
     };
@@ -294,8 +301,8 @@ export async function checkAuth(
       );
       if (!sufficient) {
         return {
-          payload: null,
-          shortCircuit: new Response("Missing roles", { status: 403 }),
+          kind: "invalid",
+          data: new Response("Missing roles", { status: 403 }),
         };
       }
     }
@@ -315,24 +322,23 @@ export async function checkAuth(
         }) was blocked from accessing the site`,
       );
       return {
-        payload: null,
-        shortCircuit: new Response(
-          "You have been blocked from accessing this site",
-          { status: 401 },
-        ),
+        kind: "invalid",
+        data: new Response("You have been blocked from accessing this site", {
+          status: 401,
+        }),
       };
     }
 
     return {
-      payload: auth,
-      shortCircuit: null,
+      kind: "valid",
+      data: auth,
     };
   } catch (err) {
     // singing issue / tampered with / different secret / something weird
     LOGGER.warn(`Could not verify JWT from user: ${err}`);
     return {
-      payload: null,
-      shortCircuit: new Response("Could not verify JWT", { status: 400 }),
+      kind: "invalid",
+      data: new Response("Could not verify JWT", { status: 400 }),
     };
   }
 }

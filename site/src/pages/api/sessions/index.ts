@@ -21,9 +21,9 @@ import { infoToName } from "../../../util/print.ts";
 export async function GET(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { payload, shortCircuit } = await checkAuth(context.request);
-  if (shortCircuit) {
-    return shortCircuit;
+  const auth = await checkAuth(context.request);
+  if (auth.kind === "invalid") {
+    return auth.data;
   }
 
   // 'date' URL parameter is required
@@ -77,7 +77,7 @@ export async function GET(
 
   let ret: Array<TrainingSession> = [];
 
-  if (canBeTrainer(payload!.info)) {
+  if (canBeTrainer(auth.data.info)) {
     // For trainers, their response includes all open sessions (as even trainers need
     // training sometimes), but also include their sessions on the date in case they
     // need to cancel them.
@@ -85,7 +85,7 @@ export async function GET(
       .filter(
         (session) =>
           session.status === SESSION_STATUS.OPEN ||
-          session.instructor === payload?.info.cid,
+          session.instructor === auth.data.info.cid,
       )
       .forEach((session) => ret.push(session));
   } else {
@@ -117,25 +117,22 @@ type UpdatePayload = {
 export async function POST(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { payload, shortCircuit } = await checkAuth(
-    context.request,
-    RequiredPermission.TRAINER,
-  );
-  if (shortCircuit) {
-    return shortCircuit;
+  const auth = await checkAuth(context.request, RequiredPermission.TRAINER);
+  if (auth.kind === "invalid") {
+    return auth.data;
   }
 
   const body: UpdatePayload = await context.request.json();
   await DB.trainingSession.create({
     data: {
-      instructor: payload!.info.cid,
+      instructor: auth.data.info.cid,
       date: body.date,
       time: body.time,
       notes: body.notes,
     },
   });
   LOGGER.info(
-    `${infoToName(payload!.info)} created a new session at ${body.date}T${
+    `${infoToName(auth.data.info)} created a new session at ${body.date}T${
       body.time
     }`,
   );

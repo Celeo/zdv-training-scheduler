@@ -18,10 +18,11 @@ export type TrainerRatingMap = Record<number, TrainerRatingEntry>;
 export async function GET(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { shortCircuit } = await checkAuth(context.request);
-  if (shortCircuit) {
-    return shortCircuit;
+  const auth = await checkAuth(context.request);
+  if (auth.kind === "invalid") {
+    return auth.data;
   }
+
   const ratings = await DB.teacherRating.findMany();
   ratings.sort((a, b) => a.cid - b.cid);
   const map: Record<number, TrainerRatingEntry> = {};
@@ -47,13 +48,11 @@ type UpdatePayload = Omit<TeacherRating, "createdAt" | "updatedAt">;
 export async function PUT(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { payload, shortCircuit } = await checkAuth(
-    context.request,
-    RequiredPermission.ADMIN,
-  );
-  if (shortCircuit) {
-    return shortCircuit;
+  const auth = await checkAuth(context.request, RequiredPermission.ADMIN);
+  if (auth.kind === "invalid") {
+    return auth.data;
   }
+
   const body: UpdatePayload = await context.request.json();
   const ratings = await DB.teacherRating.findFirst({
     where: { cid: body.cid },
@@ -63,7 +62,7 @@ export async function PUT(
       status: 400,
     });
   }
-  LOGGER.info(`${infoToName(payload!.info)} updated ratings for ${body.cid}`);
+  LOGGER.info(`${infoToName(auth.data.info)} updated ratings for ${body.cid}`);
   await DB.teacherRating.update({ where: { cid: body.cid }, data: body });
   return new Response("Updated");
 }

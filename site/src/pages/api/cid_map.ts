@@ -18,10 +18,11 @@ export type CidMap = Record<number, Omit<ZdvRosterEntry, "cid">>;
 export async function GET(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { shortCircuit } = await checkAuth(context.request);
-  if (shortCircuit) {
-    return shortCircuit;
+  const auth = await checkAuth(context.request);
+  if (auth.kind === "invalid") {
+    return auth.data;
   }
+
   const config = await loadConfig();
   const resp = await axios.get<Array<ZdvRosterEntry>>(config.oauth.userRoster);
   const map: Record<number, Omit<ZdvRosterEntry, "cid">> = {};

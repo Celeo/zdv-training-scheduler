@@ -13,15 +13,12 @@ import { infoToName } from "../../../util/print.js";
 export async function GET(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { payload, shortCircuit } = await checkAuth(
-    context.request,
-    RequiredPermission.TRAINER,
-  );
-  if (shortCircuit) {
-    return shortCircuit;
+  const auth = await checkAuth(context.request, RequiredPermission.TRAINER);
+  if (auth.kind === "invalid") {
+    return auth.data;
   }
   const data = await DB.trainingSchedule.findMany({
-    where: { instructor: payload!.info.cid },
+    where: { instructor: auth.data.info.cid },
     include: { trainingScheduleException: true },
   });
 
@@ -51,23 +48,21 @@ type CreatePayload = {
 export async function POST(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { payload, shortCircuit } = await checkAuth(
-    context.request,
-    RequiredPermission.TRAINER,
-  );
-  if (shortCircuit) {
-    return shortCircuit;
+  const auth = await checkAuth(context.request, RequiredPermission.TRAINER);
+  if (auth.kind === "invalid") {
+    return auth.data;
   }
+
   const body: CreatePayload = await context.request.json();
   await DB.trainingSchedule.create({
     data: {
-      instructor: payload!.info.cid,
+      instructor: auth.data.info.cid,
       dayOfWeek: body.dayOfWeek,
       timeOfDay: body.timeOfDay,
     },
   });
   LOGGER.info(
-    `${infoToName(payload!.info)} created schedule: ${body.dayOfWeek}, ${
+    `${infoToName(auth.data.info)} created schedule: ${body.dayOfWeek}, ${
       body.timeOfDay
     }`,
   );

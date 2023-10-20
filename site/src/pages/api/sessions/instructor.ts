@@ -9,15 +9,12 @@ import { RequiredPermission, checkAuth } from "../../../util/auth";
 export async function GET(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { payload, shortCircuit } = await checkAuth(
-    context.request,
-    RequiredPermission.TRAINER,
-  );
-  if (shortCircuit) {
-    return shortCircuit;
+  const auth = await checkAuth(context.request, RequiredPermission.TRAINER);
+  if (auth.kind === "invalid") {
+    return auth.data;
   }
   const sessions = await DB.trainingSession.findMany({
-    where: { instructor: payload!.info.cid },
+    where: { instructor: auth.data!.info.cid },
   });
   const now = DateTime.utc();
   const filtered = sessions.filter((s) => {

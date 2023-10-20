@@ -18,26 +18,24 @@ export async function DELETE(
     return new Response('Missing "id" URL parameter', { status: 404 });
   }
   const id = parseInt(context.params.id);
-  const { payload, shortCircuit } = await checkAuth(
-    context.request,
-    RequiredPermission.TRAINER,
-  );
-  if (shortCircuit) {
-    return shortCircuit;
+  const auth = await checkAuth(context.request, RequiredPermission.TRAINER);
+  if (auth.kind === "invalid") {
+    return auth.data;
   }
+
   const record = await DB.trainingSchedule.findFirst({
     where: { id: id },
   });
   if (record === null) {
     return new Response("Could not find schedule", { status: 400 });
   }
-  if (record.instructor !== payload?.info.cid) {
+  if (record.instructor !== auth.data.info.cid) {
     return new Response("You cannot delete someone else's schedule", {
       status: 400,
     });
   }
 
-  LOGGER.info(`${infoToName(payload!.info)} deleted schedule ${id}`);
+  LOGGER.info(`${infoToName(auth.data.info)} deleted schedule ${id}`);
   // disconnect existing sessions, delete the exclusions, and delete the schedule
   await DB.trainingSession.updateMany({
     where: { scheduleId: id },

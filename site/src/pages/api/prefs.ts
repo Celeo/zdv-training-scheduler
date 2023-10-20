@@ -10,12 +10,13 @@ import { infoToName } from "../../util/print.ts";
 export async function GET(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { payload, shortCircuit } = await checkAuth(context.request);
-  if (shortCircuit) {
-    return shortCircuit;
+  const auth = await checkAuth(context.request);
+  if (auth.kind === "invalid") {
+    return auth.data;
   }
+
   const preferences = await DB.userPreference.findFirst({
-    where: { cid: payload!.info.cid },
+    where: { cid: auth.data.info.cid },
   });
   return new Response(JSON.stringify(preferences));
 }
@@ -31,20 +32,21 @@ type UpdatePayload = {
 export async function PUT(
   context: APIContext<Record<string, any>>,
 ): Promise<Response> {
-  const { payload, shortCircuit } = await checkAuth(context.request);
-  if (shortCircuit) {
-    return shortCircuit;
+  const auth = await checkAuth(context.request);
+  if (auth.kind === "invalid") {
+    return auth.data;
   }
+
   const body: UpdatePayload = await context.request.json();
   await DB.userPreference.update({
-    where: { cid: payload!.info.cid },
+    where: { cid: auth.data.info.cid },
     data: {
       receiveEmails: body.email,
       receiveDiscordMessages: body.discord,
     },
   });
   LOGGER.info(
-    `${infoToName(payload!.info)} updated their preferences: ${body.email}, ${
+    `${infoToName(auth.data.info)} updated their preferences: ${body.email}, ${
       body.discord
     }`,
   );

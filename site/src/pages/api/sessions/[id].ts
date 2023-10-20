@@ -35,9 +35,9 @@ export async function PUT(
     return new Response('Missing "id" URL parameter', { status: 404 });
   }
   const id = parseInt(context.params.id);
-  const { payload, shortCircuit } = await checkAuth(context.request);
-  if (shortCircuit) {
-    return shortCircuit;
+  const auth = await checkAuth(context.request);
+  if (auth.kind === "invalid") {
+    return auth.data;
   }
 
   const body: UpdatePayload = await context.request.json();
@@ -66,7 +66,7 @@ export async function PUT(
       data: {
         scheduleId: body.scheduleId,
         instructor: schedule.instructor,
-        student: payload?.info.cid!,
+        student: auth.data.info.cid!,
         selectedPosition: body.selectedPosition,
         date: body.date!,
         time: schedule.timeOfDay,
@@ -74,7 +74,7 @@ export async function PUT(
       },
     });
     LOGGER.info(
-      `${infoToName(payload!.info)} created a session from schedule ${
+      `${infoToName(auth.data.info)} created a session from schedule ${
         body.scheduleId
       } for ${body.date}T${schedule.timeOfDay}`,
     );
@@ -94,35 +94,35 @@ export async function PUT(
     if (record.student !== null) {
       return new Response("Session already taken", { status: 400 });
     }
-    if (record.instructor === payload?.info.cid) {
+    if (record.instructor === auth.data.info.cid) {
       return new Response("Cannot accept your own session", { status: 400 });
     }
-    LOGGER.info(`${infoToName(payload!.info)} accepted session ${id}`);
+    LOGGER.info(`${infoToName(auth.data.info)} accepted session ${id}`);
 
     // accept the session and inform the trainer
     await DB.trainingSession.update({
       where: { id: record.id },
       data: {
-        student: payload!.info.cid,
+        student: auth.data.info.cid,
         status: SESSION_STATUS.ACCEPTED,
         selectedPosition: body.selectedPosition,
       },
     });
     await informUser(record.instructor, InformTypes.ACCEPTED_SESSION, {
-      first_name: payload!.info.first_name,
-      last_name: payload!.info.last_name,
-      operating_initials: payload!.info.operating_initials,
+      first_name: auth.data.info.first_name,
+      last_name: auth.data.info.last_name,
+      operating_initials: auth.data.info.operating_initials,
       date: record.date,
       time: record.time,
     });
     LOGGER.info(
-      `${infoToName(payload!.info)} accepted session ${id} for ${
+      `${infoToName(auth.data.info)} accepted session ${id} for ${
         body.selectedPosition
       }`,
     );
     return new Response("Accepted");
   } else if (body.action === "UNACCEPT") {
-    if (record.student !== payload?.info.cid) {
+    if (record.student !== auth.data.info.cid) {
       return new Response(
         "You cannot un-accept this session - you're not assigned to it",
         { status: 400 },
@@ -139,21 +139,21 @@ export async function PUT(
       },
     });
     await informUser(record.instructor, InformTypes.STUDENT_CANCELLED_SESSION, {
-      first_name: payload!.info.first_name,
-      last_name: payload!.info.last_name,
-      operating_initials: payload!.info.operating_initials,
+      first_name: auth.data.info.first_name,
+      last_name: auth.data.info.last_name,
+      operating_initials: auth.data.info.operating_initials,
       date: record.date,
       time: record.time,
     });
-    LOGGER.info(`${infoToName(payload!.info)} unaccepted session ${id}`);
+    LOGGER.info(`${infoToName(auth.data.info)} unaccepted session ${id}`);
     return new Response("Un-accepted");
   } else {
     /* update notes */
 
-    if (!canBeTrainer(payload!.info)) {
+    if (!canBeTrainer(auth.data.info)) {
       return new Response("You are not a trainer", { status: 403 });
     }
-    if (record.instructor !== payload?.info.cid) {
+    if (record.instructor !== auth.data.info.cid) {
       return new Response(
         "You cannot edit the notes on someone else's session",
         { status: 400 },
@@ -163,7 +163,7 @@ export async function PUT(
       where: { id: record.id },
       data: { notes: body.notes ?? "" },
     });
-    LOGGER.info(`${infoToName(payload!.info)} updated notes for ${id}`);
+    LOGGER.info(`${infoToName(auth.data.info)} updated notes for ${id}`);
     return new Response("Notes updated");
   }
 }
@@ -183,12 +183,9 @@ export async function DELETE(
     return new Response('Missing "id" URL parameter', { status: 404 });
   }
   const id = parseInt(context.params.id);
-  const { payload, shortCircuit } = await checkAuth(
-    context.request,
-    RequiredPermission.TRAINER,
-  );
-  if (shortCircuit) {
-    return shortCircuit;
+  const auth = await checkAuth(context.request, RequiredPermission.TRAINER);
+  if (auth.kind === "invalid") {
+    return auth.data;
   }
 
   const record = await DB.trainingSession.findFirst({ where: { id } });
@@ -215,7 +212,7 @@ export async function DELETE(
       status: 400,
     });
   }
-  if (record.instructor !== payload?.info.cid) {
+  if (record.instructor !== auth.data.info.cid) {
     return new Response("You cannot delete someone else's session", {
       status: 400,
     });
@@ -233,6 +230,6 @@ export async function DELETE(
     });
   }
   await DB.trainingSession.delete({ where: { id: record.id } });
-  LOGGER.info(`${infoToName(payload!.info)} deleted session ${id}`);
+  LOGGER.info(`${infoToName(auth.data.info)} deleted session ${id}`);
   return new Response("Session deleted");
 }
