@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { all } from "axios";
 import * as jose from "jose";
 import { nanoid } from "nanoid";
 import liboauth, { OAuth2 } from "oauth";
@@ -11,7 +11,7 @@ import { infoToName } from "./print.ts";
 /**
  * Token data back from ZDV SSO.
  */
-export type ZdvAccessData = {
+type ZdvAccessData = {
   accessToken: string;
   refreshToken: string;
 };
@@ -21,7 +21,7 @@ export type ZdvAccessData = {
  *
  * This is only a subset of what ZDV SSO returns.
  */
-export type ZdvUserInfo = {
+type ZdvUserInfo = {
   cid: number;
   email: string;
   first_name: string;
@@ -41,14 +41,6 @@ export type JwtPayload = {
   iat: number;
 };
 
-/**
- * Result of checking the user's JWT.
- */
-export type AuthStatus = {
-  payload: JwtPayload | null;
-  shortCircuit: Response | null;
-};
-
 type OAuthInfoUri = {
   user: {
     cid: number;
@@ -61,28 +53,26 @@ type OAuthInfoUri = {
   };
 };
 
-const AUTHORIZATION_HEADER = "authorization";
-
 /**
- * Permissions for an endpoint.
+ * Permission-gating endpoints.
  */
-export enum RequiredPermission {
+export enum RequiredPermissions {
+  /** Any user */
   ALL,
+  /** Any logged-in user */
+  SOME,
+  /** Trainers */
   TRAINER,
+  /** Admins */
   ADMIN,
 }
-
-const GATE_TO_ROLES = {
-  [RequiredPermission.TRAINER]: TRAINER_ROLES,
-  [RequiredPermission.ADMIN]: ADMIN_ROLES,
-};
 
 const JWT_SOURCE = "urn:zdv:training-scheduler";
 
 /**
  * Check if the user has a trainer role.
  */
-export function canBeTrainer(info: ZdvUserInfo): boolean {
+export function isSiteTrainer(info: ZdvUserInfo): boolean {
   return TRAINER_ROLES.some((role) => info.roles.includes(role));
 }
 
@@ -201,7 +191,7 @@ export async function getUserInfo(
   }
 
   // create `TeacherRating` if is trainer and no existing record
-  if (canBeTrainer(userInfo)) {
+  if (isSiteTrainer(userInfo)) {
     const teacherRating = await DB.teacherRating.findFirst({
       where: { cid: userInfo.cid },
     });
@@ -250,7 +240,7 @@ export async function createJwt(
 /**
  * Verify a JWT and return its payload.
  */
-async function verifyJwt(jwt: string): Promise<JwtPayload> {
+export async function verifyJwt(jwt: string): Promise<JwtPayload> {
   const secret = new TextEncoder().encode((await loadConfig()).jwtSecret);
   const { payload } = await jose.jwtVerify(jwt, secret, {
     issuer: JWT_SOURCE,
@@ -260,87 +250,9 @@ async function verifyJwt(jwt: string): Promise<JwtPayload> {
 }
 
 /**
- * Check the authorization header from the request, retrieving and
- * validating the JWT, and ensuring the user has the ability to
- * access logged-in-only parts of the site.
- *
- * If there is an error with the user's authentication, part of the
- * returned object will have a `Response` which should be returned
- * to the user directly.
- *
- * Called as part of endpoint authentication & authorization flow.
- */
-export async function checkAuth(
-  request: Request,
-  gate: RequiredPermission = RequiredPermission.ALL,
-): Promise<AuthStatus> {
-  const authHeader = request.headers.get(AUTHORIZATION_HEADER);
-  if (authHeader === null) {
-    // user is not logged in
-    return {
-      payload: null,
-      shortCircuit: new Response(`Missing "${AUTHORIZATION_HEADER}" header`, {
-        status: 401,
-      }),
-    };
-  }
-  try {
-    const auth = await verifyJwt(authHeader.substring(7));
-
-    // per-page permissions gating
-    if (gate !== RequiredPermission.ALL && !auth.info.roles.includes("wm")) {
-      const sufficient = auth.info.roles.find((role) =>
-        GATE_TO_ROLES[gate].includes(role),
-      );
-      if (!sufficient) {
-        return {
-          payload: null,
-          shortCircuit: new Response("Missing roles", { status: 403 }),
-        };
-      }
-    }
-
-    /*
-     * Since JWTs live on the user's browser, there needs to be some way to
-     * prevent their access to the site if needed, like for dismissals,
-     * abuse, or mandate of the ATM/DATM/TA.
-     */
-    const blocked = await DB.userBlocklist.findFirst({
-      where: { cid: auth.info.cid },
-    });
-    if (blocked) {
-      LOGGER.info(
-        `${infoToName(auth.info)} (${
-          auth.info.cid
-        }) was blocked from accessing the site`,
-      );
-      return {
-        payload: null,
-        shortCircuit: new Response(
-          "You have been blocked from accessing this site",
-          { status: 401 },
-        ),
-      };
-    }
-
-    return {
-      payload: auth,
-      shortCircuit: null,
-    };
-  } catch (err) {
-    // singing issue / tampered with / different secret / something weird
-    LOGGER.warn(`Could not verify JWT from user: ${err}`);
-    return {
-      payload: null,
-      shortCircuit: new Response("Could not verify JWT", { status: 400 }),
-    };
-  }
-}
-
-/**
  * Get a controller's information from their CID from ZDV.
  */
-export async function getUserInfoFromCid(cid: number): Promise<ZdvUserInfo> {
+async function getUserInfoFromCid(cid: number): Promise<ZdvUserInfo> {
   const config = await loadConfig();
   /*
    * Would be nice to get a specific user, rather than the whole roster,
@@ -387,6 +299,39 @@ export async function checkDiscordHeader(
   const config = await loadConfig();
   if (`Bearer ${config.discordSecret}` !== authHeader) {
     return new Response(null, { status: 403 });
+  }
+  return null;
+}
+
+/**
+ * Check the user's JWT against an endpoint's required permissions.
+ *
+ * I could simply default the permissions argument to `ALL`, but
+ * I'd rather be explicit about the permissions requirements of
+ * individual endpoints via the call to this function.
+ */
+export function authResponse(
+  info: ZdvUserInfo | null,
+  perms: RequiredPermissions,
+): Response | null {
+  if (perms === RequiredPermissions.ALL) {
+    return null;
+  }
+  if (info === null) {
+    return new Response("You must log in to view this data", {
+      status: 401,
+    });
+  }
+  if (perms === RequiredPermissions.TRAINER) {
+    if (!isSiteTrainer(info) && !isSiteAdmin(info)) {
+      return new Response("You do not have permissions to view this data", {
+        status: 403,
+      });
+    }
+  } else if (!isSiteAdmin(info)) {
+    return new Response("You do not have permissions to view this data", {
+      status: 403,
+    });
   }
   return null;
 }
