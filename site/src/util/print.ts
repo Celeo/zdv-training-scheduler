@@ -32,17 +32,25 @@ export enum DateDisplayTypes {
 /**
  * Format a JS `Date` object for display.
  */
-export function dateToStr(date: Date, type: DateDisplayTypes): string {
-  const dt = DateTime.fromJSDate(date);
+export function dateToStr(dateTime: DateTime, type: DateDisplayTypes): string {
   switch (type) {
     case DateDisplayTypes.DateAndTime: {
-      const d = dateToStr(date, DateDisplayTypes.Date);
-      const t = dateToStr(date, DateDisplayTypes.Time);
+      const d = dateToStr(dateTime, DateDisplayTypes.Date);
+      const t = dateToStr(dateTime, DateDisplayTypes.Time);
       return `${d} at ${t}`;
     }
     case DateDisplayTypes.Date:
-      return dt.toISODate()!;
+      return dateTime.toISODate()!;
     case DateDisplayTypes.Time:
-      return dt.toLocaleString(DateTime.TIME_24_SIMPLE, { locale: "en-US" });
+      return dateTime.toLocaleString(DateTime.TIME_24_SIMPLE);
   }
+}
+
+/**
+ * Take a `Date` from the server and load into the user's timezone.
+ */
+export function parseServerDate(date: Date): DateTime {
+  return DateTime.fromJSDate(date, { zone: "utc" }).setZone(
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+  );
 }

@@ -114,7 +114,7 @@ export async function PUT(
       first_name: auth.data.info.first_name,
       last_name: auth.data.info.last_name,
       operating_initials: auth.data.info.operating_initials,
-      dateTime: record.dateTime,
+      dateTime: DateTime.fromJSDate(record.dateTime),
     });
     LOGGER.info(
       `${infoToName(auth.data.info)} accepted session ${id} for ${
@@ -143,7 +143,7 @@ export async function PUT(
       first_name: auth.data.info.first_name,
       last_name: auth.data.info.last_name,
       operating_initials: auth.data.info.operating_initials,
-      dateTime: record.dateTime,
+      dateTime: DateTime.fromJSDate(record.dateTime),
     });
     LOGGER.info(`${infoToName(auth.data.info)} unaccepted session ${id}`);
     return new Response("Un-accepted");
@@ -222,7 +222,7 @@ export async function DELETE(
       first_name: trainer.first_name,
       last_name: trainer.last_name,
       operating_initials: trainer.operating_initials,
-      dateTime: record.dateTime,
+      dateTime: DateTime.fromJSDate(record.dateTime),
     });
   }
   await DB.trainingSession.delete({ where: { id: record.id } });

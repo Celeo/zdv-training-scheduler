@@ -4,10 +4,6 @@ import { DB } from "../../../data.ts";
 import { checkAuth } from "../../../util/auth.ts";
 import { SESSION_STATUS } from "../../../util/constants.ts";
 
-/*
- * TODO timezone support
- */
-
 /**
  * Get the sessions that the current user is a student of.
  *

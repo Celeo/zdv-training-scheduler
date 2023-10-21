@@ -1,3 +1,4 @@
+import type { DateTime } from "luxon";
 import * as nodemailer from "nodemailer";
 import { DB } from "../data.ts";
 import { getUserInfoFromCid } from "./auth.ts";
@@ -24,7 +25,7 @@ export enum InformTypes {
 export async function informUser(
   cid: number,
   type: InformTypes,
-  data: PrintableName & { dateTime: Date },
+  data: PrintableName & { dateTime: DateTime },
 ): Promise<void> {
   // construct message
   let message = "";

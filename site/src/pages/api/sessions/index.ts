@@ -138,18 +138,19 @@ export async function POST(
   const body: UpdatePayload = await context.request.json();
   const dt = DateTime.fromISO(`${body.date}T${body.time}`, {
     zone: "utc",
-  }).toJSDate();
+  });
   await DB.trainingSession.create({
     data: {
       trainer: auth.data.info.cid,
-      dateTime: dt,
+      dateTime: dt.toJSDate(),
       notes: body.notes,
     },
   });
   LOGGER.info(
-    `${infoToName(auth.data.info)} created a new session at ${dateToStr(
-      dt,
-      DateDisplayTypes.DateAndTime,
+    `${infoToName(
+      auth.data.info,
+    )} created a new session for ${dt.toISODate()} at ${dt.toLocaleString(
+      DateTime.TIME_24_SIMPLE,
     )}`,
   );
   return new Response("Created", { status: 201 });

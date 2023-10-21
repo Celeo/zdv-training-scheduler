@@ -9,7 +9,7 @@ import Calendar from "react-calendar";
 import { sendAlert } from "../data.ts";
 import type { Value } from "../util/calendarTypes.ts";
 import { callEndpoint } from "../util/http.ts";
-import { DateDisplayTypes, dateToStr } from "../util/print.ts";
+import { DateDisplayTypes, dateToStr, parseServerDate } from "../util/print.ts";
 import { ExistingSchedule } from "./ExistingSchedule.tsx";
 
 export function SchedulingTrainer() {
@@ -22,7 +22,7 @@ export function SchedulingTrainer() {
   const [schedules, setSchedules] = useState<
     Array<
       TrainingSchedule & {
-        trainingScheduleException: Array<TrainingScheduleException>;
+        trainingScheduleExceptions: Array<TrainingScheduleException>;
       }
     >
   >([]);
@@ -177,11 +177,11 @@ export function SchedulingTrainer() {
             <li key={s.id}>
               {s.student !== null
                 ? `${dateToStr(
-                    s.dateTime,
+                    parseServerDate(s.dateTime),
                     DateDisplayTypes.DateAndTime,
                   )} with ${s.student} on ${s.position}`
                 : `${dateToStr(
-                    s.dateTime,
+                    parseServerDate(s.dateTime),
                     DateDisplayTypes.DateAndTime,
                   )} (unclaimed)`}
               <button

@@ -5,10 +5,6 @@ import { RequiredPermission, checkAuth } from "../../../util/auth.js";
 import { LOGGER } from "../../../util/log.js";
 import { infoToName } from "../../../util/print.js";
 
-/*
- * TODO timezone support
- */
-
 /**
  * Get the user's schedules.
  *
@@ -58,17 +54,36 @@ export async function POST(
   }
 
   const body: CreatePayload = await context.request.json();
+
+  /*
+   * Process:
+   * 1. Take the current date, in the user's timezone, with their specified time.
+   * 2. Step forward day by day until the day of the week matches their selection.
+   * 3. Convert the timestamp to UTC
+   * 4. Save the day of week and time of day of the UTC timestamp
+   */
+
+  let dtUser = DateTime.fromISO(
+    `${DateTime.utc().toISODate()}T${body.timeOfDay}:00`,
+    { zone: context.locals.timezone },
+  );
+  while (dtUser.weekday !== body.dayOfWeek) {
+    dtUser = dtUser.plus({ day: 1 });
+  }
+  const dtUserUtc = dtUser.setZone("utc");
+  const newTime = dtUserUtc.toLocaleString(DateTime.TIME_24_SIMPLE);
   await DB.trainingSchedule.create({
     data: {
       trainer: auth.data.info.cid,
-      dayOfWeek: body.dayOfWeek,
-      timeOfDay: body.timeOfDay,
+      dayOfWeek: dtUserUtc.weekday,
+      timeOfDay: newTime,
     },
   });
+
   LOGGER.info(
-    `${infoToName(auth.data.info)} created schedule: ${body.dayOfWeek}, ${
-      body.timeOfDay
-    }`,
+    `${infoToName(auth.data.info)} created schedule: ${
+      dtUserUtc.weekday
+    }, ${newTime}`,
   );
   return new Response(null, { status: 201 });
 }
