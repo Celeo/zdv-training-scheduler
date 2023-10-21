@@ -69,12 +69,12 @@ function ratingsToPrintout(ratings: Array<Positions>): string {
 
 export function AvailableSession(props: AvailableSessionProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [position, setposition] = useState("");
+  const [position, setPosition] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const close = (): void => {
     setIsOpen(false);
-    setposition("");
+    setPosition("");
   };
 
   const confirm = async (): Promise<void> => {
@@ -156,7 +156,7 @@ export function AvailableSession(props: AvailableSessionProps) {
             name="position"
             id="position"
             className="block border text-sm rounded-md w-1/2 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
-            onChange={(e) => setposition(e.target.value)}
+            onChange={(e) => setPosition(e.target.value)}
             value={position}
           >
             <option value="" disabled></option>

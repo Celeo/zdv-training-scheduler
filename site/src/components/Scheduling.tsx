@@ -6,11 +6,6 @@ import { TRAINER_ROLES } from "../util/constants.js";
 import { SchedulingStudent } from "./SchedulingStudent.js";
 import { SchedulingTrainer } from "./SchedulingTrainer.js";
 
-const inactiveTab =
-  "inline-block pb-4 px-10 cursor-pointer border-b-2 border-transparent rounded-t-lg hover:border-gray-300 hover:text-gray-300";
-const activeTab =
-  "inline-block pb-4 px-10 cursor-pointer border-b-2 rounded-t-lg active text-blue-500 border-blue-500";
-
 export function Scheduling() {
   const [selectedTab, setSelectedTab] = useState(1);
   const [isTrainer, setIsTrainer] = useState(false);
@@ -30,7 +25,7 @@ export function Scheduling() {
 
   if (!isTrainer) {
     return (
-      <div className="mx-auto max-w-6xl pt-5">
+      <div className="pt-5 px-5 lg:px-0 max-w-xl lg:max-w-3xl mx-auto">
         <SchedulingStudent currentUserCid={currentUserCid} />
       </div>
     );
@@ -43,7 +38,11 @@ export function Scheduling() {
           <li className="mr-2">
             <button
               onClick={() => setSelectedTab(1)}
-              className={`${selectedTab === 1 ? activeTab : inactiveTab}`}
+              className={`${
+                selectedTab === 1
+                  ? "inline-block pb-4 px-10 cursor-pointer border-b-2 rounded-t-lg active text-blue-500 border-blue-500"
+                  : "inline-block pb-4 px-10 cursor-pointer border-b-2 border-transparent rounded-t-lg hover:border-gray-300 hover:text-gray-300"
+              }`}
             >
               Student
             </button>
@@ -51,7 +50,11 @@ export function Scheduling() {
           <li className="mr-2">
             <button
               onClick={() => setSelectedTab(2)}
-              className={`${selectedTab === 2 ? activeTab : inactiveTab}`}
+              className={`${
+                selectedTab === 2
+                  ? "inline-block pb-4 px-10 cursor-pointer border-b-2 rounded-t-lg active text-blue-500 border-blue-500"
+                  : "inline-block pb-4 px-10 cursor-pointer border-b-2 border-transparent rounded-t-lg hover:border-gray-300 hover:text-gray-300"
+              }`}
               aria-current="page"
             >
               Trainer

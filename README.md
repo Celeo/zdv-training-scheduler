@@ -7,7 +7,7 @@ Website and Discord bot for scheduling training sessions for the [VATSIM Denver 
 ## Tech
 
 - [Astro](https://astro.build/)
-- [Tailwind](https://tailwindcss.com/) with help from [Flowbite](https://flowbite.com/) and [Realtime Colors](https://realtimecolors.com/)
+- [Tailwind](https://tailwindcss.com/) with help from [Flowbite](https://flowbite.com/)
 - [React](https://react.dev/)
 - [Prisma](https://www.prisma.io/)
 - [SQLite](https://www.sqlite.org/index.html)

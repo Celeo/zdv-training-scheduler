@@ -35,7 +35,17 @@ export async function callEndpoint<T = unknown>(
     }
 
     if (args?.setHook !== undefined || args?.returnData) {
-      const data = await resp.json();
+      const text = await resp.text();
+
+      // thanks, JS no built-in JSON date deserializing
+      const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
+      const data = JSON.parse(text, (_: any, value: any) => {
+        if (typeof value === "string" && dateFormat.test(value)) {
+          return new Date(value);
+        }
+        return value;
+      });
+
       if (args?.setHook) {
         args?.setHook(data);
       }

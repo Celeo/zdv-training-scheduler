@@ -19,7 +19,7 @@ const DAY_OF_WEEK: Record<string, string> = {
 
 export function ExistingSchedule(props: {
   schedule: TrainingSchedule & {
-    trainingScheduleException: Array<TrainingScheduleException>;
+    trainingScheduleExceptions: Array<TrainingScheduleException>;
   };
   updateTrigger: () => void;
 }) {
@@ -83,11 +83,11 @@ export function ExistingSchedule(props: {
           onClick={(e) => e.stopPropagation()}
         >
           <h3 className="text-2xl mb-4 font-bold">Schedule Exclusions</h3>
-          {props.schedule.trainingScheduleException.length === 0 ? (
+          {props.schedule.trainingScheduleExceptions.length === 0 ? (
             <p>No exclusions</p>
           ) : (
             <ul className="list-disc list-inside">
-              {props.schedule.trainingScheduleException.map((excl) => (
+              {props.schedule.trainingScheduleExceptions.map((excl) => (
                 <li key={excl.id}>{excl.date}</li>
               ))}
             </ul>

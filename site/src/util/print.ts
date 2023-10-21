@@ -43,6 +43,6 @@ export function dateToStr(date: Date, type: DateDisplayTypes): string {
     case DateDisplayTypes.Date:
       return dt.toISODate()!;
     case DateDisplayTypes.Time:
-      return dt.toLocaleString({ hour: "numeric", minute: "numeric" });
+      return dt.toLocaleString(DateTime.TIME_24_SIMPLE, { locale: "en-US" });
   }
 }
