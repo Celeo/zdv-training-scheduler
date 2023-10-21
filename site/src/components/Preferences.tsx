@@ -83,7 +83,10 @@ export function Preferences() {
         <button
           type="submit"
           onClick={submit}
-          className="text-black focus:ring-4 focus:outline-none rounded-xl text-sm w-auto px-5 py-2.5 text-center bg-sky-400 hover:bg-sky-300"
+          className={`text-black focus:ring-4 focus:outline-none rounded-xl text-sm w-auto px-5 py-2.5 text-center ${
+            email || discord ? "bg-sky-400 hover:bg-sky-300" : "bg-gray-500"
+          }`}
+          disabled={!email && !discord}
         >
           Submit
         </button>
