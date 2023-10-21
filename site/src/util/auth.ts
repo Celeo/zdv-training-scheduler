@@ -209,11 +209,11 @@ export async function getUserInfo(
 
   // create `TeacherRating` if is trainer and no existing record
   if (canBeTrainer(userInfo)) {
-    const teacherRating = await DB.teacherRating.findFirst({
+    const teacherRating = await DB.trainerRating.findFirst({
       where: { cid: userInfo.cid },
     });
     if (teacherRating === null) {
-      await DB.teacherRating.create({ data: { cid: userInfo.cid } });
+      await DB.trainerRating.create({ data: { cid: userInfo.cid } });
     }
   }
 

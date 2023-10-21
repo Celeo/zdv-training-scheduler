@@ -8,22 +8,24 @@ import {
   type Positions,
 } from "../util/constants.ts";
 import { callEndpoint } from "../util/http.ts";
-import { infoToName } from "../util/print.ts";
+import { DateDisplayTypes, dateToStr, infoToName } from "../util/print.ts";
 
 export type AvailableSessionProps = {
   session: {
     id: number;
     scheduleId: number | null;
-    instructor: number;
-    date: string;
-    time: string;
+    trainer: number;
+    dateTime: Date;
     status: string;
     notes: string;
   };
+
   cidMap: CidMap;
   ratingMap: TrainerRatingMap;
+
   pendingSessions: number;
   currentUserCid: number;
+
   updateTrigger: () => void;
 };
 
@@ -66,12 +68,12 @@ function ratingsToPrintout(ratings: Array<Positions>): string {
 
 export function AvailableSession(props: AvailableSessionProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedPosition, setSelectedPosition] = useState("");
+  const [position, setposition] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const close = (): void => {
     setIsOpen(false);
-    setSelectedPosition("");
+    setposition("");
   };
 
   const confirm = async (): Promise<void> => {
@@ -82,7 +84,7 @@ export function AvailableSession(props: AvailableSessionProps) {
         body: {
           action: "ACCEPT",
           scheduleId: props.session.scheduleId,
-          selectedPosition,
+          position,
           date: props.session.date,
         },
       });
@@ -110,7 +112,7 @@ export function AvailableSession(props: AvailableSessionProps) {
   };
 
   const dropdownOptions = isOpen
-    ? ratings(props.session.instructor, props.ratingMap).map((pos) => (
+    ? ratings(props.session.trainer, props.ratingMap).map((pos) => (
         <option key={pos} value={pos}>
           {FRIENDLY_POSITION_NAME_MAP[pos]}
         </option>
@@ -134,11 +136,12 @@ export function AvailableSession(props: AvailableSessionProps) {
         >
           <h3 className="text-2xl mb-4 font-bold">Confirm registration</h3>
           <p>
-            <span className="font-bold">Time</span>: {props.session.time}
+            <span className="font-bold">Time</span>:{" "}
+            {dateToStr(props.session.dateTime, DateDisplayTypes.Time)}
           </p>
           <p>
             <span className="font-bold">Trainer</span>:{" "}
-            {infoToName(props.cidMap[props.session.instructor]!)}
+            {infoToName(props.cidMap[props.session.trainer]!)}
           </p>
           {props.session.notes && (
             <p>
@@ -152,8 +155,8 @@ export function AvailableSession(props: AvailableSessionProps) {
             name="position"
             id="position"
             className="block border text-sm rounded-md w-1/2 p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white"
-            onChange={(e) => setSelectedPosition(e.target.value)}
-            value={selectedPosition}
+            onChange={(e) => setposition(e.target.value)}
+            value={position}
           >
             <option value="" disabled></option>
             {dropdownOptions}
@@ -166,7 +169,7 @@ export function AvailableSession(props: AvailableSessionProps) {
               Cancel
             </button>
 
-            {props.currentUserCid === props.session.instructor && (
+            {props.currentUserCid === props.session.trainer && (
               <button
                 className="text-black focus:ring-4 focus:outline-none rounded-xl text-sm w-auto px-5 py-2.5 text-center bg-orange-400 hover:bg-orange-300"
                 onClick={deleteSession}
@@ -177,14 +180,14 @@ export function AvailableSession(props: AvailableSessionProps) {
 
             <button
               className={`text-black focus:ring-4 focus:outline-none rounded-xl text-sm w-auto px-5 py-2.5 text-center ${
-                selectedPosition === "" ||
+                position === "" ||
                 isLoading ||
                 props.pendingSessions >= MAXIMUM_PENDING_SESSIONS
                   ? "bg-gray-500"
                   : "bg-green-400 hover:bg-green-300"
               }`}
               disabled={
-                selectedPosition === "" ||
+                position === "" ||
                 props.pendingSessions >= MAXIMUM_PENDING_SESSIONS
               }
               onClick={confirm}
@@ -205,18 +208,16 @@ export function AvailableSession(props: AvailableSessionProps) {
         onClick={() => setIsOpen(true)}
       >
         <h5 className="mb-2 text-2xl font-bold tracking-tight text-white">
-          {props.session.time}
+          {dateToStr(props.session.dateTime, DateDisplayTypes.Time)}
         </h5>
         <div className="font-normal text-gray-400">
           <p>
             <span className="font-bold">Trainer</span>:{" "}
-            {infoToName(props.cidMap[props.session.instructor]!)}
+            {infoToName(props.cidMap[props.session.trainer]!)}
           </p>
           <p>
             <span className="font-bold">Positions</span>:{" "}
-            {ratingsToPrintout(
-              ratings(props.session.instructor, props.ratingMap),
-            )}
+            {ratingsToPrintout(ratings(props.session.trainer, props.ratingMap))}
           </p>
           {props.session.notes && (
             <p>

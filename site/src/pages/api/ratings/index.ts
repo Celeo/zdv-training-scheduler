@@ -1,4 +1,4 @@
-import type { TeacherRating } from "@prisma/client";
+import type { TrainerRating } from "@prisma/client";
 import type { APIContext } from "astro";
 import { DB } from "../../../data.ts";
 import { RequiredPermission, checkAuth } from "../../../util/auth.ts";
@@ -6,7 +6,7 @@ import { LOGGER } from "../../../util/log.ts";
 import { infoToName } from "../../../util/print.ts";
 
 export type TrainerRatingEntry = Omit<
-  TeacherRating,
+  TrainerRating,
   "cid" | "createdAt" | "updatedAt"
 >;
 
@@ -23,7 +23,7 @@ export async function GET(
     return auth.data;
   }
 
-  const ratings = await DB.teacherRating.findMany();
+  const ratings = await DB.trainerRating.findMany();
   ratings.sort((a, b) => a.cid - b.cid);
   const map: Record<number, TrainerRatingEntry> = {};
   for (const rating of ratings) {
@@ -40,7 +40,7 @@ export async function GET(
   return new Response(JSON.stringify(map));
 }
 
-type UpdatePayload = Omit<TeacherRating, "createdAt" | "updatedAt">;
+type UpdatePayload = Omit<TrainerRating, "createdAt" | "updatedAt">;
 
 /**
  * Update the stored trainer ratings for the CID.
@@ -54,7 +54,7 @@ export async function PUT(
   }
 
   const body: UpdatePayload = await context.request.json();
-  const ratings = await DB.teacherRating.findFirst({
+  const ratings = await DB.trainerRating.findFirst({
     where: { cid: body.cid },
   });
   if (ratings === undefined) {
@@ -63,6 +63,6 @@ export async function PUT(
     });
   }
   LOGGER.info(`${infoToName(auth.data.info)} updated ratings for ${body.cid}`);
-  await DB.teacherRating.update({ where: { cid: body.cid }, data: body });
+  await DB.trainerRating.update({ where: { cid: body.cid }, data: body });
   return new Response("Updated");
 }

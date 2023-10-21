@@ -6,17 +6,16 @@ import {
   type Positions,
 } from "../util/constants.ts";
 import { callEndpoint } from "../util/http.ts";
-import { infoToName } from "../util/print.ts";
+import { DateDisplayTypes, dateToStr, infoToName } from "../util/print.ts";
 
 export type PendingSessionProps = {
   session: {
     id: number;
     scheduleId: number | null;
-    instructor: number;
-    date: string;
-    time: string;
+    trainer: number;
+    dateTime: Date;
     notes: string;
-    selectedPosition: string | null;
+    position: string | null;
   };
 
   cidMap: CidMap;
@@ -39,8 +38,8 @@ export function PendingSession(props: PendingSessionProps) {
     }
   };
 
-  const instructor = props.cidMap[props.session.instructor];
-  if (instructor === undefined) {
+  const trainer = props.cidMap[props.session.trainer];
+  if (trainer === undefined) {
     return <></>;
   }
   return (
@@ -77,13 +76,9 @@ export function PendingSession(props: PendingSessionProps) {
       </div>
       <ul className="list-disc list-inside text-base">
         <li className="text-sky-200">
-          {props.session.date} at {props.session.time} with{" "}
-          {infoToName(instructor!)} for{" "}
-          {
-            FRIENDLY_POSITION_NAME_MAP[
-              props.session.selectedPosition! as Positions
-            ]
-          }
+          {dateToStr(props.session.dateTime, DateDisplayTypes.DateAndTime)} with{" "}
+          {infoToName(trainer!)} for{" "}
+          {FRIENDLY_POSITION_NAME_MAP[props.session.position! as Positions]}
           {props.session.notes}
           <button
             className="focus:outline-none focus:ring-4 font-medium rounded-xl text-sm px-2 py-1 text-center mb-0 ml-2 text-red-500 hover:text-white hover:bg-red-700 focus:ring-red-900"

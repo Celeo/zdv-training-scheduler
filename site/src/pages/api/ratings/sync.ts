@@ -21,7 +21,7 @@ export async function POST(
   }
 
   const config = await loadConfig();
-  const stored = await DB.teacherRating.findMany();
+  const stored = await DB.trainerRating.findMany();
   const roster = [];
   LOGGER.info(`${infoToName(auth.data.info)} is synchronizing the roster`);
 
@@ -35,13 +35,13 @@ export async function POST(
   for (const user of stored) {
     if (!roster.some((r) => r === user.cid)) {
       LOGGER.info(`Removing ${user.cid} from trainer roster`);
-      await DB.teacherRating.delete({ where: { cid: user.cid } });
+      await DB.trainerRating.delete({ where: { cid: user.cid } });
     }
   }
   for (const user of roster) {
     if (!stored.some((s) => s.cid === user)) {
       LOGGER.info(`Adding ${user} to trainer roster`);
-      await DB.teacherRating.create({ data: { cid: user } });
+      await DB.trainerRating.create({ data: { cid: user } });
     }
   }
   LOGGER.info("Roster sync finished");

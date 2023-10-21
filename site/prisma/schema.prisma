@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model TeacherRating {
+model TrainerRating {
   cid           Int      @id
   minorGround   Boolean  @default(false)
   majorGround   Boolean  @default(false)
@@ -21,15 +21,15 @@ model TeacherRating {
 }
 
 model TrainingSchedule {
-  id         Int      @id @default(autoincrement())
-  instructor Int
-  dayOfWeek  Int
-  timeOfDay  String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  trainer   Int
+  dayOfWeek Int
+  timeOfDay String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  trainingSessions          TrainingSession[]
-  trainingScheduleException TrainingScheduleException[]
+  trainingSessions           TrainingSession[]
+  trainingScheduleExceptions TrainingScheduleException[]
 }
 
 model TrainingScheduleException {
@@ -41,17 +41,16 @@ model TrainingScheduleException {
 }
 
 model TrainingSession {
-  id               Int      @id @default(autoincrement())
-  scheduleId       Int?
-  instructor       Int
-  student          Int?
-  selectedPosition String?
-  date             String
-  time             String
-  status           String   @default("open")
-  notes            String   @default("")
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  scheduleId Int?
+  trainer    Int
+  student    Int?
+  position   String?
+  dateTime   DateTime
+  status     String   @default("open")
+  notes      String   @default("")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   schedule TrainingSchedule? @relation(fields: [scheduleId], references: [id])
 }

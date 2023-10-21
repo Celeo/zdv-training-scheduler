@@ -18,12 +18,11 @@ export async function GET(
     return auth.data;
   }
   const sessions = await DB.trainingSession.findMany({
-    where: { instructor: auth.data!.info.cid },
+    where: { trainer: auth.data!.info.cid },
   });
   const now = DateTime.utc();
-  const filtered = sessions.filter((s) => {
-    const date = DateTime.fromISO(`${s.date}T${s.time}`, { zone: "utc" });
-    return date > now;
-  });
+  const filtered = sessions.filter(
+    (s) => DateTime.fromJSDate(s.dateTime) > now,
+  );
   return new Response(JSON.stringify(filtered));
 }

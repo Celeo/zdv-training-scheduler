@@ -32,11 +32,7 @@ export async function GET(
       },
     });
     records = records.filter((session) => {
-      const sessionDateTime = DateTime.fromISO(
-        `${session.date}T${session.time}`,
-        { zone: "utc" },
-      );
-      return sessionDateTime > now;
+      return DateTime.fromJSDate(session.dateTime) > now;
     });
     return new Response(JSON.stringify(records));
   }

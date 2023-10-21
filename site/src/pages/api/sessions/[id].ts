@@ -18,7 +18,7 @@ import { infoToName } from "../../../util/print.ts";
 
 type UpdatePayload = {
   action: "ACCEPT" | "UNACCEPT" | "UPDATE_NOTES";
-  selectedPosition: string;
+  position: string;
   date: string | null;
   scheduleId: number | null;
   notes?: string;
@@ -69,9 +69,9 @@ export async function PUT(
     await DB.trainingSession.create({
       data: {
         scheduleId: body.scheduleId,
-        instructor: schedule.instructor,
+        trainer: schedule.trainer,
         student: auth.data.info.cid!,
-        selectedPosition: body.selectedPosition,
+        position: body.position,
         date: body.date!,
         time: schedule.timeOfDay,
         status: SESSION_STATUS.ACCEPTED,
@@ -98,7 +98,7 @@ export async function PUT(
     if (record.student !== null) {
       return new Response("Session already taken", { status: 400 });
     }
-    if (record.instructor === auth.data.info.cid) {
+    if (record.trainer === auth.data.info.cid) {
       return new Response("Cannot accept your own session", { status: 400 });
     }
     LOGGER.info(`${infoToName(auth.data.info)} accepted session ${id}`);
@@ -109,10 +109,10 @@ export async function PUT(
       data: {
         student: auth.data.info.cid,
         status: SESSION_STATUS.ACCEPTED,
-        selectedPosition: body.selectedPosition,
+        position: body.position,
       },
     });
-    await informUser(record.instructor, InformTypes.ACCEPTED_SESSION, {
+    await informUser(record.trainer, InformTypes.ACCEPTED_SESSION, {
       first_name: auth.data.info.first_name,
       last_name: auth.data.info.last_name,
       operating_initials: auth.data.info.operating_initials,
@@ -121,7 +121,7 @@ export async function PUT(
     });
     LOGGER.info(
       `${infoToName(auth.data.info)} accepted session ${id} for ${
-        body.selectedPosition
+        body.position
       }`,
     );
     return new Response("Accepted");
@@ -139,10 +139,10 @@ export async function PUT(
       data: {
         student: null,
         status: SESSION_STATUS.OPEN,
-        selectedPosition: null,
+        position: null,
       },
     });
-    await informUser(record.instructor, InformTypes.STUDENT_CANCELLED_SESSION, {
+    await informUser(record.trainer, InformTypes.STUDENT_CANCELLED_SESSION, {
       first_name: auth.data.info.first_name,
       last_name: auth.data.info.last_name,
       operating_initials: auth.data.info.operating_initials,
@@ -157,7 +157,7 @@ export async function PUT(
     if (!canBeTrainer(auth.data.info)) {
       return new Response("You are not a trainer", { status: 403 });
     }
-    if (record.instructor !== auth.data.info.cid) {
+    if (record.trainer !== auth.data.info.cid) {
       return new Response(
         "You cannot edit the notes on someone else's session",
         { status: 400 },
@@ -216,7 +216,7 @@ export async function DELETE(
       status: 400,
     });
   }
-  if (record.instructor !== auth.data.info.cid) {
+  if (record.trainer !== auth.data.info.cid) {
     return new Response("You cannot delete someone else's session", {
       status: 400,
     });
@@ -224,7 +224,7 @@ export async function DELETE(
 
   // if a student already accepted the session, inform them that it's cancelled
   if (record.student !== null) {
-    const instructor = await getUserInfoFromCid(record.instructor);
+    const instructor = await getUserInfoFromCid(record.trainer);
     await informUser(record.student, InformTypes.TRAINER_CANCELLED_SESSION, {
       first_name: instructor.first_name,
       last_name: instructor.last_name,

@@ -9,6 +9,7 @@ import Calendar from "react-calendar";
 import { sendAlert } from "../data.ts";
 import type { Value } from "../util/calendarTypes.ts";
 import { callEndpoint } from "../util/http.ts";
+import { DateDisplayTypes, dateToStr } from "../util/print.ts";
 import { ExistingSchedule } from "./ExistingSchedule.tsx";
 
 export function SchedulingTrainer() {
@@ -38,10 +39,7 @@ export function SchedulingTrainer() {
    */
   const createNewSession = async (): Promise<void> => {
     try {
-      const dt = DateTime.fromJSDate(selectedDate as Date);
-      const ds = `${dt.year}-${dt.month.toString().padStart(2, "0")}-${dt.day
-        .toString()
-        .padStart(2, "0")}`;
+      const ds = DateTime.fromJSDate(selectedDate as Date).toISODate();
       await callEndpoint("/api/sessions", {
         method: "POST",
         body: {
@@ -178,8 +176,14 @@ export function SchedulingTrainer() {
           {sessions.map((s) => (
             <li key={s.id}>
               {s.student !== null
-                ? `${s.date} at ${s.time} with ${s.student} on ${s.selectedPosition}`
-                : `${s.date} at ${s.time} (unclaimed)`}
+                ? `${dateToStr(
+                    s.dateTime,
+                    DateDisplayTypes.DateAndTime,
+                  )} with ${s.student} on ${s.position}`
+                : `${dateToStr(
+                    s.dateTime,
+                    DateDisplayTypes.DateAndTime,
+                  )} (unclaimed)`}
               <button
                 className="focus:outline-none focus:ring-4 font-medium rounded-xl text-sm px-2 py-1 text-center mb-2 ml-2 text-red-500 hover:text-white hover:bg-red-700 focus:ring-red-900"
                 onClick={() => {

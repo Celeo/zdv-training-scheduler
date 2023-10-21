@@ -44,7 +44,7 @@ export async function GET(
   });
   const schedules = await DB.trainingSchedule.findMany({
     where: { dayOfWeek: date.weekday },
-    include: { trainingScheduleException: true },
+    include: { trainingScheduleExceptions: true },
   });
 
   // for those schedules, filter down to those that don't have a session on this date
@@ -60,16 +60,16 @@ export async function GET(
   schedulesWithoutSessions
     .filter(
       (schedule) =>
-        !schedule.trainingScheduleException.some(
+        !schedule.trainingScheduleExceptions.some(
           (except) => except.date === dateStr,
         ),
     )
     .map((schedule) => ({
       id: -1,
       scheduleId: schedule.id,
-      instructor: schedule.instructor,
+      instructor: schedule.trainer,
       student: null,
-      selectedPosition: null,
+      position: null,
       date: dateStr,
       time: schedule.timeOfDay,
       status: SESSION_STATUS.OPEN,
@@ -89,7 +89,7 @@ export async function GET(
       .filter(
         (session) =>
           session.status === SESSION_STATUS.OPEN ||
-          session.instructor === auth.data.info.cid,
+          session.trainer === auth.data.info.cid,
       )
       .forEach((session) => ret.push(session));
   } else {
@@ -129,7 +129,7 @@ export async function POST(
   const body: UpdatePayload = await context.request.json();
   await DB.trainingSession.create({
     data: {
-      instructor: auth.data.info.cid,
+      trainer: auth.data.info.cid,
       date: body.date,
       time: body.time,
       notes: body.notes,

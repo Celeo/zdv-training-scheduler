@@ -22,15 +22,15 @@ export async function GET(
     return auth.data;
   }
   const data = await DB.trainingSchedule.findMany({
-    where: { instructor: auth.data.info.cid },
-    include: { trainingScheduleException: true },
+    where: { trainer: auth.data.info.cid },
+    include: { trainingScheduleExceptions: true },
   });
 
   // filter exclusions to those in the future
   const now = DateTime.utc();
   for (const schedule of data) {
-    schedule.trainingScheduleException =
-      schedule.trainingScheduleException.filter(
+    schedule.trainingScheduleExceptions =
+      schedule.trainingScheduleExceptions.filter(
         (excl) =>
           DateTime.fromISO(`${excl.date}T${schedule.timeOfDay}`, {
             zone: "utc",
@@ -60,7 +60,7 @@ export async function POST(
   const body: CreatePayload = await context.request.json();
   await DB.trainingSchedule.create({
     data: {
-      instructor: auth.data.info.cid,
+      trainer: auth.data.info.cid,
       dayOfWeek: body.dayOfWeek,
       timeOfDay: body.timeOfDay,
     },

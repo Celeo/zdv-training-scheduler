@@ -19,9 +19,7 @@ export async function GET(
   const now = DateTime.utc();
   const inNextHour = [];
   for (const session of sessions) {
-    const dt = DateTime.fromISO(`${session.date}T${session.time}`, {
-      zone: "utc",
-    });
+    const dt = DateTime.fromJSDate(session.dateTime);
     if (now < dt && dt.toMillis() - now.toMillis() < 1_000 * 60 * 60) {
       inNextHour.push(session);
     }

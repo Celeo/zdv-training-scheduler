@@ -29,7 +29,7 @@ export async function DELETE(
   if (record === null) {
     return new Response("Could not find schedule", { status: 400 });
   }
-  if (record.instructor !== auth.data.info.cid) {
+  if (record.trainer !== auth.data.info.cid) {
     return new Response("You cannot delete someone else's schedule", {
       status: 400,
     });
