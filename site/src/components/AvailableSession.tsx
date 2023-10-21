@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { useState } from "react";
 import { sendAlert } from "../data.ts";
 import type { CidMap } from "../pages/api/cid_map.ts";
@@ -85,7 +86,7 @@ export function AvailableSession(props: AvailableSessionProps) {
           action: "ACCEPT",
           scheduleId: props.session.scheduleId,
           position,
-          date: props.session.date,
+          date: DateTime.fromJSDate(props.session.dateTime).toISODate(),
         },
       });
       props.updateTrigger();
@@ -100,7 +101,7 @@ export function AvailableSession(props: AvailableSessionProps) {
       await callEndpoint(`/api/sessions/${props.session.id}`, {
         method: "DELETE",
         body: {
-          date: props.session.date,
+          date: DateTime.fromJSDate(props.session.dateTime).toISODate(),
           scheduleId: props.session.scheduleId,
         },
       });

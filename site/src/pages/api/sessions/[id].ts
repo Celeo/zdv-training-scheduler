@@ -72,8 +72,9 @@ export async function PUT(
         trainer: schedule.trainer,
         student: auth.data.info.cid!,
         position: body.position,
-        date: body.date!,
-        time: schedule.timeOfDay,
+        dateTime: DateTime.fromISO(`${body.date!}T${schedule.timeOfDay}`, {
+          zone: "utc",
+        }).toJSDate(),
         status: SESSION_STATUS.ACCEPTED,
       },
     });
@@ -87,10 +88,7 @@ export async function PUT(
 
   /* found the session by id */
 
-  const recordDate = DateTime.fromISO(`${record.date}T${record.time}`, {
-    zone: "utc",
-  });
-  if (recordDate < DateTime.utc()) {
+  if (DateTime.fromJSDate(record.dateTime) < DateTime.utc()) {
     return new Response("Cannot edit a session in the past", { status: 400 });
   }
 
@@ -116,8 +114,7 @@ export async function PUT(
       first_name: auth.data.info.first_name,
       last_name: auth.data.info.last_name,
       operating_initials: auth.data.info.operating_initials,
-      date: record.date,
-      time: record.time,
+      dateTime: record.dateTime,
     });
     LOGGER.info(
       `${infoToName(auth.data.info)} accepted session ${id} for ${
@@ -146,8 +143,7 @@ export async function PUT(
       first_name: auth.data.info.first_name,
       last_name: auth.data.info.last_name,
       operating_initials: auth.data.info.operating_initials,
-      date: record.date,
-      time: record.time,
+      dateTime: record.dateTime,
     });
     LOGGER.info(`${infoToName(auth.data.info)} unaccepted session ${id}`);
     return new Response("Un-accepted");
@@ -208,10 +204,7 @@ export async function DELETE(
     });
     return new Response("Schedule exception created");
   }
-  const recordDate = DateTime.fromISO(`${record.date}T00:00:00`, {
-    zone: "utc",
-  });
-  if (recordDate < DateTime.utc()) {
+  if (DateTime.fromJSDate(record.dateTime) < DateTime.utc()) {
     return new Response("You cannot edit a session in the past", {
       status: 400,
     });
@@ -224,13 +217,12 @@ export async function DELETE(
 
   // if a student already accepted the session, inform them that it's cancelled
   if (record.student !== null) {
-    const instructor = await getUserInfoFromCid(record.trainer);
+    const trainer = await getUserInfoFromCid(record.trainer);
     await informUser(record.student, InformTypes.TRAINER_CANCELLED_SESSION, {
-      first_name: instructor.first_name,
-      last_name: instructor.last_name,
-      operating_initials: instructor.operating_initials,
-      date: record.date,
-      time: record.time,
+      first_name: trainer.first_name,
+      last_name: trainer.last_name,
+      operating_initials: trainer.operating_initials,
+      dateTime: record.dateTime,
     });
   }
   await DB.trainingSession.delete({ where: { id: record.id } });

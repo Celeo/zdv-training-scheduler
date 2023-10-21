@@ -30,7 +30,7 @@ export function SchedulingTrainer() {
   useEffect(() => {
     (async () => {
       await callEndpoint("/api/schedules", { setHook: setSchedules });
-      await callEndpoint("/api/sessions/instructor", { setHook: setSessions });
+      await callEndpoint("/api/sessions/trainer", { setHook: setSessions });
     })();
   }, []);
 
@@ -50,7 +50,7 @@ export function SchedulingTrainer() {
       });
       setNewSessionTime("");
       setNewSessionNotes("");
-      await callEndpoint("/api/sessions/instructor", { setHook: setSessions });
+      await callEndpoint("/api/sessions/trainer", { setHook: setSessions });
     } catch (err) {
       console.error(`Error creating new session: ${err}`);
       sendAlert("ERROR", "Could not create new session");
@@ -87,7 +87,7 @@ export function SchedulingTrainer() {
     try {
       await callEndpoint(`/api/sessions/${id}`, { method: "DELETE" });
       sendAlert("INFO", "Session deleted");
-      await callEndpoint("/api/sessions/instructor", { setHook: setSessions });
+      await callEndpoint("/api/sessions/trainer", { setHook: setSessions });
     } catch (err) {
       console.error(`Error deleting existing session: ${err}`);
       sendAlert("ERROR", "Could not delete session");

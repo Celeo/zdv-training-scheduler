@@ -9,7 +9,11 @@ import {
 } from "../../../util/auth.ts";
 import { SESSION_STATUS } from "../../../util/constants.ts";
 import { LOGGER } from "../../../util/log.ts";
-import { infoToName } from "../../../util/print.ts";
+import {
+  DateDisplayTypes,
+  dateToStr,
+  infoToName,
+} from "../../../util/print.ts";
 
 /*
  * TODO timezone support
@@ -39,8 +43,10 @@ export async function GET(
   const date = DateTime.fromISO(`${dateStr}T00:00:00`, { zone: "utc" });
 
   // find the sessions on the date and the schedules on the day of the week
-  const sessions = await DB.trainingSession.findMany({
-    where: { date: dateStr },
+  let sessions = await DB.trainingSession.findMany({
+    where: {
+      dateTime: { lte: date.endOf("day").toJSDate(), gte: date.toJSDate() },
+    },
   });
   const schedules = await DB.trainingSchedule.findMany({
     where: { dayOfWeek: date.weekday },
@@ -67,11 +73,12 @@ export async function GET(
     .map((schedule) => ({
       id: -1,
       scheduleId: schedule.id,
-      instructor: schedule.trainer,
+      trainer: schedule.trainer,
       student: null,
       position: null,
-      date: dateStr,
-      time: schedule.timeOfDay,
+      dateTime: DateTime.fromISO(`${dateStr}T${schedule.timeOfDay}`, {
+        zone: "utc",
+      }).toJSDate(),
       status: SESSION_STATUS.OPEN,
       notes: "",
       createdAt: date.toJSDate(),
@@ -103,7 +110,9 @@ export async function GET(
 
   // sort by time of day for better UX
   ret.sort(
-    (a, b) => parseInt(a.time.split(":")[0]!) - parseInt(b.time.split(":")[0]!),
+    (a, b) =>
+      DateTime.fromJSDate(a.dateTime).hour -
+      DateTime.fromJSDate(b.dateTime).hour,
   );
 
   return new Response(JSON.stringify(ret));
@@ -127,18 +136,21 @@ export async function POST(
   }
 
   const body: UpdatePayload = await context.request.json();
+  const dt = DateTime.fromISO(`${body.date}T${body.time}`, {
+    zone: "utc",
+  }).toJSDate();
   await DB.trainingSession.create({
     data: {
       trainer: auth.data.info.cid,
-      date: body.date,
-      time: body.time,
+      dateTime: dt,
       notes: body.notes,
     },
   });
   LOGGER.info(
-    `${infoToName(auth.data.info)} created a new session at ${body.date}T${
-      body.time
-    }`,
+    `${infoToName(auth.data.info)} created a new session at ${dateToStr(
+      dt,
+      DateDisplayTypes.DateAndTime,
+    )}`,
   );
   return new Response("Created", { status: 201 });
 }
