@@ -19,3 +19,7 @@ jobs:
       working-directory: site
     - run: npm run build
       working-directory: site
+    - uses: oven-sh/setup-bun@v1
+    - run: bun install
+      working-directory: bot
+
