@@ -3,6 +3,10 @@ import { DateTime } from "luxon";
 import { DB } from "../../../data";
 import { RequiredPermission, checkAuth } from "../../../util/auth";
 
+/*
+ * TODO timezone support
+ */
+
 /**
  * Return all future sessions for the current user (trainer).
  */

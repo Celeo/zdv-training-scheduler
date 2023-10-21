@@ -5,6 +5,10 @@ import { RequiredPermission, checkAuth } from "../../../util/auth.js";
 import { LOGGER } from "../../../util/log.js";
 import { infoToName } from "../../../util/print.js";
 
+/*
+ * TODO timezone support
+ */
+
 /**
  * Get the user's schedules.
  *

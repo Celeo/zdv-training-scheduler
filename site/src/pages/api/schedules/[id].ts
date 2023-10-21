@@ -8,8 +8,8 @@ import { infoToName } from "../../../util/print";
  * Delete a schedule. Trainers only. Only the
  * owning user can perform this action.
  *
- * Note that any sessions that have already been accepted
- * by students will not be deleted as part of this action.
+ * Any sessions that have already been accepted by
+ * students will not be deleted as part of this action.
  */
 export async function DELETE(
   context: APIContext<Record<string, any>>,
