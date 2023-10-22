@@ -1,3 +1,4 @@
+import type { DateTime } from "luxon";
 import { useState } from "react";
 import { sendAlert } from "../data.ts";
 import type { CidMap } from "../pages/api/cid_map.ts";
@@ -6,19 +7,14 @@ import {
   type Positions,
 } from "../util/constants.ts";
 import { callEndpoint } from "../util/http.ts";
-import {
-  DateDisplayTypes,
-  dateToStr,
-  infoToName,
-  parseServerDate,
-} from "../util/print.ts";
+import { DateDisplayTypes, dateToStr, infoToName } from "../util/print.ts";
 
 export type PendingSessionProps = {
   session: {
     id: number;
     scheduleId: number | null;
     trainer: number;
-    dateTime: Date;
+    dateTime: DateTime;
     notes: string;
     position: string | null;
   };
@@ -81,11 +77,8 @@ export function PendingSession(props: PendingSessionProps) {
       </div>
       <ul className="list-disc list-inside text-base">
         <li className="text-sky-200">
-          {dateToStr(
-            parseServerDate(props.session.dateTime),
-            DateDisplayTypes.DateAndTime,
-          )}{" "}
-          with {infoToName(trainer!)} for{" "}
+          {dateToStr(props.session.dateTime, DateDisplayTypes.DateAndTime)} with{" "}
+          {infoToName(trainer!)} for{" "}
           {FRIENDLY_POSITION_NAME_MAP[props.session.position! as Positions]}
           {props.session.notes}
           <button

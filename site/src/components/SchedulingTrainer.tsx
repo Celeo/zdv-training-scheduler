@@ -1,20 +1,19 @@
 import type {
   TrainingSchedule,
   TrainingScheduleException,
-  TrainingSession,
 } from "@prisma/client";
 import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import { sendAlert } from "../data.ts";
-import type { Value } from "../util/calendarTypes.ts";
 import { callEndpoint } from "../util/http.ts";
-import { DateDisplayTypes, dateToStr, parseServerDate } from "../util/print.ts";
+import { DateDisplayTypes, dateToStr } from "../util/print.ts";
+import type { TrainingSession_DT, Value } from "../util/types.ts";
 import { ExistingSchedule } from "./ExistingSchedule.tsx";
 
 export function SchedulingTrainer() {
   const [selectedDate, setSelectedDate] = useState<Value>(null);
-  const [sessions, setSessions] = useState<Array<TrainingSession>>([]);
+  const [sessions, setSessions] = useState<Array<TrainingSession_DT>>([]);
   const [newSessionTime, setNewSessionTime] = useState("");
   const [newSessionNotes, setNewSessionNotes] = useState("");
   const [newScheduleDayOfWeek, setNewScheduleDayOfWeek] = useState(-1);
@@ -177,11 +176,11 @@ export function SchedulingTrainer() {
             <li key={s.id}>
               {s.student !== null
                 ? `${dateToStr(
-                    parseServerDate(s.dateTime),
+                    s.dateTime,
                     DateDisplayTypes.DateAndTime,
                   )} with ${s.student} on ${s.position}`
                 : `${dateToStr(
-                    parseServerDate(s.dateTime),
+                    s.dateTime,
                     DateDisplayTypes.DateAndTime,
                   )} (unclaimed)`}
               <button

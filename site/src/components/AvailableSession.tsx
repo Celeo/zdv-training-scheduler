@@ -9,19 +9,14 @@ import {
   type Positions,
 } from "../util/constants.ts";
 import { callEndpoint } from "../util/http.ts";
-import {
-  DateDisplayTypes,
-  dateToStr,
-  infoToName,
-  parseServerDate,
-} from "../util/print.ts";
+import { DateDisplayTypes, dateToStr, infoToName } from "../util/print.ts";
 
 export type AvailableSessionProps = {
   session: {
     id: number;
     scheduleId: number | null;
     trainer: number;
-    dateTime: Date;
+    dateTime: DateTime;
     status: string;
     notes: string;
   };
@@ -91,7 +86,7 @@ export function AvailableSession(props: AvailableSessionProps) {
           action: "ACCEPT",
           scheduleId: props.session.scheduleId,
           position,
-          date: DateTime.fromJSDate(props.session.dateTime).toISODate(),
+          date: props.session.dateTime.toISODate(),
         },
       });
       props.updateTrigger();
@@ -106,7 +101,7 @@ export function AvailableSession(props: AvailableSessionProps) {
       await callEndpoint(`/api/sessions/${props.session.id}`, {
         method: "DELETE",
         body: {
-          date: DateTime.fromJSDate(props.session.dateTime).toISODate(),
+          date: props.session.dateTime.toISODate(),
           scheduleId: props.session.scheduleId,
         },
       });
@@ -143,10 +138,7 @@ export function AvailableSession(props: AvailableSessionProps) {
           <h3 className="text-2xl mb-4 font-bold">Confirm registration</h3>
           <p>
             <span className="font-bold">Time</span>:{" "}
-            {dateToStr(
-              parseServerDate(props.session.dateTime),
-              DateDisplayTypes.Time,
-            )}
+            {dateToStr(props.session.dateTime, DateDisplayTypes.Time)}
           </p>
           <p>
             <span className="font-bold">Trainer</span>:{" "}
@@ -217,10 +209,7 @@ export function AvailableSession(props: AvailableSessionProps) {
         onClick={() => setIsOpen(true)}
       >
         <h5 className="mb-2 text-2xl font-bold tracking-tight text-white">
-          {dateToStr(
-            parseServerDate(props.session.dateTime),
-            DateDisplayTypes.Time,
-          )}
+          {dateToStr(props.session.dateTime, DateDisplayTypes.Time)}
         </h5>
         <div className="font-normal text-gray-400">
           <p>

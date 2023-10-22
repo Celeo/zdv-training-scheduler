@@ -45,12 +45,3 @@ export function dateToStr(dateTime: DateTime, type: DateDisplayTypes): string {
       return dateTime.toLocaleString(DateTime.TIME_24_SIMPLE);
   }
 }
-
-/**
- * Take a `Date` from the server and load into the user's timezone.
- */
-export function parseServerDate(date: Date): DateTime {
-  return DateTime.fromJSDate(date, { zone: "utc" }).setZone(
-    Intl.DateTimeFormat().resolvedOptions().timeZone,
-  );
-}

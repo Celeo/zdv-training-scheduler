@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 /**
  * Make an authenticated call to the server endpoint.
  *
@@ -25,7 +27,8 @@ export async function callEndpoint<T = unknown>(
     if (jwt) {
       headers.set("authorization", `Bearer ${jwt}`);
     }
-    headers.set("timezone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    headers.set("timezone", timeZone);
 
     const resp = await fetch(path, { method, body, headers });
     if (!resp.ok) {
@@ -41,7 +44,8 @@ export async function callEndpoint<T = unknown>(
       const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
       const data = JSON.parse(text, (_: any, value: any) => {
         if (typeof value === "string" && dateFormat.test(value)) {
-          return new Date(value);
+          // using luxon, parse string to DateTime object in UTC and then convert to the user's time zone
+          return DateTime.fromISO(value, { zone: "utc" }).setZone(timeZone);
         }
         return value;
       });

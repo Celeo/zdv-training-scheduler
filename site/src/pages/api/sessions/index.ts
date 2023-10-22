@@ -9,18 +9,14 @@ import {
 } from "../../../util/auth.ts";
 import { SESSION_STATUS } from "../../../util/constants.ts";
 import { LOGGER } from "../../../util/log.ts";
-import {
-  DateDisplayTypes,
-  dateToStr,
-  infoToName,
-} from "../../../util/print.ts";
+import { infoToName } from "../../../util/print.ts";
 
 /*
  * TODO timezone support
  */
 
 /**
- * Get all sessions. 'date' is a require query param.
+ * Get all sessions. 'date' is a required query param.
  *
  * Can optionally include a 'limit-to-open' query param
  * to filter the retrieved rows to just those that have

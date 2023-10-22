@@ -1,18 +1,17 @@
-import type { TrainingSession } from "@prisma/client";
 import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import { sendAlert } from "../data.ts";
 import type { CidMap } from "../pages/api/cid_map.ts";
-import type { Value } from "../util/calendarTypes.ts";
 import { callEndpoint } from "../util/http.ts";
+import type { TrainingSession_DT, Value } from "../util/types.ts";
 import { AvailableSession } from "./AvailableSession.tsx";
 import { PendingSession } from "./PendingSession.tsx";
 
 export function SchedulingStudent(props: { currentUserCid: number }) {
   const [selectedDate, setSelectedDate] = useState<Value>(null);
-  const [sessions, setSessions] = useState<Array<TrainingSession>>([]);
-  const [mySessions, setMySessions] = useState<Array<TrainingSession>>([]);
+  const [sessions, setSessions] = useState<Array<TrainingSession_DT>>([]);
+  const [mySessions, setMySessions] = useState<Array<TrainingSession_DT>>([]);
   const [cidMap, setCidMap] = useState<CidMap>({});
   const [ratingMap, setRatingMap] = useState<{}>({});
 
