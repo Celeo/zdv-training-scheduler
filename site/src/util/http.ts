@@ -42,7 +42,7 @@ export async function callEndpoint<T = unknown>(
 
       // thanks, JS no built-in JSON date deserializing
       const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
-      const data = JSON.parse(text, (_: any, value: any) => {
+      const data = JSON.parse(text, (_, value: any) => {
         if (typeof value === "string" && dateFormat.test(value)) {
           // using luxon, parse string to DateTime object in UTC and then convert to the user's time zone
           return DateTime.fromISO(value, { zone: "utc" }).setZone(timeZone);

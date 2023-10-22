@@ -11,10 +11,6 @@ import { SESSION_STATUS } from "../../../util/constants.ts";
 import { LOGGER } from "../../../util/log.ts";
 import { infoToName } from "../../../util/print.ts";
 
-/*
- * TODO timezone support
- */
-
 /**
  * Get all sessions. 'date' is a required query param.
  *
@@ -36,7 +32,9 @@ export async function GET(
   if (!dateStr) {
     return new Response('Missing "date"', { status: 400 });
   }
-  const date = DateTime.fromISO(`${dateStr}T00:00:00`, { zone: "utc" });
+  const date = DateTime.fromISO(`${dateStr}T00:00:00`, {
+    zone: context.locals.timezone,
+  }).setZone("utc");
 
   // find the sessions on the date and the schedules on the day of the week
   let sessions = await DB.trainingSession.findMany({
@@ -63,7 +61,7 @@ export async function GET(
     .filter(
       (schedule) =>
         !schedule.trainingScheduleExceptions.some(
-          (except) => except.date === dateStr,
+          (except) => except.date === dateStr, // TODO
         ),
     )
     .map((schedule) => ({
@@ -73,6 +71,7 @@ export async function GET(
       student: null,
       position: null,
       dateTime: DateTime.fromISO(`${dateStr}T${schedule.timeOfDay}`, {
+        // TODO
         zone: "utc",
       }).toJSDate(),
       status: SESSION_STATUS.OPEN,

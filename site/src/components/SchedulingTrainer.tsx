@@ -38,7 +38,7 @@ export function SchedulingTrainer() {
    */
   const createNewSession = async (): Promise<void> => {
     try {
-      const ds = DateTime.fromJSDate(selectedDate as Date).toISODate();
+      const ds = DateTime.fromJSDate(selectedDate as Date).toISODate(); // TODO include time in this for the TZ conversion
       await callEndpoint("/api/sessions", {
         method: "POST",
         body: {

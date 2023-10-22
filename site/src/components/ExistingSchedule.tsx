@@ -17,7 +17,9 @@ const DAY_OF_WEEK: Record<string, string> = {
   "7": "Sunday",
 };
 
-// TODO need ot handle UTC to local TZ
+/*
+ * TODO timezone support
+ */
 
 export function ExistingSchedule(props: {
   schedule: TrainingSchedule & {
