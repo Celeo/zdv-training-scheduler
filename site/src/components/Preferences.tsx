@@ -8,18 +8,34 @@ type EndpointData = {
 };
 
 export function Preferences() {
+  const [serverValues, setServerValues] = useState<EndpointData>({
+    receiveEmails: false,
+    receiveDiscordMessages: false,
+  });
   const [email, setEmail] = useState(false);
   const [discord, setDiscord] = useState(false);
+  const [dirty, setDirty] = useState(false);
+
+  const loadData = async (): Promise<void> => {
+    const data = await callEndpoint<EndpointData>("/api/prefs", {
+      returnData: true,
+    });
+    setServerValues(data!);
+    setEmail(data!.receiveEmails);
+    setDiscord(data!.receiveDiscordMessages);
+    setDirty(false);
+  };
 
   useEffect(() => {
-    (async () => {
-      const data = await callEndpoint<EndpointData>("/api/prefs", {
-        returnData: true,
-      });
-      setEmail(data!.receiveEmails);
-      setDiscord(data!.receiveDiscordMessages);
-    })();
+    loadData();
   }, []);
+
+  useEffect(() => {
+    setDirty(
+      email !== serverValues.receiveEmails ||
+        discord !== serverValues.receiveDiscordMessages,
+    );
+  }, [email, discord]);
 
   const submit = async (
     event: React.MouseEvent<HTMLButtonElement>,
@@ -30,6 +46,7 @@ export function Preferences() {
         method: "PUT",
         body: { email, discord },
       });
+      await loadData();
       sendAlert("INFO", "Preferences saved");
     } catch (err) {
       console.error(`Error saving preferences: ${err}`);
@@ -84,9 +101,11 @@ export function Preferences() {
           type="submit"
           onClick={submit}
           className={`text-black focus:ring-4 focus:outline-none rounded-xl text-sm w-auto px-5 py-2.5 text-center ${
-            email || discord ? "bg-sky-400 hover:bg-sky-300" : "bg-gray-500"
+            dirty && (email || discord)
+              ? "bg-sky-400 hover:bg-sky-300"
+              : "bg-gray-500"
           }`}
-          disabled={!email && !discord}
+          disabled={!dirty || (!email && !discord)}
         >
           Submit
         </button>
