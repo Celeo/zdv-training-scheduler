@@ -12,10 +12,6 @@ import { InformTypes, informUser } from "../../../util/inform.ts";
 import { LOGGER } from "../../../util/log.ts";
 import { infoToName } from "../../../util/print.ts";
 
-/*
- * TODO timezone support
- */
-
 type UpdatePayload = {
   action: "ACCEPT" | "UNACCEPT" | "UPDATE_NOTES";
   position: string;

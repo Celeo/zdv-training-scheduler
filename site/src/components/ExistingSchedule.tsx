@@ -17,10 +17,6 @@ const DAY_OF_WEEK: Record<string, string> = {
   "7": "Sunday",
 };
 
-/*
- * TODO timezone support
- */
-
 export function ExistingSchedule(props: {
   schedule: TrainingSchedule & {
     trainingScheduleExceptions: Array<TrainingScheduleException>;

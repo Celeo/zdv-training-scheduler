@@ -61,7 +61,7 @@ export async function GET(
     .filter(
       (schedule) =>
         !schedule.trainingScheduleExceptions.some(
-          (except) => except.date === dateStr, // TODO
+          (except) => except.date === dateStr,
         ),
     )
     .map((schedule) => ({
@@ -71,7 +71,6 @@ export async function GET(
       student: null,
       position: null,
       dateTime: DateTime.fromISO(`${dateStr}T${schedule.timeOfDay}`, {
-        // TODO
         zone: "utc",
       }).toJSDate(),
       status: SESSION_STATUS.OPEN,

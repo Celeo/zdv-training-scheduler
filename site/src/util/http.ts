@@ -18,7 +18,13 @@ export async function callEndpoint<T = unknown>(
   const body = args?.body
     ? typeof args?.body == "string"
       ? args?.body
-      : JSON.stringify(args?.body)
+      : JSON.stringify(args?.body, (_, value: unknown): any => {
+          // transform luxon::DateTime objects to UTC, and then to a string
+          if (value && typeof value === "object" && "fromISO" in value) {
+            const dt = value as unknown as DateTime;
+            return dt.setZone("utc").toISO();
+          }
+        })
     : null;
 
   try {
@@ -40,11 +46,10 @@ export async function callEndpoint<T = unknown>(
     if (args?.setHook !== undefined || args?.returnData) {
       const text = await resp.text();
 
-      // thanks, JS no built-in JSON date deserializing
       const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
       const data = JSON.parse(text, (_, value: any) => {
         if (typeof value === "string" && dateFormat.test(value)) {
-          // using luxon, parse string to DateTime object in UTC and then convert to the user's time zone
+          // parse the string to a luxon::DateTime object in UTC, then transform to the user's TZ
           return DateTime.fromISO(value, { zone: "utc" }).setZone(timeZone);
         }
         return value;

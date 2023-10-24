@@ -13,12 +13,12 @@ export async function GET(
   if (auth.kind === "invalid") {
     return auth.data;
   }
+  const now = DateTime.utc().toJSDate();
   const sessions = await DB.trainingSession.findMany({
-    where: { trainer: auth.data!.info.cid },
+    where: {
+      trainer: auth.data!.info.cid,
+      dateTime: { gte: now },
+    },
   });
-  const now = DateTime.utc();
-  const filtered = sessions.filter(
-    (s) => DateTime.fromJSDate(s.dateTime) > now,
-  );
-  return new Response(JSON.stringify(filtered));
+  return new Response(JSON.stringify(sessions));
 }
