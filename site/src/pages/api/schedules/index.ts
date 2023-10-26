@@ -69,7 +69,7 @@ export async function POST(
   while (dtUser.weekday !== body.dayOfWeek) {
     dtUser = dtUser.plus({ day: 1 });
   }
-  const dtUserUtc = dtUser.setZone("utc");
+  const dtUserUtc = dtUser.toUTC();
   const newTime = dtUserUtc.toLocaleString(DateTime.TIME_24_SIMPLE);
   await DB.trainingSchedule.create({
     data: {

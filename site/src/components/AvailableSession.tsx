@@ -87,7 +87,7 @@ export function AvailableSession(props: AvailableSessionProps) {
           scheduleId: props.session.scheduleId,
           position,
           // explicitly cast to UTC and get the date
-          date: props.session.dateTime.setZone("utc").toISODate(),
+          date: props.session.dateTime.toUTC().toISODate(),
         },
       });
       props.updateTrigger();
@@ -103,7 +103,7 @@ export function AvailableSession(props: AvailableSessionProps) {
         method: "DELETE",
         body: {
           // explicitly cast to UTC and get the date
-          date: props.session.dateTime.setZone("utc").toISODate(),
+          date: props.session.dateTime.toUTC().toISODate(),
           scheduleId: props.session.scheduleId,
         },
       });

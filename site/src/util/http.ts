@@ -22,7 +22,7 @@ export async function callEndpoint<T = unknown>(
           // transform luxon::DateTime objects to UTC, and then to a string
           if (value && typeof value === "object" && "fromISO" in value) {
             const dt = value as unknown as DateTime;
-            return dt.setZone("utc").toISO();
+            return dt.toUTC().toISO();
           }
           return value;
         })
