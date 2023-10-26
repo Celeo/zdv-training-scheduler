@@ -24,6 +24,7 @@ export async function callEndpoint<T = unknown>(
             const dt = value as unknown as DateTime;
             return dt.setZone("utc").toISO();
           }
+          return value;
         })
     : null;
 
