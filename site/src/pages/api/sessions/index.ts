@@ -32,17 +32,34 @@ export async function GET(
   if (!dateStr) {
     return new Response('Missing "date"', { status: 400 });
   }
-  const date = DateTime.fromISO(`${dateStr}T00:00:00`, { zone: "utc" });
+  const dayStart = DateTime.fromISO(`${dateStr}T00:00:00`, {
+    zone: context.locals.timezone,
+  });
+  const dayEnd = dayStart.endOf("day");
 
   // find the sessions on the date and the schedules on the day of the week
-  let sessions = await DB.trainingSession.findMany({
+  const sessions = await DB.trainingSession.findMany({
     where: {
-      dateTime: { lte: date.endOf("day").toJSDate(), gte: date.toJSDate() },
+      dateTime: {
+        lte: dayEnd.toUTC().toJSDate(),
+        gte: dayStart.toUTC().toJSDate(),
+      },
     },
   });
-  const schedules = await DB.trainingSchedule.findMany({
-    where: { dayOfWeek: date.weekday },
-    include: { trainingScheduleExceptions: true },
+
+  const schedules = (
+    await DB.trainingSchedule.findMany({
+      include: { trainingScheduleExceptions: true },
+    })
+  ).filter((s) => {
+    let d = DateTime.fromISO(
+      `${DateTime.utc().minus({ day: 1 }).toISODate()}T${s.timeOfDay}`,
+      { zone: "utc" },
+    );
+    while (d.weekday !== s.dayOfWeek) {
+      d = d.plus({ day: 1 });
+    }
+    return dayStart <= d && d <= dayEnd;
   });
 
   // for those schedules, filter down to those that don't have a session on this date
@@ -55,6 +72,7 @@ export async function GET(
   // for schedules that should "tick" on this date, filter to those that
   // the owner hasn't expressly cancelled (deleted), and add those to
   // the list of sessions to show to the user (with a mock id of -1)
+  const nowUtc = DateTime.utc().toJSDate();
   schedulesWithoutSessions
     .filter(
       (schedule) =>
@@ -73,12 +91,12 @@ export async function GET(
       }).toJSDate(),
       status: SESSION_STATUS.OPEN,
       notes: "",
-      createdAt: date.toJSDate(),
-      updatedAt: date.toJSDate(),
+      createdAt: nowUtc,
+      updatedAt: nowUtc,
     }))
     .forEach((s) => sessions.push(s));
 
-  let ret: Array<TrainingSession> = [];
+  const ret: Array<TrainingSession> = [];
   if (canBeTrainer(auth.data.info)) {
     // For trainers, their response includes all open sessions (as even trainers need
     // training sometimes), but also include their sessions on the date in case they
@@ -102,8 +120,8 @@ export async function GET(
   // sort by time of day for better UX
   ret.sort(
     (a, b) =>
-      DateTime.fromJSDate(a.dateTime, { zone: "utc" }).hour -
-      DateTime.fromJSDate(b.dateTime, { zone: "utc" }).hour,
+      DateTime.fromJSDate(a.dateTime).hour -
+      DateTime.fromJSDate(b.dateTime).hour,
   );
 
   return new Response(JSON.stringify(ret));
