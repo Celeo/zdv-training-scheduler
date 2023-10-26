@@ -38,12 +38,12 @@ export function SchedulingTrainer() {
    */
   const createNewSession = async (): Promise<void> => {
     try {
-      const ds = DateTime.fromJSDate(selectedDate as Date).toISODate();
+      const day = DateTime.fromJSDate(selectedDate as Date).toISODate();
+      const dt = DateTime.fromISO(`${day}T${newSessionTime}:00`);
       await callEndpoint("/api/sessions", {
         method: "POST",
         body: {
-          date: ds,
-          time: newSessionTime,
+          dateTime: dt,
           notes: newSessionNotes,
         },
       });
@@ -63,6 +63,7 @@ export function SchedulingTrainer() {
     try {
       await callEndpoint("/api/schedules", {
         method: "POST",
+        // purposefully left in the user's timezone here
         body: {
           dayOfWeek: newScheduleDayOfWeek,
           timeOfDay: newScheduleTimeOfDay,
@@ -97,11 +98,11 @@ export function SchedulingTrainer() {
     <>
       <div className="pb-5">
         <h2 className="text-2xl pb-2">Your schedules</h2>
-        <ul className="list-disc list-inside basis-4/12 pb-5">
-          {schedules.length === 0 ? (
-            <p>No schedules</p>
-          ) : (
-            schedules.map((schedule) => (
+        {schedules.length === 0 ? (
+          <p className="pb-5">No schedules</p>
+        ) : (
+          <ul className="list-disc list-inside basis-4/12 pb-5">
+            {schedules.map((schedule) => (
               <ExistingSchedule
                 key={schedule.id}
                 schedule={schedule}
@@ -109,9 +110,9 @@ export function SchedulingTrainer() {
                   callEndpoint("/api/schedules", { setHook: setSchedules })
                 }
               />
-            ))
-          )}
-        </ul>
+            ))}
+          </ul>
+        )}
         <h3 className="text-lg pb-2">Create new schedule</h3>
         <div className="flex-1">
           <div className="flex flex-items justify-start gap-x-5 mb-3">
@@ -169,7 +170,7 @@ export function SchedulingTrainer() {
       <hr className="pb-5" />
       <h2 className="text-2xl pb-2">Your sessions</h2>
       {sessions.length === 0 ? (
-        <p>No pending sessions</p>
+        <p className="pb-5">No pending sessions</p>
       ) : (
         <ul className="list-disc list-inside basis-4/12 pb-5">
           {sessions.map((s) => (

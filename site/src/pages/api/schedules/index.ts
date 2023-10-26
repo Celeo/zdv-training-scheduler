@@ -22,7 +22,6 @@ export async function GET(
     include: { trainingScheduleExceptions: true },
   });
 
-  // filter exclusions to those in the future
   const now = DateTime.utc();
   for (const schedule of data) {
     schedule.trainingScheduleExceptions =

@@ -32,9 +32,7 @@ export async function GET(
   if (!dateStr) {
     return new Response('Missing "date"', { status: 400 });
   }
-  const date = DateTime.fromISO(`${dateStr}T00:00:00`, {
-    zone: context.locals.timezone,
-  }).setZone("utc");
+  const date = DateTime.fromISO(`${dateStr}T00:00:00`, { zone: "utc" });
 
   // find the sessions on the date and the schedules on the day of the week
   let sessions = await DB.trainingSession.findMany({
@@ -81,7 +79,6 @@ export async function GET(
     .forEach((s) => sessions.push(s));
 
   let ret: Array<TrainingSession> = [];
-
   if (canBeTrainer(auth.data.info)) {
     // For trainers, their response includes all open sessions (as even trainers need
     // training sometimes), but also include their sessions on the date in case they
@@ -105,16 +102,15 @@ export async function GET(
   // sort by time of day for better UX
   ret.sort(
     (a, b) =>
-      DateTime.fromJSDate(a.dateTime).hour -
-      DateTime.fromJSDate(b.dateTime).hour,
+      DateTime.fromJSDate(a.dateTime, { zone: "utc" }).hour -
+      DateTime.fromJSDate(b.dateTime, { zone: "utc" }).hour,
   );
 
   return new Response(JSON.stringify(ret));
 }
 
 type UpdatePayload = {
-  date: string;
-  time: string;
+  dateTime: string;
   notes: string;
 };
 
@@ -130,9 +126,7 @@ export async function POST(
   }
 
   const body: UpdatePayload = await context.request.json();
-  const dt = DateTime.fromISO(`${body.date}T${body.time}`, {
-    zone: "utc",
-  });
+  const dt = DateTime.fromISO(body.dateTime, { zone: "utc" });
   await DB.trainingSession.create({
     data: {
       trainer: auth.data.info.cid,
@@ -141,11 +135,7 @@ export async function POST(
     },
   });
   LOGGER.info(
-    `${infoToName(
-      auth.data.info,
-    )} created a new session for ${dt.toISODate()} at ${dt.toLocaleString(
-      DateTime.TIME_24_SIMPLE,
-    )}`,
+    `${infoToName(auth.data.info)} created a new session at ${dt.toString()}`,
   );
   return new Response("Created", { status: 201 });
 }

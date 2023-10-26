@@ -66,9 +66,10 @@ export async function PUT(
       data: {
         scheduleId: body.scheduleId,
         trainer: schedule.trainer,
-        student: auth.data.info.cid!,
+        student: auth.data.info.cid,
         position: body.position,
-        dateTime: DateTime.fromISO(`${body.date!}T${schedule.timeOfDay}`, {
+        // date cast to UTC by client; timeOfDay from DB which is UTC
+        dateTime: DateTime.fromISO(`${body.date}T${schedule.timeOfDay}`, {
           zone: "utc",
         }).toJSDate(),
         status: SESSION_STATUS.ACCEPTED,
@@ -83,8 +84,9 @@ export async function PUT(
   }
 
   /* found the session by id */
+  const sessionDateTime = DateTime.fromJSDate(record.dateTime, { zone: "utc" });
 
-  if (DateTime.fromJSDate(record.dateTime) < DateTime.utc()) {
+  if (sessionDateTime < DateTime.utc()) {
     return new Response("Cannot edit a session in the past", { status: 400 });
   }
 
@@ -110,7 +112,7 @@ export async function PUT(
       first_name: auth.data.info.first_name,
       last_name: auth.data.info.last_name,
       operating_initials: auth.data.info.operating_initials,
-      dateTime: DateTime.fromJSDate(record.dateTime),
+      dateTime: sessionDateTime,
     });
     LOGGER.info(
       `${infoToName(auth.data.info)} accepted session ${id} for ${
@@ -139,7 +141,7 @@ export async function PUT(
       first_name: auth.data.info.first_name,
       last_name: auth.data.info.last_name,
       operating_initials: auth.data.info.operating_initials,
-      dateTime: DateTime.fromJSDate(record.dateTime),
+      dateTime: sessionDateTime,
     });
     LOGGER.info(`${infoToName(auth.data.info)} unaccepted session ${id}`);
     return new Response("Un-accepted");
@@ -194,13 +196,16 @@ export async function DELETE(
       );
     }
 
-    // create an exception for the schedule on this date
+    // Create an exception for the schedule on this date; date
+    // comes in as already UTC.
     await DB.trainingScheduleException.create({
       data: { scheduleId: body.scheduleId, date: body.date },
     });
     return new Response("Schedule exception created");
   }
-  if (DateTime.fromJSDate(record.dateTime) < DateTime.utc()) {
+  const dt = DateTime.fromJSDate(record.dateTime, { zone: "utc" });
+
+  if (dt < DateTime.utc()) {
     return new Response("You cannot edit a session in the past", {
       status: 400,
     });
@@ -218,7 +223,7 @@ export async function DELETE(
       first_name: trainer.first_name,
       last_name: trainer.last_name,
       operating_initials: trainer.operating_initials,
-      dateTime: DateTime.fromJSDate(record.dateTime),
+      dateTime: dt,
     });
   }
   await DB.trainingSession.delete({ where: { id: record.id } });

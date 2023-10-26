@@ -34,11 +34,7 @@ export function SchedulingStudent(props: { currentUserCid: number }) {
     setSelectedDate(val);
     const date = val as Date;
     try {
-      const dt = DateTime.fromJSDate(date);
-      const ds = `${dt.year}-${dt.month.toString().padStart(2, "0")}-${dt.day
-        .toString()
-        .padStart(2, "0")}`;
-
+      const ds = DateTime.fromJSDate(date).setZone("utc").toISODate();
       await callEndpoint(`/api/sessions?date=${ds}`, { setHook: setSessions });
     } catch (err) {
       console.error(`Error getting sessions for ${date}: ${err}`);

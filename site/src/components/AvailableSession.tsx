@@ -86,7 +86,8 @@ export function AvailableSession(props: AvailableSessionProps) {
           action: "ACCEPT",
           scheduleId: props.session.scheduleId,
           position,
-          date: props.session.dateTime.toISODate(),
+          // explicitly cast to UTC and get the date
+          date: props.session.dateTime.setZone("utc").toISODate(),
         },
       });
       props.updateTrigger();
@@ -101,7 +102,8 @@ export function AvailableSession(props: AvailableSessionProps) {
       await callEndpoint(`/api/sessions/${props.session.id}`, {
         method: "DELETE",
         body: {
-          date: props.session.dateTime.toISODate(),
+          // explicitly cast to UTC and get the date
+          date: props.session.dateTime.setZone("utc").toISODate(),
           scheduleId: props.session.scheduleId,
         },
       });

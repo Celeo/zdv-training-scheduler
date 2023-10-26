@@ -34,7 +34,7 @@ model TrainingSchedule {
 
 model TrainingScheduleException {
   id         Int    @id @default(autoincrement())
-  scheduleId Int?
+  scheduleId Int
   date       String
 
   schedule TrainingSchedule? @relation(fields: [scheduleId], references: [id])

@@ -36,7 +36,7 @@ export async function informUser(
       }) has accepted your training session on ${dateToStr(
         data.dateTime,
         DateDisplayTypes.DateAndTime,
-      )}`;
+      )} UTC`;
       break;
     }
     case InformTypes.STUDENT_CANCELLED_SESSION:
@@ -46,7 +46,7 @@ export async function informUser(
       }) has cancelled the training session on ${dateToStr(
         data.dateTime,
         DateDisplayTypes.DateAndTime,
-      )}`;
+      )} UTC`;
       break;
     }
   }

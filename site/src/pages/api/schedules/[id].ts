@@ -23,9 +23,7 @@ export async function DELETE(
     return auth.data;
   }
 
-  const record = await DB.trainingSchedule.findFirst({
-    where: { id: id },
-  });
+  const record = await DB.trainingSchedule.findFirst({ where: { id: id } });
   if (record === null) {
     return new Response("Could not find schedule", { status: 400 });
   }

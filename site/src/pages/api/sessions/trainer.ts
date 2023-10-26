@@ -16,7 +16,7 @@ export async function GET(
   const now = DateTime.utc().toJSDate();
   const sessions = await DB.trainingSession.findMany({
     where: {
-      trainer: auth.data!.info.cid,
+      trainer: auth.data.info.cid,
       dateTime: { gte: now },
     },
   });

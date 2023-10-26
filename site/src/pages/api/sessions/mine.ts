@@ -20,15 +20,12 @@ export async function GET(
   const pending = urlParams.get("pending");
 
   if (pending) {
-    const now = DateTime.utc();
-    let records = await DB.trainingSession.findMany({
+    const records = await DB.trainingSession.findMany({
       where: {
         student: auth.data.info.cid,
         status: SESSION_STATUS.ACCEPTED,
+        dateTime: { gte: DateTime.utc().toJSDate() },
       },
-    });
-    records = records.filter((session) => {
-      return DateTime.fromJSDate(session.dateTime) > now;
     });
     return new Response(JSON.stringify(records));
   }
