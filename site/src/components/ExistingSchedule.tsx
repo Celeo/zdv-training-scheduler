@@ -2,9 +2,11 @@ import type {
   TrainingSchedule,
   TrainingScheduleException,
 } from "@prisma/client";
+import { DateTime } from "luxon";
 import { useState } from "react";
 import { sendAlert } from "../data";
 import { callEndpoint } from "../util/http";
+import { DateDisplayTypes, dateToStr } from "../util/print";
 
 const DAY_OF_WEEK: Record<string, string> = {
   "0": "Sunday",
@@ -25,6 +27,20 @@ export function ExistingSchedule(props: {
 }) {
   const [showExclusionsModal, setShowExclusionsModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  /*
+   * Like the process to parse the new schedule from day of week and time, this
+   * snippet does the reverse to transform the UTC schedule into the user's TZ.
+   */
+
+  let scheduleForUser = DateTime.fromISO(
+    `${DateTime.utc().toISODate()}T${props.schedule.timeOfDay}:00`,
+    { zone: "utc" },
+  );
+  while (scheduleForUser.weekday !== props.schedule.dayOfWeek) {
+    scheduleForUser = scheduleForUser.plus({ day: 1 });
+  }
+  scheduleForUser = scheduleForUser.toLocal();
 
   const deleteSchedule = async (): Promise<void> => {
     try {
@@ -94,8 +110,9 @@ export function ExistingSchedule(props: {
           )}
         </div>
       </div>
-      {DAY_OF_WEEK[props.schedule.dayOfWeek.toString()]}s at{" "}
-      {props.schedule.timeOfDay}
+      {/* FIXME this isn't being put into the user's timezone */}
+      {DAY_OF_WEEK[scheduleForUser.weekday.toString()]}s at{" "}
+      {dateToStr(scheduleForUser, DateDisplayTypes.Time)}
       <button
         className="focus:outline-none focus:ring-4 font-medium rounded-xl text-sm px-2 py-1 text-center mb-2 ml-2 text-yellow-500 hover:text-white hover:bg-yellow-700 focus:ring-yellow-900"
         onClick={() => {
