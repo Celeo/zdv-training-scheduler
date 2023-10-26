@@ -53,7 +53,8 @@ export async function informUser(
 
   // based on the user's preferences, send them the message over Discord and/or email (or neither)
   let userPrefs = await DB.userPreference.findFirst({ where: { cid } });
-  if (userPrefs?.receiveDiscordMessages) {
+  if (userPrefs === null || userPrefs?.receiveDiscordMessages) {
+    // default to Discord if there are no saved preferences for whatever reason
     try {
       await DB.discordMessage.create({ data: { cid, message } });
     } catch (err) {

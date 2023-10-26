@@ -18,6 +18,17 @@ export async function GET(
   const preferences = await DB.userPreference.findFirst({
     where: { cid: auth.data.info.cid },
   });
+  if (preferences === null) {
+    LOGGER.info(`Created new preferences object for ${auth.data.info.cid}`);
+    await DB.userPreference.create({ data: { cid: auth.data.info.cid } });
+    return new Response(
+      JSON.stringify({
+        cid: auth.data.info.cid,
+        receiveEmails: false,
+        receiveDiscordMessages: true,
+      }),
+    );
+  }
   return new Response(JSON.stringify(preferences));
 }
 
