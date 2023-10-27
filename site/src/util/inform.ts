@@ -11,6 +11,7 @@ import { DateDisplayTypes, dateToStr, type PrintableName } from "./print.ts";
  */
 export enum InformTypes {
   ACCEPTED_SESSION,
+  ACCEPTING_SESSION,
   STUDENT_CANCELLED_SESSION,
   TRAINER_CANCELLED_SESSION,
 }
@@ -34,6 +35,15 @@ export async function informUser(
       message = `${data.first_name} ${data.last_name} (${
         data.operating_initials
       }) has accepted your training session on ${dateToStr(
+        data.dateTime,
+        DateDisplayTypes.DateAndTime,
+      )} UTC`;
+      break;
+    }
+    case InformTypes.ACCEPTING_SESSION: {
+      message = `You have accepted the session from ${data.first_name} ${
+        data.last_name
+      } (${data.operating_initials}) on ${dateToStr(
         data.dateTime,
         DateDisplayTypes.DateAndTime,
       )} UTC`;

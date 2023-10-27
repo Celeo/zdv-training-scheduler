@@ -114,6 +114,11 @@ export async function PUT(
       operating_initials: auth.data.info.operating_initials,
       dateTime: sessionDateTime,
     });
+    const trainerInfo = await getUserInfoFromCid(record.trainer);
+    await informUser(auth.data.info.cid, InformTypes.ACCEPTING_SESSION, {
+      ...trainerInfo,
+      dateTime: sessionDateTime,
+    });
     LOGGER.info(
       `${infoToName(auth.data.info)} accepted session ${id} for ${
         body.position
