@@ -110,7 +110,6 @@ export function ExistingSchedule(props: {
           )}
         </div>
       </div>
-      {/* FIXME this isn't being put into the user's timezone */}
       {DAY_OF_WEEK[scheduleForUser.weekday.toString()]}s at{" "}
       {dateToStr(scheduleForUser, DateDisplayTypes.Time)}
       <button
