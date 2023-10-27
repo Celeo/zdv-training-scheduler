@@ -16,7 +16,7 @@ Website and Discord bot for scheduling training sessions for the [VATSIM Denver 
 - [Discord.js](https://discord.js.org/)
 - [Bun](https://bun.sh/)
 
-This is first and foremost an Astro project, allowing the site to utilize [SSR](https://docs.astro.build/en/guides/server-side-rendering/) to build a [MPA](https://docs.astro.build/en/concepts/why-astro/#server-first) site (rather than SPA from just React) with backend included. React is used for client-side functionality. Prisma and SQLite provide storage. OAuth via ZDV provides authentication and authorization. Once [Bun](https://bun.sh/) in Astro stabilizes, this project will likely uptake it to replace Node.
+This is first and foremost an Astro project, allowing the site to utilize [SSR](https://docs.astro.build/en/guides/server-side-rendering/) to build a [MPA](https://docs.astro.build/en/concepts/why-astro/#server-first) site (rather than SPA from just React) with backend included. React is used for client-side functionality. Prisma and SQLite provide storage. OAuth via ZDV provides authentication and authorization.
 
 The Discord bot portion of this project is for users who wish to receive notifications via Discord rather than / in addition to email. The bot runs, checking for pending messages on the site every minute, and dispatches them to the correct Discord users, marking each message complete thereafter.
 
