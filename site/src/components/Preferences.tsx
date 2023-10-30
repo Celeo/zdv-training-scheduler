@@ -61,8 +61,8 @@ export function Preferences() {
         These notification preferences control where you will get notifications:
       </p>
       <ul className="list-disc list-inside pb-4 -ml-2">
-        <li>A student accepting your session</li>
-        <li>A student un-accepting your session</li>
+        <li>You accepting a session</li>
+        <li>A student (un-)accepting your session</li>
         <li>Your trainer cancelling your session</li>
       </ul>
       <form>
