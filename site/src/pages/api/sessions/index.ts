@@ -7,7 +7,10 @@ import {
   canBeTrainer,
   checkAuth,
 } from "../../../util/auth.ts";
-import { SESSION_STATUS } from "../../../util/constants.ts";
+import {
+  SCHEDULE_WEEK_OUTLOOK,
+  SESSION_STATUS,
+} from "../../../util/constants.ts";
 import { LOGGER } from "../../../util/log.ts";
 import { infoToName } from "../../../util/print.ts";
 
@@ -59,7 +62,14 @@ export async function GET(
     while (d.weekday !== s.dayOfWeek) {
       d = d.plus({ day: 1 });
     }
-    return dayStart <= d && d <= dayEnd;
+    // allow taking sessions out to a number of weeks
+    for (let week = 0; week < SCHEDULE_WEEK_OUTLOOK; week++) {
+      const d2 = d.plus({ week });
+      if (dayStart <= d2 && d2 <= dayEnd) {
+        return true;
+      }
+    }
+    return false;
   });
 
   // for those schedules, filter down to those that don't have a session on this date

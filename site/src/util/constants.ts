@@ -39,3 +39,9 @@ export const ADMIN_ROLES = ["atm", "datm", "ta"];
  * being prevented from accepting more.
  */
 export const MAXIMUM_PENDING_SESSIONS = 2;
+
+/**
+ * Number of weeks that students are able to look forward
+ * to create sessions from a trainer's schedule.
+ */
+export const SCHEDULE_WEEK_OUTLOOK = 6;
