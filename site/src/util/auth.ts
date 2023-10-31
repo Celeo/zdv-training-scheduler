@@ -23,7 +23,6 @@ export type ZdvAccessData = {
  */
 export type ZdvUserInfo = {
   cid: number;
-  email: string;
   first_name: string;
   last_name: string;
   operating_initials: string;
@@ -177,11 +176,11 @@ export async function getUserInfo(
   // data to be put into the JWT; only part of the available data
   const userInfo = {
     cid: data.user.cid,
-    email: data.user.email,
     first_name: data.user.firstname,
     last_name: data.user.lastname,
     operating_initials: data.user.oi,
     roles: data.user.roles.map((role) => role.name),
+    // note: email *is* available here
   };
 
   // only home and visiting controllers can train
@@ -365,7 +364,6 @@ export async function getUserInfoFromCid(cid: number): Promise<ZdvUserInfo> {
   // don't need everything; just what's useful for this site
   return {
     cid: controller.cid as number,
-    email: controller.email as string,
     first_name: controller.first_name as string,
     last_name: controller.last_name as string,
     operating_initials: controller.operating_initials as string,

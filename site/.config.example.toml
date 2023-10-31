@@ -2,6 +2,7 @@ facilityShort = "ZDV"
 facilityDomain = "zdvartcc.org"
 jwtSecret = ""
 discordSecret = ""
+vatusaToken = ""
 
 [oauth]
 clientId = ""

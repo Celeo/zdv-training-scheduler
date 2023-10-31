@@ -15,6 +15,8 @@ export type Config = {
   jwtSecret: string;
   /** Secret for Discord bot site access */
   discordSecret: string;
+  /** VATUSA JWT */
+  vatusaToken: string;
   /** ZDV SSO data */
   oauth: {
     clientId: string;

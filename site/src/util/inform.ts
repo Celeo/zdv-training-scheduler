@@ -1,7 +1,7 @@
+import axios from "axios";
 import type { DateTime } from "luxon";
 import * as nodemailer from "nodemailer";
 import { DB } from "../data.ts";
-import { getUserInfoFromCid } from "./auth.ts";
 import { loadConfig } from "./config.ts";
 import { LOGGER } from "./log.ts";
 import { DateDisplayTypes, dateToStr, type PrintableName } from "./print.ts";
@@ -81,13 +81,26 @@ export async function informUser(
 }
 
 /**
+ * Use the VATUSA v2 API to get the user's email.
+ */
+async function getEmailForCid(cid: number): Promise<string> {
+  const config = await loadConfig();
+  const resp = await axios.get<{ data: { email: string } }>(
+    `https://api.vatusa.net/user/${cid}?apikey=${config.vatusaToken}`,
+  );
+  if (resp.status !== 200) {
+    throw new Error(`Got status ${resp.status} from VATUSA user details`);
+  }
+  return resp.data.data.email;
+}
+
+/**
  * Send an email via ZDV's email services.
  */
-async function sendEmail(cid: number, text: string): Promise<void> {
+export async function sendEmail(cid: number, text: string): Promise<void> {
   const config = await loadConfig();
-  const userInfo = await getUserInfoFromCid(cid);
+  const email = await getEmailForCid(cid);
 
-  LOGGER.debug(`Sending email to ${userInfo.email}`);
   // use the ZDV email servers, as the zdvartcc.org site does
   const transporter = nodemailer.createTransport({
     host: config.email.host,
@@ -104,9 +117,9 @@ async function sendEmail(cid: number, text: string): Promise<void> {
   });
   await transporter.sendMail({
     from: config.email.from,
-    to: userInfo.email,
+    to: email,
     subject: `${config.facilityShort} Training Notification`,
     text,
   });
-  LOGGER.info(`Sent email to ${userInfo.email}`);
+  LOGGER.info(`Sent email to ${email}`);
 }
