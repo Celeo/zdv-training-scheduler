@@ -1,9 +1,9 @@
+import { useSignal } from "@preact/signals-react";
 import type {
   TrainingSchedule,
   TrainingScheduleException,
 } from "@prisma/client";
 import { DateTime } from "luxon";
-import { useState } from "react";
 import { sendAlert } from "../data";
 import { callEndpoint } from "../util/http";
 import { DateDisplayTypes, dateToStr } from "../util/print";
@@ -25,8 +25,8 @@ export function ExistingSchedule(props: {
   };
   updateTrigger: () => void;
 }) {
-  const [showExclusionsModal, setShowExclusionsModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const showExclusionsModal = useSignal(false);
+  const showDeleteModal = useSignal(false);
 
   /*
    * Like the process to parse the new schedule from day of week and time, this
@@ -47,7 +47,7 @@ export function ExistingSchedule(props: {
       await callEndpoint(`/api/schedules/${props.schedule.id}`, {
         method: "DELETE",
       });
-      setShowDeleteModal(false);
+      showDeleteModal.value = false;
       props.updateTrigger();
     } catch (err) {
       console.error(`Could not delete schedule: ${err}`);
@@ -59,9 +59,9 @@ export function ExistingSchedule(props: {
     <li>
       <div
         className={`fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full z-30 ${
-          showDeleteModal ? "" : "hidden"
+          showDeleteModal.value ? "" : "hidden"
         }`}
-        onClick={() => setShowDeleteModal(false)}
+        onClick={() => (showDeleteModal.value = false)}
       >
         <div
           className="relative top-20 mx-auto py-5 px-12 border w-1/4 shadow-lg rounded-xl z-40"
@@ -74,7 +74,7 @@ export function ExistingSchedule(props: {
           <div className="flex justify-between pt-5">
             <button
               className="text-black focus:ring-4 focus:outline-none rounded-xl text-sm w-auto px-5 py-2.5 text-center bg-green-400 hover:bg-green-300"
-              onClick={() => setShowDeleteModal(false)}
+              onClick={() => (showDeleteModal.value = false)}
             >
               Do not delete
             </button>
@@ -89,9 +89,9 @@ export function ExistingSchedule(props: {
       </div>
       <div
         className={`fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full z-30 ${
-          showExclusionsModal ? "" : "hidden"
+          showExclusionsModal.value ? "" : "hidden"
         }`}
-        onClick={() => setShowExclusionsModal(false)}
+        onClick={() => (showExclusionsModal.value = false)}
       >
         <div
           className="relative top-20 mx-auto py-5 px-12 border w-1/4 shadow-lg rounded-xl z-40"
@@ -115,7 +115,7 @@ export function ExistingSchedule(props: {
       <button
         className="focus:outline-none focus:ring-4 font-medium rounded-xl text-sm px-2 py-1 text-center mb-2 ml-2 text-yellow-500 hover:text-white hover:bg-yellow-700 focus:ring-yellow-900"
         onClick={() => {
-          setShowExclusionsModal(true);
+          showExclusionsModal.value = true;
         }}
       >
         Show exclusions
@@ -123,7 +123,7 @@ export function ExistingSchedule(props: {
       <button
         className="focus:outline-none focus:ring-4 font-medium rounded-xl text-sm px-2 py-1 text-center mb-2 ml-2 text-red-500 hover:text-white hover:bg-red-700 focus:ring-red-900"
         onClick={() => {
-          setShowDeleteModal(true);
+          showDeleteModal.value = true;
         }}
       >
         Delete

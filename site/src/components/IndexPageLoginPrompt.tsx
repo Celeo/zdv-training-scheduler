@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { effect, useSignal } from "@preact/signals-react";
 
 export function IndexPageLoginPrompt() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const isLoggedIn = useSignal(false);
 
-  useEffect(() => {
-    setIsLoggedIn(localStorage.getItem("jwt") !== null);
-  }, []);
+  effect(() => {
+    isLoggedIn.value = localStorage.getItem("jwt") !== null;
+  });
 
-  if (isLoggedIn) {
+  if (isLoggedIn.value) {
     return <></>;
   }
   return (

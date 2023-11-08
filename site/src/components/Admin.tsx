@@ -1,3 +1,4 @@
+import { useSignal } from "@preact/signals-react";
 import { useEffect, useState } from "react";
 import { sendAlert } from "../data";
 import type { CidMap } from "../pages/api/cid_map";
@@ -41,10 +42,10 @@ function Row(props: {
 }
 
 export function Admin() {
-  const [cidMap, setCidMap] = useState<CidMap>({});
-  const [ratings, setRatings] = useState<TrainerRatingMap>({});
-  const [serverRatings, setServerRatings] = useState<TrainerRatingMap>({});
-  const [dirty, setDirty] = useState(false);
+  const cidMap = useSignal<CidMap>({});
+  const ratings = useSignal<TrainerRatingMap>({});
+  const serverRatings = useSignal<TrainerRatingMap>({});
+  const dirty = useSignal(false);
 
   const getCidMap = async (): Promise<void> => {
     try {
@@ -60,8 +61,8 @@ export function Admin() {
       const data = await callEndpoint<TrainerRatingMap>("/api/ratings", {
         returnData: true,
       });
-      setRatings(data!);
-      setServerRatings(data!);
+      ratings.value = data!;
+      serverRatings.value = data!;
     } catch (err) {
       sendAlert("ERROR", "Could not get ratings from the server");
       console.error(`Could not get ratings: ${err}`);
@@ -71,12 +72,15 @@ export function Admin() {
   const saveAll = async (): Promise<void> => {
     for (const cidStr of Object.keys(ratings)) {
       const cid = parseInt(cidStr);
-      if (JSON.stringify(ratings[cid]) === JSON.stringify(serverRatings[cid])) {
+      if (
+        JSON.stringify(ratings.value[cid]) ===
+        JSON.stringify(serverRatings.value[cid])
+      ) {
         continue;
       }
       await callEndpoint("/api/ratings", {
         method: "PUT",
-        body: { cid, ...ratings[cid] },
+        body: { cid, ...ratings.value[cid] },
       });
     }
     sendAlert("INFO", "Ratings saved");
@@ -95,7 +99,7 @@ export function Admin() {
   };
 
   useEffect(() => {
-    setDirty(JSON.stringify(ratings) !== JSON.stringify(serverRatings));
+    dirty.value = JSON.stringify(ratings) !== JSON.stringify(serverRatings);
   }, [ratings]);
 
   useEffect(() => {
@@ -114,22 +118,25 @@ export function Admin() {
           Sync
         </button>
       </div>
-      {Object.keys(cidMap).length > 0 && (
+      {Object.keys(cidMap.value).length > 0 && (
         <>
-          {Object.keys(ratings).map((cid) => (
+          {Object.keys(ratings.value).map((cid) => (
             <Row
               key={cid}
-              cidMap={cidMap}
-              ratings={ratings[parseInt(cid)]!}
+              cidMap={cidMap.value}
+              ratings={ratings.value[parseInt(cid)]!}
               cid={parseInt(cid)}
-              toggle={(cid, position) =>
-                setRatings((r) => ({
-                  ...r,
-                  [cid]: {
-                    ...r[cid]!,
-                    [position]: !r[cid]![position],
-                  },
-                }))
+              toggle={
+                (cid, position) => {
+                  ratings.value = [...ratings.value, [cid] : { ... }]
+                }
+                //   setRatings((r) => ({
+                //     ...r,
+                //     [cid]: {
+                //       ...r[cid]!,
+                //       [position]: !r[cid]![position],
+                //     },
+                //   }))
               }
             />
           ))}

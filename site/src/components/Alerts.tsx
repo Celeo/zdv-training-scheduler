@@ -1,13 +1,14 @@
 import { useStore } from "@nanostores/react";
+import { useSignal } from "@preact/signals-react";
 import { nanoid } from "nanoid";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import type { Alert } from "../data";
 import { alertStore } from "../data.ts";
 
 type UiAlert = Alert & { uuid: string };
 
 export function Alerts() {
-  const [localAlerts, setLocalAlerts] = useState<Array<UiAlert>>([]);
+  const localAlerts = useSignal<Array<UiAlert>>([]);
   const globalAlerts = useStore(alertStore);
 
   useEffect(() => {
@@ -15,21 +16,21 @@ export function Alerts() {
       const newAlerts = globalAlerts.map((a2) => ({ ...a2, uuid: nanoid() }));
       newAlerts.forEach(({ uuid }) =>
         setTimeout(() => {
-          setLocalAlerts((alerts) => alerts.filter((a) => a.uuid !== uuid));
+          localAlerts.value = localAlerts.value.filter((a) => a.uuid !== uuid);
         }, 10_000),
       );
-      setLocalAlerts((a) => [...a, ...newAlerts]);
+      localAlerts.value = [...localAlerts.value, ...newAlerts];
       alertStore.set([]);
     }
   }, [globalAlerts]);
 
   const close = (uuid: string): void => {
-    setLocalAlerts((alerts) => alerts.filter((a) => a.uuid !== uuid));
+    localAlerts.value = localAlerts.value.filter((a) => a.uuid !== uuid);
   };
 
   return (
     <div className="absolute top-5 right-5">
-      {localAlerts.map(({ level, message, uuid }) => {
+      {localAlerts.value.map(({ level, message, uuid }) => {
         let icon;
         if (level === "INFO") {
           icon = (
