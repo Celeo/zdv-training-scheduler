@@ -1,6 +1,5 @@
 ---
 import Main from "../layouts/Main.astro";
-import { IndexPageLoginPrompt } from "../components/IndexPageLoginPrompt.tsx";
 import { loadConfig } from "../util/config";
 
 const config = await loadConfig();
@@ -26,20 +25,17 @@ const config = await loadConfig();
     </p>
     <p id="login-prompt" class="text-lg pt-5 hidden">
       To get started,
-      <a
-        href="/sso/login"
-        class="underline text-sky-300 hover:text-sky-200"
-      >
+      <a href="/sso/login" class="underline text-sky-300 hover:text-sky-200">
         log in
       </a>
-      .
+       .
     </p>
   </div>
 
   <script>
     (() => {
       if (localStorage.getItem("jwt") === null) {
-        document.getElementById('login-prompt').classList.remove('hidden');
+        document.getElementById("login-prompt").classList.remove("hidden");
       }
     })();
   </script>
