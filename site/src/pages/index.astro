@@ -24,6 +24,23 @@ const config = await loadConfig();
       For controllers who have trained in ZDV/ZLC before, this site replaces
       Picktime.
     </p>
-    <IndexPageLoginPrompt client:only />
+    <p id="login-prompt" class="text-lg pt-5 hidden">
+      To get started,
+      <a
+        href="/sso/login"
+        class="underline text-sky-300 hover:text-sky-200"
+      >
+        log in
+      </a>
+      .
+    </p>
   </div>
+
+  <script>
+    (() => {
+      if (localStorage.getItem("jwt") === null) {
+        document.getElementById('login-prompt').classList.remove('hidden');
+      }
+    })();
+  </script>
 </Main>
