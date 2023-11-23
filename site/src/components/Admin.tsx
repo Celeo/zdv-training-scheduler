@@ -2,36 +2,35 @@ import { useEffect, useState } from "react";
 import { sendAlert } from "../data";
 import type { CidMap } from "../pages/api/cid_map";
 import type {
-  TrainerRatingEntry,
   TrainerRatingMap,
+  TrainerRatingMapEntry,
 } from "../pages/api/ratings";
-import { FRIENDLY_POSITION_NAME_MAP, type Positions } from "../util/constants";
 import { callEndpoint } from "../util/http";
 import { infoToName } from "../util/print";
 
 function Row(props: {
   cidMap: CidMap;
-  ratings: TrainerRatingEntry;
+  ratings: TrainerRatingMapEntry;
   cid: number;
-  toggle: (cid: number, position: Positions) => void;
+  toggle: (cid: number, position: string) => void;
 }): JSX.Element {
   return (
     <div className="flex justify-between mt-1">
       <p className="pt-2">{infoToName(props.cidMap[props.cid]!)}</p>
       <div className="flex justify-center text-sm">
-        {Object.keys(props.ratings).map((n) => {
-          const name = n as Positions;
+        {Object.keys(props.ratings).map((name) => {
           return (
             <button
               key={name}
               className={`px-3 py-2 mx-0.5 rounded-none border-0 ${
-                props.ratings[name]
+                props.ratings[name]!.rated
                   ? "border-green-200 bg-green-400 bg-opacity-50 hover:bg-opacity-90 text-white"
                   : "border-white bg-white bg-opacity-60 hover:bg-opacity-90 text-black"
               }`}
               onClick={() => props.toggle(props.cid, name)}
             >
-              {FRIENDLY_POSITION_NAME_MAP[name]}
+              {/* {config.positions.find(([n, _]) => n === name)?.[1]} */}
+              {props.ratings[name]!.friendly}
             </button>
           );
         })}
@@ -74,20 +73,24 @@ export function Admin() {
       if (JSON.stringify(ratings[cid]) === JSON.stringify(serverRatings[cid])) {
         continue;
       }
+      const r: Record<string, boolean> = {};
+      Object.entries(ratings[cid] ?? {}).forEach(([key, value]) => {
+        r[key] = value.rated;
+      });
       await callEndpoint("/api/ratings", {
         method: "PUT",
-        body: { cid, ...ratings[cid] },
+        body: { cid, ratings: r },
       });
     }
     sendAlert("INFO", "Ratings saved");
-    getRatings();
+    await getRatings();
   };
 
   const syncRoster = async (): Promise<void> => {
     try {
       await callEndpoint("/api/ratings/sync", { method: "POST" });
       sendAlert("INFO", "Roster synchronized");
-      getRatings();
+      await getRatings();
     } catch (err) {
       console.error(`Error syncing roster: ${err}`);
       sendAlert("ERROR", "Could not sync roster");
@@ -104,7 +107,7 @@ export function Admin() {
   }, []);
 
   return (
-    <div className="pt-5 max-w-3xl lg:max-w-6xl mx-auto">
+    <div className="pt-5 max-w-3xl mx-auto" style={{ maxWidth: "110rem" }}>
       <div className="flex justify-between pb-5">
         <h2 className="text-2xl">Training ratings management</h2>
         <button
@@ -122,15 +125,20 @@ export function Admin() {
               cidMap={cidMap}
               ratings={ratings[parseInt(cid)]!}
               cid={parseInt(cid)}
-              toggle={(cid, position) =>
-                setRatings((r) => ({
-                  ...r,
-                  [cid]: {
-                    ...r[cid]!,
-                    [position]: !r[cid]![position],
-                  },
-                }))
-              }
+              toggle={(cid, position) => {
+                setRatings((r) => {
+                  return {
+                    ...r,
+                    [cid]: {
+                      ...r[cid]!,
+                      [position]: {
+                        friendly: r[cid]![position]!.friendly,
+                        rated: !r[cid]![position]!.rated,
+                      },
+                    },
+                  };
+                });
+              }}
             />
           ))}
           <div className="flex flex-center pt-10">

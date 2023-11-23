@@ -2,10 +2,16 @@ import type { TrainerRating } from "@prisma/client";
 import type { APIContext } from "astro";
 import { DB } from "../../../data.ts";
 import { RequiredPermission, checkAuth } from "../../../util/auth.ts";
+import { loadConfig } from "../../../util/config.ts";
 import { LOGGER } from "../../../util/log.ts";
 import { infoToName } from "../../../util/print.ts";
 
-export type TrainerRatingMap = Record<number, Record<string, boolean>>;
+export type TrainerRatingMapEntry = Record<
+  string,
+  { rated: boolean; friendly: string }
+>;
+
+export type TrainerRatingMap = Record<number, TrainerRatingMapEntry>;
 
 /**
  * Get the stored trainer ratings as a map of CID to ratings.
@@ -18,6 +24,7 @@ export async function GET(
     return auth.data;
   }
 
+  const config = await loadConfig();
   const ratings = await DB.trainerRating.findMany();
   ratings.sort((a, b) => a.cid - b.cid);
   const map: TrainerRatingMap = {};
@@ -25,12 +32,20 @@ export async function GET(
     if (!(rating.cid in map)) {
       map[rating.cid] = {};
     }
-    map[rating.cid]![rating.position] = rating.rated;
+    map[rating.cid]![rating.position] = {
+      rated: rating.rated,
+      friendly: config.positions.find(
+        ([name, _]) => rating.position === name,
+      )![1],
+    };
   }
   return new Response(JSON.stringify(map));
 }
 
-type UpdatePayload = Omit<TrainerRating, "createdAt" | "updatedAt">;
+type UpdatePayload = {
+  cid: number;
+  ratings: Record<string, boolean>;
+};
 
 /**
  * Update the stored trainer ratings for the CID.
@@ -53,6 +68,11 @@ export async function PUT(
     });
   }
   LOGGER.info(`${infoToName(auth.data.info)} updated ratings for ${body.cid}`);
-  await DB.trainerRating.update({ where: { cid: body.cid }, data: body });
+  for (const key of Object.keys(body.ratings)) {
+    await DB.trainerRating.updateMany({
+      where: { cid: body.cid, position: key },
+      data: { rated: body.ratings[key] ?? false },
+    });
+  }
   return new Response("Updated");
 }

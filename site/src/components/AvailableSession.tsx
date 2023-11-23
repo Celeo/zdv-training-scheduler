@@ -26,44 +26,6 @@ export type AvailableSessionProps = {
   updateTrigger: () => void;
 };
 
-// TODO
-function ratings(cid: number, map: TrainerRatingMap): Array<string> {
-  const e = map[cid];
-  const ratings = [];
-  if (e?.minorGround) {
-    ratings.push("minorGround");
-  }
-  if (e?.majorGround) {
-    ratings.push("majorGround");
-  }
-  if (e?.minorTower) {
-    ratings.push("minorTower");
-  }
-  if (e?.majorTower) {
-    ratings.push("majorTower");
-  }
-  if (e?.minorApproach) {
-    ratings.push("minorApproach");
-  }
-  if (e?.majorApproach) {
-    ratings.push("majorApproach");
-  }
-  if (e?.center) {
-    ratings.push("center");
-  }
-  return ratings as Array<Positions>;
-}
-
-function ratingsToPrintout(ratings: Array<Positions>): string {
-  if (ratings.length === 0) {
-    return "None";
-  }
-  if (ratings.length === 7) {
-    return "All";
-  }
-  return ratings.map((pos) => FRIENDLY_POSITION_NAME_MAP[pos]).join(", ");
-}
-
 export function AvailableSession(props: AvailableSessionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState("");

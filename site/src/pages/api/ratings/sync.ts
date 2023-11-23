@@ -38,6 +38,7 @@ export async function POST(
       await DB.trainerRating.deleteMany({ where: { cid: user.cid } });
     }
   }
+
   for (const user of roster) {
     if (!stored.some((s) => s.cid === user)) {
       LOGGER.info(`Adding ${user} to trainer roster`);
@@ -48,6 +49,7 @@ export async function POST(
       }
     }
   }
+
   LOGGER.info("Roster sync finished");
 
   return new Response("Updated");
