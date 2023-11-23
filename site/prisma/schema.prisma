@@ -8,16 +8,12 @@ datasource db {
 }
 
 model TrainerRating {
-  cid           Int      @id
-  minorGround   Boolean  @default(false)
-  majorGround   Boolean  @default(false)
-  minorTower    Boolean  @default(false)
-  majorTower    Boolean  @default(false)
-  minorApproach Boolean  @default(false)
-  majorApproach Boolean  @default(false)
-  center        Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  cid       Int
+  position  String
+  rated     Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model TrainingSchedule {

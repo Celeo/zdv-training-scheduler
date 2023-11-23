@@ -5,12 +5,7 @@ import { RequiredPermission, checkAuth } from "../../../util/auth.ts";
 import { LOGGER } from "../../../util/log.ts";
 import { infoToName } from "../../../util/print.ts";
 
-export type TrainerRatingEntry = Omit<
-  TrainerRating,
-  "cid" | "createdAt" | "updatedAt"
->;
-
-export type TrainerRatingMap = Record<number, TrainerRatingEntry>;
+export type TrainerRatingMap = Record<number, Record<string, boolean>>;
 
 /**
  * Get the stored trainer ratings as a map of CID to ratings.
@@ -25,17 +20,12 @@ export async function GET(
 
   const ratings = await DB.trainerRating.findMany();
   ratings.sort((a, b) => a.cid - b.cid);
-  const map: Record<number, TrainerRatingEntry> = {};
+  const map: TrainerRatingMap = {};
   for (const rating of ratings) {
-    map[rating.cid] = {
-      minorGround: rating.minorGround,
-      majorGround: rating.majorGround,
-      minorTower: rating.minorTower,
-      majorTower: rating.majorTower,
-      minorApproach: rating.minorApproach,
-      majorApproach: rating.majorApproach,
-      center: rating.center,
-    };
+    if (!(rating.cid in map)) {
+      map[rating.cid] = {};
+    }
+    map[rating.cid]![rating.position] = rating.rated;
   }
   return new Response(JSON.stringify(map));
 }

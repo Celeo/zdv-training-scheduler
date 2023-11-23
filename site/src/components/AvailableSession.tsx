@@ -3,11 +3,7 @@ import { useState } from "react";
 import { sendAlert } from "../data.ts";
 import type { CidMap } from "../pages/api/cid_map.ts";
 import type { TrainerRatingMap } from "../pages/api/ratings/index.ts";
-import {
-  FRIENDLY_POSITION_NAME_MAP,
-  MAXIMUM_PENDING_SESSIONS,
-  type Positions,
-} from "../util/constants.ts";
+import { MAXIMUM_PENDING_SESSIONS } from "../util/constants.ts";
 import { callEndpoint } from "../util/http.ts";
 import { DateDisplayTypes, dateToStr, infoToName } from "../util/print.ts";
 
@@ -30,7 +26,8 @@ export type AvailableSessionProps = {
   updateTrigger: () => void;
 };
 
-function ratings(cid: number, map: TrainerRatingMap): Array<Positions> {
+// TODO
+function ratings(cid: number, map: TrainerRatingMap): Array<string> {
   const e = map[cid];
   const ratings = [];
   if (e?.minorGround) {

@@ -17,6 +17,8 @@ export type Config = {
   discordSecret: string;
   /** VATUSA JWT */
   vatusaToken: string;
+  /** Positions in the ARTCC */
+  positions: Array<[string, string]>;
   /** ZDV SSO data */
   oauth: {
     clientId: string;
