@@ -3,6 +3,12 @@ facilityDomain = "zdvartcc.org"
 jwtSecret = ""
 discordSecret = ""
 vatusaToken = ""
+positions = [
+  ["GND", "Ground"],
+  ["TWR", "Tower"],
+  ["APP", "Approach"],
+  ["CTR", "Center"],
+]
 
 [oauth]
 clientId = ""

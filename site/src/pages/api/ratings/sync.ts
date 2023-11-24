@@ -35,15 +35,21 @@ export async function POST(
   for (const user of stored) {
     if (!roster.some((r) => r === user.cid)) {
       LOGGER.info(`Removing ${user.cid} from trainer roster`);
-      await DB.trainerRating.delete({ where: { cid: user.cid } });
+      await DB.trainerRating.deleteMany({ where: { cid: user.cid } });
     }
   }
+
   for (const user of roster) {
     if (!stored.some((s) => s.cid === user)) {
       LOGGER.info(`Adding ${user} to trainer roster`);
-      await DB.trainerRating.create({ data: { cid: user } });
+      for (const positionPair of config.positions) {
+        await DB.trainerRating.create({
+          data: { cid: user, position: positionPair[0] },
+        });
+      }
     }
   }
+
   LOGGER.info("Roster sync finished");
 
   return new Response("Updated");

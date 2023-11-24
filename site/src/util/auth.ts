@@ -167,11 +167,11 @@ export async function getAccessToken(code: string): Promise<ZdvAccessData> {
 export async function getUserInfo(
   access_token: string,
 ): Promise<ZdvUserInfo | null> {
+  const config = await loadConfig();
   // make the authenticated call back to ZDV SSO
-  const { data } = await axios.get<OAuthInfoUri>(
-    (await loadConfig()).oauth.userInfoUri,
-    { headers: { Authorization: `Bearer ${access_token}` } },
-  );
+  const { data } = await axios.get<OAuthInfoUri>(config.oauth.userInfoUri, {
+    headers: { Authorization: `Bearer ${access_token}` },
+  });
 
   // data to be put into the JWT; only part of the available data
   const userInfo = {
@@ -206,13 +206,29 @@ export async function getUserInfo(
     return null;
   }
 
-  // create `TeacherRating` if is trainer and no existing record
+  // create missing `TeacherRating` models
   if (canBeTrainer(userInfo)) {
     const teacherRating = await DB.trainerRating.findFirst({
       where: { cid: userInfo.cid },
     });
     if (teacherRating === null) {
-      await DB.trainerRating.create({ data: { cid: userInfo.cid } });
+      const promises = [];
+      for (const positionPair of config.positions) {
+        const position = positionPair[0];
+        promises.push(
+          (async () => {
+            const model = await DB.trainerRating.findFirst({
+              where: { cid: userInfo.cid, position },
+            });
+            if (model === null) {
+              await DB.trainerRating.create({
+                data: { cid: userInfo.cid, position },
+              });
+            }
+          })(),
+        );
+      }
+      await Promise.all(promises);
     }
   }
 

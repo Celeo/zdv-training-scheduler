@@ -2,10 +2,6 @@ import type { DateTime } from "luxon";
 import { useState } from "react";
 import { sendAlert } from "../data.ts";
 import type { CidMap } from "../pages/api/cid_map.ts";
-import {
-  FRIENDLY_POSITION_NAME_MAP,
-  type Positions,
-} from "../util/constants.ts";
 import { callEndpoint } from "../util/http.ts";
 import { DateDisplayTypes, dateToStr, infoToName } from "../util/print.ts";
 
@@ -19,6 +15,7 @@ export type PendingSessionProps = {
     position: string | null;
   };
 
+  positions: Array<[string, string]>;
   cidMap: CidMap;
   updateTrigger: () => void;
 };
@@ -79,7 +76,11 @@ export function PendingSession(props: PendingSessionProps) {
         <li className="text-sky-200">
           {dateToStr(props.session.dateTime, DateDisplayTypes.DateAndTime)} with{" "}
           {infoToName(trainer!)} for{" "}
-          {FRIENDLY_POSITION_NAME_MAP[props.session.position! as Positions]}
+          {
+            props.positions.find(
+              ([name, _]) => name === props.session.position,
+            )?.[1]
+          }
           {props.session.notes}
           <button
             className="focus:outline-none focus:ring-4 font-medium rounded-xl text-sm px-2 py-1 text-center mb-0 ml-2 text-red-500 hover:text-white hover:bg-red-700 focus:ring-red-900"
