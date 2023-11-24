@@ -17,6 +17,7 @@ export type AvailableSessionProps = {
     notes: string;
   };
 
+  positions: Array<[string, string]>;
   cidMap: CidMap;
   ratingMap: TrainerRatingMap;
 
@@ -73,13 +74,30 @@ export function AvailableSession(props: AvailableSessionProps) {
     }
   };
 
+  let positionsStr = "";
+  const positionsList = Object.entries(
+    props.ratingMap[props.session.trainer] ?? [],
+  )
+    .filter(([_, val]) => val.rated)
+    .map(([key, val]) => [key, val.friendly]);
+  if (positionsList.length === 0) {
+    positionsStr = "None";
+  } else if (positionsList.length === props.positions.length) {
+    positionsStr = "All";
+  } else {
+    positionsStr = positionsList.map(([_key, value]) => value).join(", ");
+  }
   const dropdownOptions = isOpen
-    ? ratings(props.session.trainer, props.ratingMap).map((pos) => (
-        <option key={pos} value={pos}>
-          {FRIENDLY_POSITION_NAME_MAP[pos]}
+    ? positionsList.map(([name, friendly]) => (
+        <option key={name} value={name}>
+          {friendly}
         </option>
       ))
     : [];
+
+  if (Object.keys(props.cidMap).length === 0) {
+    return <></>;
+  }
 
   return (
     <>
@@ -178,8 +196,7 @@ export function AvailableSession(props: AvailableSessionProps) {
             {infoToName(props.cidMap[props.session.trainer]!)}
           </p>
           <p>
-            <span className="font-bold">Positions</span>:{" "}
-            {ratingsToPrintout(ratings(props.session.trainer, props.ratingMap))}
+            <span className="font-bold">Positions</span>: {positionsStr}
           </p>
           {props.session.notes && (
             <p>

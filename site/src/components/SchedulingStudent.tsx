@@ -13,6 +13,7 @@ export function SchedulingStudent(props: { currentUserCid: number }) {
   const [sessions, setSessions] = useState<Array<TrainingSession_DT>>([]);
   const [mySessions, setMySessions] = useState<Array<TrainingSession_DT>>([]);
   const [cidMap, setCidMap] = useState<CidMap>({});
+  const [positions, setPositions] = useState<Array<[string, string]>>([]);
   const [ratingMap, setRatingMap] = useState<{}>({});
 
   useEffect(() => {
@@ -23,6 +24,7 @@ export function SchedulingStudent(props: { currentUserCid: number }) {
         }),
         callEndpoint("/api/cid_map", { setHook: setCidMap }),
         callEndpoint("/api/ratings", { setHook: setRatingMap }),
+        callEndpoint("/api/positions", { setHook: setPositions }),
       ]);
     })();
   }, []);
@@ -51,6 +53,7 @@ export function SchedulingStudent(props: { currentUserCid: number }) {
             <PendingSession
               key={session.id}
               session={session}
+              positions={positions}
               cidMap={cidMap}
               updateTrigger={() =>
                 callEndpoint("/api/sessions/mine?pending=true", {
@@ -85,6 +88,7 @@ export function SchedulingStudent(props: { currentUserCid: number }) {
                   <AvailableSession
                     key={session.id}
                     session={session}
+                    positions={positions}
                     cidMap={cidMap}
                     ratingMap={ratingMap}
                     pendingSessions={mySessions.length}
