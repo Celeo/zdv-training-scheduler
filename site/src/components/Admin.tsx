@@ -29,7 +29,6 @@ function Row(props: {
               }`}
               onClick={() => props.toggle(props.cid, name)}
             >
-              {/* {config.positions.find(([n, _]) => n === name)?.[1]} */}
               {props.ratings[name]!.friendly}
             </button>
           );
