@@ -116,7 +116,7 @@ export function Admin() {
           Sync
         </button>
       </div>
-      {Object.keys(cidMap).length > 0 && (
+      {Object.keys(cidMap).length > 0 ? (
         <>
           {Object.keys(ratings).map((cid) => (
             <Row
@@ -152,6 +152,8 @@ export function Admin() {
             </button>
           </div>
         </>
+      ) : (
+        <p className="text-gray-300 text-xl pl-40">Loading ratings ...</p>
       )}
     </div>
   );
