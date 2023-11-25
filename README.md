@@ -20,6 +20,12 @@ This is first and foremost an Astro project, allowing the site to utilize [SSR](
 
 The Discord bot portion of this project is for users who wish to receive notifications via Discord rather than / in addition to email. The bot runs, checking for pending messages on the site every minute, and dispatches them to the correct Discord users, marking each message complete thereafter.
 
+### Requirements
+
+A quick note about a requirements: this site relies on the [ADH Partnership](https://github.com/adh-partnership) backend and auth that powers ZAN, ZDV, ZLC, and other VATIM ARTCC websites. That is, while this entire project is FOSS and you're welcome to run it wherever you like, unless your ARTCC is running that entire setup, this project won't have anything to talk to and be effectively useless.
+
+If you're interested in breaking out of that requirement, please reach out to me.
+
 ## Architecture / Flows
 
 ### Log in
@@ -122,19 +128,9 @@ sequenceDiagram
 
 ### Update trainer permissions
 
-Only the TA (and (D)ATM) can update permissions for Mentors and Instructors on which permissions they are allowed
-to train students on:
+Only the TA (and (D)ATM) can update permissions for Mentors and Instructors on which permissions they are allowed to train students on the positions configured in the config file.
 
-- Minor Ground
-- Major Ground
-- Minor Tower
-- Major Tower
-- Minor Approach
-- Major Approach
-- Center
-
-When Senior Staff update the permissions for a trainer, all of their open sessions
-are updated to show the increased training opportunities.
+When Senior Staff update the permissions for a trainer, all of their open sessions are updated to show the increased training opportunities.
 
 ```mermaid
 sequenceDiagram
@@ -192,7 +188,7 @@ These steps will create a Docker image, push it to your server, push a [systemd]
 
 ## Contribution
 
-This project is currently not open to outside contributions as it is actively in-dev.
+Please feel free to contribute. Do note that this project is running for several VATSIM ARTCCs, and anything that those Senior Staff don't want will be up for discussion rather than certain merge. Please open an issue first (or comment on an existing one) so that I know that you want to add/change something.
 
 ## License
 
