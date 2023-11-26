@@ -91,7 +91,11 @@ async function getEmailForCid(cid: number): Promise<string> {
   if (resp.status !== 200) {
     throw new Error(`Got status ${resp.status} from VATUSA user details`);
   }
-  return resp.data.data.email;
+  const email = resp.data.data.email;
+  if (!email) {
+    throw new Error(`No email returned from VATUSA details`);
+  }
+  return email;
 }
 
 /**
