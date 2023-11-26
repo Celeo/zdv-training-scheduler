@@ -6,14 +6,16 @@ import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import { sendAlert } from "../data.ts";
+import type { CidMap } from "../pages/api/cid_map.ts";
 import { callEndpoint } from "../util/http.ts";
-import { DateDisplayTypes, dateToStr } from "../util/print.ts";
+import { DateDisplayTypes, dateToStr, infoToName } from "../util/print.ts";
 import type { TrainingSession_DT, Value } from "../util/types.ts";
 import { ExistingSchedule } from "./ExistingSchedule.tsx";
 
 export function SchedulingTrainer() {
   const [selectedDate, setSelectedDate] = useState<Value>(null);
   const [sessions, setSessions] = useState<Array<TrainingSession_DT>>([]);
+  const [cidMap, setCidMap] = useState<CidMap>({});
   const [newSessionTime, setNewSessionTime] = useState("");
   const [newSessionNotes, setNewSessionNotes] = useState("");
   const [newScheduleDayOfWeek, setNewScheduleDayOfWeek] = useState(-1);
@@ -27,10 +29,9 @@ export function SchedulingTrainer() {
   >([]);
 
   useEffect(() => {
-    (async () => {
-      await callEndpoint("/api/schedules", { setHook: setSchedules });
-      await callEndpoint("/api/sessions/trainer", { setHook: setSessions });
-    })();
+    callEndpoint("/api/schedules", { setHook: setSchedules });
+    callEndpoint("/api/sessions/trainer", { setHook: setSessions });
+    callEndpoint("/api/cid_map", { setHook: setCidMap });
   }, []);
 
   /**
@@ -179,7 +180,11 @@ export function SchedulingTrainer() {
                 ? `${dateToStr(
                     s.dateTime,
                     DateDisplayTypes.DateAndTime,
-                  )} with ${s.student} on ${s.position}`
+                  )} with ${
+                    s.student in cidMap
+                      ? infoToName(cidMap[s.student]!)
+                      : s.student
+                  } on ${s.position}`
                 : `${dateToStr(
                     s.dateTime,
                     DateDisplayTypes.DateAndTime,
