@@ -8,6 +8,7 @@ export type Stat = {
   schedules: number;
   exclusions: number;
   sessionsPast: number;
+  sessionsPending: number;
 };
 export type Stats = Array<Stat>;
 
@@ -36,6 +37,9 @@ export async function GET(
       .flatMap((s) => s.trainingScheduleExceptions).length,
     sessionsPast: sessions.filter((s) => s.trainer === cid && s.dateTime <= now)
       .length,
+    sessionsPending: sessions.filter(
+      (s) => s.trainer === cid && s.dateTime > now,
+    ).length,
   }));
 
   return new Response(JSON.stringify(stats));

@@ -45,6 +45,7 @@ export function Stats() {
             <th className="pl-2">Trainer</th>
             <th className="pl-2">Schedules</th>
             <th className="pl-2">Sessions past</th>
+            <th className="pl-2">Sessions pending</th>
           </tr>
         </thead>
         <tbody>
@@ -58,6 +59,7 @@ export function Stats() {
                 {s.schedules} ({s.exclusions} exclusions)
               </td>
               <td className="pl-5">{s.sessionsPast}</td>
+              <td className="pl-5">{s.sessionsPending}</td>
             </tr>
           ))}
         </tbody>
