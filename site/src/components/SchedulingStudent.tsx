@@ -86,7 +86,9 @@ export function SchedulingStudent(props: { currentUserCid: number }) {
               {sessions.length > 0 ? (
                 sessions.map((session) => (
                   <AvailableSession
-                    key={session.id}
+                    key={`${session.id} ${
+                      session.scheduleId
+                    } ${selectedDate.toString()}`}
                     session={session}
                     positions={positions}
                     cidMap={cidMap}
