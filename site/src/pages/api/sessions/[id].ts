@@ -133,7 +133,8 @@ export async function PUT(
       );
     }
 
-    // open the session back up and inform the trainer
+    if (record.scheduleId === null) {
+      // open the session back up
     await DB.trainingSession.update({
       where: { id: record.id },
       data: {
@@ -142,6 +143,11 @@ export async function PUT(
         position: null,
       },
     });
+    } else {
+      // delete this from-schedule session
+      await DB.trainingSession.delete({ where: { id: record.id } });
+    }
+
     await informUser(record.trainer, InformTypes.STUDENT_CANCELLED_SESSION, {
       first_name: auth.data.info.first_name,
       last_name: auth.data.info.last_name,
