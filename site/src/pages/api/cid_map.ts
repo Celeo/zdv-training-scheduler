@@ -1,7 +1,8 @@
 import type { APIContext } from "astro";
 import axios from "axios";
+import memoizee from "memoizee";
 import { checkAuth } from "../../util/auth.ts";
-import { loadConfig } from "../../util/config.ts";
+import { loadConfig, type Config } from "../../util/config.ts";
 
 export type ZdvRosterEntry = {
   cid: number;
@@ -11,6 +12,19 @@ export type ZdvRosterEntry = {
 };
 
 export type CidMap = Record<number, Omit<ZdvRosterEntry, "cid">>;
+
+async function _queryArtccRoster(config: Config): Promise<ZdvRosterEntry[]> {
+  return (await axios.get<Array<ZdvRosterEntry>>(config.oauth.userRoster)).data;
+}
+
+/**
+ * Get the roster data from the ARTCC site.
+ *
+ * Cached for 5 minutes.
+ */
+const queryArtccRoster = memoizee(_queryArtccRoster, {
+  maxAge: 1_000 * 60 * 5,
+});
 
 /**
  * Get the ARTCC roster, mapping CID to name and OIs.
@@ -24,9 +38,9 @@ export async function GET(
   }
 
   const config = await loadConfig();
-  const resp = await axios.get<Array<ZdvRosterEntry>>(config.oauth.userRoster);
+  const resp = await queryArtccRoster(config);
   const map: Record<number, Omit<ZdvRosterEntry, "cid">> = {};
-  for (const entry of resp.data) {
+  for (const entry of resp) {
     map[entry.cid] = {
       first_name: entry.first_name,
       last_name: entry.last_name,
