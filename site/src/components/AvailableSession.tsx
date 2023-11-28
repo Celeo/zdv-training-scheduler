@@ -51,6 +51,7 @@ export function AvailableSession(props: AvailableSessionProps) {
         },
       });
       props.updateTrigger();
+      setIsOpen(false);
     } catch (err) {
       console.error(`Error confirming session: ${err}`);
       sendAlert("ERROR", "Error confirming session");
