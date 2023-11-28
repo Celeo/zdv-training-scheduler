@@ -62,25 +62,31 @@ export async function PUT(
       });
     }
 
-    await DB.trainingSession.create({
-      data: {
-        scheduleId: body.scheduleId,
-        trainer: schedule.trainer,
-        student: auth.data.info.cid,
-        position: body.position,
-        // date cast to UTC by client; timeOfDay from DB which is UTC
-        dateTime: DateTime.fromISO(`${body.date}T${schedule.timeOfDay}`, {
-          zone: "utc",
-        }).toJSDate(),
-        status: SESSION_STATUS.ACCEPTED,
-      },
-    });
-    LOGGER.info(
-      `${infoToName(auth.data.info)} created a session from schedule ${
-        body.scheduleId
-      } for ${body.date}T${schedule.timeOfDay}`,
+    if (body.action === "ACCEPT") {
+      await DB.trainingSession.create({
+        data: {
+          scheduleId: body.scheduleId,
+          trainer: schedule.trainer,
+          student: auth.data.info.cid,
+          position: body.position,
+          // date cast to UTC by client; timeOfDay from DB which is UTC
+          dateTime: DateTime.fromISO(`${body.date}T${schedule.timeOfDay}`, {
+            zone: "utc",
+          }).toJSDate(),
+          status: SESSION_STATUS.ACCEPTED,
+        },
+      });
+      LOGGER.info(
+        `${infoToName(auth.data.info)} created a session from schedule ${
+          body.scheduleId
+        } for ${body.date}T${schedule.timeOfDay}`,
+      );
+      return new Response("Accepted");
+    }
+    return new Response(
+      `Unknown action on schedule ${body.scheduleId} without session id`,
+      { status: 400 },
     );
-    return new Response("Accepted");
   }
 
   /* found the session by id */
@@ -135,14 +141,14 @@ export async function PUT(
 
     if (record.scheduleId === null) {
       // open the session back up
-    await DB.trainingSession.update({
-      where: { id: record.id },
-      data: {
-        student: null,
-        status: SESSION_STATUS.OPEN,
-        position: null,
-      },
-    });
+      await DB.trainingSession.update({
+        where: { id: record.id },
+        data: {
+          student: null,
+          status: SESSION_STATUS.OPEN,
+          position: null,
+        },
+      });
     } else {
       // delete this from-schedule session
       await DB.trainingSession.delete({ where: { id: record.id } });
