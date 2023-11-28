@@ -7,6 +7,12 @@ import { Scheduling as Component } from "../components/Scheduling.tsx";
   <Component client:load />
 </Main>
 
+<style is:global>
+.react-calendar__tile--active {
+  color: blue !important;
+}
+</style>
+
 <script>
   if (localStorage.getItem("jwt") === null) {
     window.location.href = "/";
