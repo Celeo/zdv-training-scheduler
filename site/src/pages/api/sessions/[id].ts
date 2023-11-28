@@ -63,6 +63,24 @@ export async function PUT(
     }
 
     if (body.action === "ACCEPT") {
+      const dateUtc = DateTime.fromISO(`${body.date}T00:00:00`, {
+        zone: "utc",
+      });
+      const existingSession = await DB.trainingSession.findMany({
+        where: {
+          scheduleId: body.scheduleId,
+          dateTime: {
+            lte: dateUtc.toJSDate(),
+            gte: dateUtc.endOf("day").toJSDate(),
+          },
+        },
+      });
+      if (existingSession.length > 0) {
+        return new Response("That scheduled session is already taken", {
+          status: 400,
+        });
+      }
+
       await DB.trainingSession.create({
         data: {
           scheduleId: body.scheduleId,
