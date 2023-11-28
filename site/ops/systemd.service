@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/srv
-ExecStart=docker run --init --rm -p 4321:4321 -v /srv/data:/data -v /srv/YOUR_ARTCC-training-scheduler.config.toml:/app/.config.toml --name YOUR_ARTCC-training-scheduler celeo/zdv-training-scheduler:latest
+ExecStart=docker run --init --rm -p 4321:4321 -v /srv/data:/data -v /srv/YOUR_ARTCC-training-scheduler.config.toml:/app/.config.toml -v /srv/data/log.txt:/app/log.txt --name YOUR_ARTCC-training-scheduler celeo/zdv-training-scheduler:latest
 Restart=always
 
 [Install]
