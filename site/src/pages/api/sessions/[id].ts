@@ -61,6 +61,11 @@ export async function PUT(
         status: 400,
       });
     }
+    if (schedule.trainer === auth.data.info.cid) {
+      return new Response("You cannot accept your own scheduled session", {
+        status: 400,
+      });
+    }
 
     if (body.action === "ACCEPT") {
       const dateUtc = DateTime.fromISO(`${body.date}T00:00:00`, {
