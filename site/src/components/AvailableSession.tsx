@@ -46,11 +46,11 @@ export function AvailableSession(props: AvailableSessionProps) {
           action: "ACCEPT",
           scheduleId: props.session.scheduleId,
           position,
-          // explicitly cast to UTC and get the date
-          date: props.session.dateTime.toUTC().toISODate(),
+          date: props.session.dateTime.toISODate(),
         },
       });
       props.updateTrigger();
+      sendAlert("INFO", "Session accepted");
       setIsOpen(false);
     } catch (err) {
       console.error(`Error confirming session: ${err}`);
@@ -63,12 +63,13 @@ export function AvailableSession(props: AvailableSessionProps) {
       await callEndpoint(`/api/sessions/${props.session.id}`, {
         method: "DELETE",
         body: {
-          // explicitly cast to UTC and get the date
-          date: props.session.dateTime.toUTC().toISODate(),
+          date: props.session.dateTime.toISODate(),
           scheduleId: props.session.scheduleId,
         },
       });
       props.updateTrigger();
+      sendAlert("INFO", "Session deleted");
+      setIsOpen(false);
     } catch (err) {
       console.error(`Error deleting session: ${err}`);
       sendAlert("ERROR", "Error deleting session");
@@ -161,14 +162,16 @@ export function AvailableSession(props: AvailableSessionProps) {
 
             <button
               className={`text-black focus:ring-4 focus:outline-none rounded-xl text-sm w-auto px-5 py-2.5 text-center ${
-                position === "" ||
                 isLoading ||
+                position === "" ||
+                props.session.trainer === props.currentUserCid ||
                 props.pendingSessions >= MAXIMUM_PENDING_SESSIONS
                   ? "bg-gray-500"
                   : "bg-green-400 hover:bg-green-300"
               }`}
               disabled={
                 position === "" ||
+                props.session.trainer === props.currentUserCid ||
                 props.pendingSessions >= MAXIMUM_PENDING_SESSIONS
               }
               onClick={confirm}

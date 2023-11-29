@@ -61,6 +61,11 @@ export async function PUT(
         status: 400,
       });
     }
+    if (schedule.trainer === auth.data.info.cid) {
+      return new Response("You cannot accept your own scheduled session", {
+        status: 400,
+      });
+    }
 
     if (body.action === "ACCEPT") {
       const dateUtc = DateTime.fromISO(`${body.date}T00:00:00`, {
@@ -87,7 +92,7 @@ export async function PUT(
           trainer: schedule.trainer,
           student: auth.data.info.cid,
           position: body.position,
-          // date cast to UTC by client; timeOfDay from DB which is UTC
+          // TODO date is in the user's timezone
           dateTime: DateTime.fromISO(`${body.date}T${schedule.timeOfDay}`, {
             zone: "utc",
           }).toJSDate(),
@@ -231,8 +236,8 @@ export async function DELETE(
       );
     }
 
-    // Create an exception for the schedule on this date; date
-    // comes in as already UTC.
+    // Create an exception for the schedule on this date.
+    // TODO date is in user's timezone
     await DB.trainingScheduleException.create({
       data: { scheduleId: body.scheduleId, date: body.date },
     });
