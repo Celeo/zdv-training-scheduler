@@ -1,4 +1,3 @@
-import type { TrainerRating } from "@prisma/client";
 import type { APIContext } from "astro";
 import { DB } from "../../../data.ts";
 import { RequiredPermission, checkAuth } from "../../../util/auth.ts";
