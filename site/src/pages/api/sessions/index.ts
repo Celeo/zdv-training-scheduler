@@ -90,7 +90,6 @@ export async function GET(
     .filter(
       // filter out stuff that'd be in the past
       (schedule) =>
-        // FIXME dateStr is local timezone
         DateTime.fromISO(`${dateStr}T${schedule.timeOfDay}`, {
           zone: "utc",
         }) > DateTime.utc(),
@@ -103,7 +102,6 @@ export async function GET(
         trainer: schedule.trainer,
         student: null,
         position: null,
-        // FIXME dateStr is local timezone
         dateTime: DateTime.fromISO(`${dateStr}T${schedule.timeOfDay}`, {
           zone: "utc",
         }).toJSDate(),
