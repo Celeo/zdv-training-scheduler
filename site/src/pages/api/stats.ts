@@ -29,18 +29,21 @@ export async function GET(
   const sessions = await DB.trainingSession.findMany();
   const now = DateTime.utc().toJSDate();
 
-  const stats: Stats = trainerCids.map((cid) => ({
-    cid,
-    schedules: schedules.filter((s) => s.trainer === cid).length,
-    exclusions: schedules
-      .filter((s) => s.trainer === cid)
-      .flatMap((s) => s.trainingScheduleExceptions).length,
-    sessionsPast: sessions.filter((s) => s.trainer === cid && s.dateTime <= now)
-      .length,
-    sessionsPending: sessions.filter(
-      (s) => s.trainer === cid && s.dateTime > now,
-    ).length,
-  }));
+  const stats: Stats = trainerCids
+    .map((cid) => ({
+      cid,
+      schedules: schedules.filter((s) => s.trainer === cid).length,
+      exclusions: schedules
+        .filter((s) => s.trainer === cid)
+        .flatMap((s) => s.trainingScheduleExceptions).length,
+      sessionsPast: sessions.filter(
+        (s) => s.trainer === cid && s.dateTime <= now,
+      ).length,
+      sessionsPending: sessions.filter(
+        (s) => s.trainer === cid && s.dateTime > now,
+      ).length,
+    }))
+    .sort((a, b) => a.cid - b.cid);
 
   return new Response(JSON.stringify(stats));
 }

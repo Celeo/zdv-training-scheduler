@@ -118,28 +118,30 @@ export function Admin() {
       </div>
       {Object.keys(cidMap).length > 0 ? (
         <>
-          {Object.keys(ratings).map((cid) => (
-            <Row
-              key={cid}
-              cidMap={cidMap}
-              ratings={ratings[parseInt(cid)]!}
-              cid={parseInt(cid)}
-              toggle={(cid, position) => {
-                setRatings((r) => {
-                  return {
-                    ...r,
-                    [cid]: {
-                      ...r[cid]!,
-                      [position]: {
-                        friendly: r[cid]![position]!.friendly,
-                        rated: !r[cid]![position]!.rated,
+          {Object.keys(ratings)
+            .sort((a, b) => parseInt(a) - parseInt(b))
+            .map((cid) => (
+              <Row
+                key={cid}
+                cidMap={cidMap}
+                ratings={ratings[parseInt(cid)]!}
+                cid={parseInt(cid)}
+                toggle={(cid, position) => {
+                  setRatings((r) => {
+                    return {
+                      ...r,
+                      [cid]: {
+                        ...r[cid]!,
+                        [position]: {
+                          friendly: r[cid]![position]!.friendly,
+                          rated: !r[cid]![position]!.rated,
+                        },
                       },
-                    },
-                  };
-                });
-              }}
-            />
-          ))}
+                    };
+                  });
+                }}
+              />
+            ))}
           <div className="flex flex-center pt-10">
             <button
               className={`mx-auto w-6/12 text-black focus:ring-4 focus:outline-none rounded-xl text-sm px-5 py-2.5 text-center ${
