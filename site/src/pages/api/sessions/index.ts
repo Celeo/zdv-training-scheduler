@@ -40,6 +40,8 @@ export async function GET(
   });
   const dayEnd = dayStart.endOf("day");
 
+  console.log(dayStart.toString(), "|", dayEnd.toString());
+
   // find the sessions on the date and the schedules on the day of the week
   const sessionsOnDate = await DB.trainingSession.findMany({
     where: {
@@ -49,74 +51,82 @@ export async function GET(
       },
     },
   });
+  console.log("sessionsOnDate", sessionsOnDate);
 
   const nowUtc = DateTime.utc().toJSDate();
-  const schedules = await DB.trainingSchedule.findMany({
+  let schedules = await DB.trainingSchedule.findMany({
     include: { trainingScheduleExceptions: true },
   });
 
-  schedules
-    .filter((s) => {
-      // filter to schedules that would tick on the date
-      let d = DateTime.fromISO(
-        `${DateTime.utc().minus({ day: 1 }).toISODate()}T${s.timeOfDay}`,
-        { zone: "utc" },
-      );
-      while (d.weekday !== s.dayOfWeek) {
-        d = d.plus({ day: 1 });
-      }
-      // only allow taking sessions out to a certain number of weeks
-      for (let week = 0; week < SCHEDULE_WEEK_OUTLOOK; week++) {
-        const d2 = d.plus({ week });
-        if (dayStart <= d2 && d2 <= dayEnd) {
-          return true;
-        }
-      }
-      return false;
-    })
-    .filter(
-      // filter out those that have a session on this date already
-      (schedule) =>
-        sessionsOnDate.find((session) => session.scheduleId === schedule.id) ===
-        undefined,
-    )
-    .filter(
-      // filter out exclusions
-      (schedule) =>
-        !schedule.trainingScheduleExceptions.some(
-          (except) => except.date === dateStr,
-        ),
-    )
-    .filter(
-      // filter out stuff that'd be in the past
-      (schedule) =>
-        // FIXME dateStr is local timezone
-        DateTime.fromISO(`${dateStr}T${schedule.timeOfDay}`, {
-          zone: "utc",
-        }) > DateTime.utc(),
-    )
-    .map(
-      // create the session
-      (schedule) => ({
-        id: -1,
-        scheduleId: schedule.id,
-        trainer: schedule.trainer,
-        student: null,
-        position: null,
-        // FIXME dateStr is local timezone
-        dateTime: DateTime.fromISO(`${dateStr}T${schedule.timeOfDay}`, {
-          zone: "utc",
-        }).toJSDate(),
-        status: SESSION_STATUS.OPEN,
-        notes: "",
-        createdAt: nowUtc,
-        updatedAt: nowUtc,
-      }),
-    )
-    .forEach(
-      // append to the sessions list
-      (s) => sessionsOnDate.push(s),
+  console.log("1)", schedules.map((s) => s.id).join(", "));
+  schedules = schedules.filter(
+    // filter out those that have a session on this date already
+    (schedule) =>
+      sessionsOnDate.find((session) => session.scheduleId === schedule.id) ===
+      undefined,
+  );
+  console.log("2)", schedules.map((s) => s.id).join(", "));
+  schedules = schedules.filter((s) => {
+    // filter to schedules that would tick on the date
+    let d = DateTime.fromISO(
+      `${DateTime.utc().minus({ day: 1 }).toISODate()}T${s.timeOfDay}`,
+      { zone: "utc" },
     );
+    while (d.weekday !== s.dayOfWeek) {
+      d = d.plus({ day: 1 });
+    }
+    // only allow taking sessions out to a certain number of weeks
+    for (let week = 0; week < SCHEDULE_WEEK_OUTLOOK; week++) {
+      const d2 = d.plus({ week });
+      if (dayStart <= d2 && d2 <= dayEnd) {
+        return true;
+      }
+    }
+    return false;
+  });
+  console.log("3)", schedules.map((s) => s.id).join(", "));
+  schedules = schedules.filter(
+    // filter out exclusions
+    (schedule) =>
+      !schedule.trainingScheduleExceptions.some(
+        (except) => except.date === dateStr,
+      ),
+  );
+  console.log("4)", schedules.map((s) => s.id).join(", "));
+  schedules = schedules.filter(
+    // filter out stuff that'd be in the past
+    (schedule) =>
+      // FIXME dateStr is local timezone
+      DateTime.fromISO(`${dateStr}T${schedule.timeOfDay}`, {
+        zone: "utc",
+      }) > DateTime.utc(),
+  );
+  console.log("5)", schedules.map((s) => s.id).join(", "));
+  const scheduledSessions = schedules.map(
+    // create the session
+    (schedule) => ({
+      id: -1,
+      scheduleId: schedule.id,
+      trainer: schedule.trainer,
+      student: null,
+      position: null,
+      // FIXME dateStr is local timezone
+      dateTime: DateTime.fromISO(`${dateStr}T${schedule.timeOfDay}`, {
+        zone: "utc",
+      }).toJSDate(),
+      status: SESSION_STATUS.OPEN,
+      notes: "",
+      createdAt: nowUtc,
+      updatedAt: nowUtc,
+    }),
+  );
+  console.log("6)", scheduledSessions.map((s) => s.scheduleId).join(", "));
+  scheduledSessions.forEach(
+    // append to the sessions list
+    (s) => sessionsOnDate.push(s),
+  );
+  console.log();
+  console.log();
 
   const returnSessions: Array<TrainingSession> = [];
   if (canBeTrainer(auth.data.info)) {
