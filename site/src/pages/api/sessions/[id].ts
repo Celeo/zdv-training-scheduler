@@ -92,7 +92,6 @@ export async function PUT(
           trainer: schedule.trainer,
           student: auth.data.info.cid,
           position: body.position,
-          // TODO date is in the user's timezone
           dateTime: DateTime.fromISO(`${body.date}T${schedule.timeOfDay}`, {
             zone: "utc",
           }).toJSDate(),
@@ -236,8 +235,7 @@ export async function DELETE(
       );
     }
 
-    // Create an exception for the schedule on this date.
-    // TODO date is in user's timezone
+    // Create an exception for the schedule on this date
     await DB.trainingScheduleException.create({
       data: { scheduleId: body.scheduleId, date: body.date },
     });
