@@ -50,6 +50,7 @@ export function AvailableSession(props: AvailableSessionProps) {
         },
       });
       props.updateTrigger();
+      sendAlert("INFO", "Session accepted");
       setIsOpen(false);
     } catch (err) {
       console.error(`Error confirming session: ${err}`);
@@ -67,6 +68,8 @@ export function AvailableSession(props: AvailableSessionProps) {
         },
       });
       props.updateTrigger();
+      sendAlert("INFO", "Session deleted");
+      setIsOpen(false);
     } catch (err) {
       console.error(`Error deleting session: ${err}`);
       sendAlert("ERROR", "Error deleting session");
