@@ -45,7 +45,29 @@ describe("util/schedule", () => {
     expect(ret[0]?.id).toBe(24);
   });
 
-  test("schedules with exclusions are filtered out", () => {
-    // TODO
+  test("schedules with exclusions are filtered out", async () => {
+    const dbMock = getDbMock();
+    dbMock.trainingSession.findMany.mockImplementation(() => []);
+    dbMock.trainingSchedule.findMany.mockImplementation(() => [
+      {
+        id: 24,
+        trainer: 1000000,
+        dayOfWeek: 5,
+        timeOfDay: "20:00",
+        trainingScheduleExceptions: [
+          {
+            id: 285,
+            scheduleId: 24,
+            date: "2023-12-01",
+          },
+        ],
+      },
+    ]);
+
+    const ret = await schedulesOnDate(
+      DateTime.fromISO("2023-12-01T12:00:00", { zone: LA }),
+      dbMock as any,
+    );
+    expect(ret.length).toBe(0);
   });
 });
