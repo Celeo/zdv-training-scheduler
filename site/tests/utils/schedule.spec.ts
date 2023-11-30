@@ -21,10 +21,11 @@ describe("util/schedule", () => {
       DateTime.fromISO("2023-11-10T12:00:00", { zone: LA }),
       dbMock as any,
     );
-    expect(ret.length).toBe(0);
+    expect(ret.schedules.length).toBe(0);
+    expect(ret.sessions.length).toBe(0);
   });
 
-  test.only("returns the schedule when no sessions", async () => {
+  test("returns the schedule when no sessions", async () => {
     const dbMock = getDbMock();
     dbMock.trainingSession.findMany.mockImplementation(() => []);
     dbMock.trainingSchedule.findMany.mockImplementation(() => [
@@ -41,8 +42,10 @@ describe("util/schedule", () => {
       DateTime.fromISO("2023-12-01T12:00:00", { zone: LA }),
       dbMock as any,
     );
-    expect(ret.length).toBe(1);
-    expect(ret[0]?.id).toBe(24);
+    expect(ret.schedules.length).toBe(1);
+    expect(ret.sessions.length).toBe(1);
+    expect(ret.schedules[0]?.id).toBe(24);
+    expect(ret.sessions[0]?.id).toBe(-1);
   });
 
   test("schedules with exclusions are filtered out", async () => {
@@ -68,6 +71,7 @@ describe("util/schedule", () => {
       DateTime.fromISO("2023-12-01T12:00:00", { zone: LA }),
       dbMock as any,
     );
-    expect(ret.length).toBe(0);
+    expect(ret.schedules.length).toBe(0);
+    expect(ret.sessions.length).toBe(0);
   });
 });

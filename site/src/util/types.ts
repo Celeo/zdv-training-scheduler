@@ -3,6 +3,7 @@
  */
 
 import type {
+  TrainingSchedule,
   TrainingScheduleException,
   TrainingSession,
 } from "@prisma/client";
@@ -29,4 +30,11 @@ export type TrainingScheduleException_DT = Omit<
 
 export type TrainingSession_DT = Omit<TrainingSession, "dateTime"> & {
   dateTime: DateTime;
+};
+
+/**
+ * The `TrainingSchedule` model with the joined `TrainingScheduleException` field.
+ */
+export type TrainingScheduleWithExceptions = TrainingSchedule & {
+  trainingScheduleExceptions: Array<TrainingScheduleException>;
 };

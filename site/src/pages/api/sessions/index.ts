@@ -13,6 +13,7 @@ import {
 } from "../../../util/constants.ts";
 import { LOGGER } from "../../../util/log.ts";
 import { infoToName } from "../../../util/print.ts";
+import { schedulesOnDate } from "../../../util/schedules.ts";
 
 /**
  * Get all sessions. 'date' is a required query param.
@@ -35,93 +36,17 @@ export async function GET(
   if (!dateStr) {
     return new Response('Missing "date"', { status: 400 });
   }
-  const dayStart = DateTime.fromISO(`${dateStr}T00:00:00`, {
+  const date = DateTime.fromISO(`${dateStr}T12:00:00`, {
     zone: context.locals.timezone,
   });
-  const dayEnd = dayStart.endOf("day");
 
-  // find the sessions on the date and the schedules on the day of the week
-  const sessionsOnDate = await DB.trainingSession.findMany({
-    where: {
-      dateTime: {
-        lte: dayEnd.toUTC().toJSDate(),
-        gte: dayStart.toUTC().toJSDate(),
-      },
-    },
-  });
-
-  const nowUtc = DateTime.utc().toJSDate();
-  (
-    await DB.trainingSchedule.findMany({
-      include: { trainingScheduleExceptions: true },
-    })
-  )
-    .filter(
-      // filter out those that have a session on this date already
-      (schedule) =>
-        sessionsOnDate.find((session) => session.scheduleId === schedule.id) ===
-        undefined,
-    )
-    .filter((s) => {
-      // filter to schedules that would tick on the date
-      let d = DateTime.fromISO(
-        `${DateTime.utc().minus({ day: 1 }).toISODate()}T${s.timeOfDay}`,
-        { zone: "utc" },
-      );
-      while (d.weekday !== s.dayOfWeek) {
-        d = d.plus({ day: 1 });
-      }
-      // only allow taking sessions out to a certain number of weeks
-      for (let week = 0; week < SCHEDULE_WEEK_OUTLOOK; week++) {
-        const d2 = d.plus({ week });
-        if (dayStart <= d2 && d2 <= dayEnd) {
-          return true;
-        }
-      }
-      return false;
-    })
-    .filter(
-      // filter out exclusions
-      (schedule) =>
-        !schedule.trainingScheduleExceptions.some(
-          (except) => except.date === dateStr,
-        ),
-    )
-    .filter(
-      // filter out stuff that'd be in the past
-      (schedule) =>
-        DateTime.fromISO(`${dateStr}T${schedule.timeOfDay}`, {
-          zone: "utc",
-        }) > DateTime.utc(),
-    )
-    .map(
-      // create the session
-      (schedule) => ({
-        id: -1,
-        scheduleId: schedule.id,
-        trainer: schedule.trainer,
-        student: null,
-        position: null,
-        dateTime: DateTime.fromISO(`${dateStr}T${schedule.timeOfDay}`, {
-          zone: "utc",
-        }).toJSDate(),
-        status: SESSION_STATUS.OPEN,
-        notes: "",
-        createdAt: nowUtc,
-        updatedAt: nowUtc,
-      }),
-    )
-    .forEach(
-      // append to the sessions list
-      (s) => sessionsOnDate.push(s),
-    );
-
+  const sessions = (await schedulesOnDate(date)).sessions;
   const returnSessions: Array<TrainingSession> = [];
   if (canBeTrainer(auth.data.info)) {
     // For trainers, their response includes all open sessions (as even trainers need
     // training sometimes), but also include their sessions on the date in case they
     // need to cancel them.
-    sessionsOnDate
+    sessions
       .filter(
         (session) =>
           session.status === SESSION_STATUS.OPEN ||
@@ -132,7 +57,7 @@ export async function GET(
     // Now filter to sessions that are open. This cannot have been done as part of the DB
     // query, since we needed to know _all_ the sessions on the date to determine
     // which schedules should "tick".
-    sessionsOnDate
+    sessions
       .filter((session) => session.status === SESSION_STATUS.OPEN)
       .forEach((session) => returnSessions.push(session));
   }
