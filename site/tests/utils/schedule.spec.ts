@@ -39,7 +39,7 @@ describe("util/schedule", () => {
     ]);
 
     const ret = await schedulesOnDate(
-      DateTime.fromISO("2023-12-01T12:00:00", { zone: LA }),
+      DateTime.fromISO("2023-12-08T12:00:00", { zone: LA }),
       dbMock as any,
     );
     expect(ret.schedules.length).toBe(1);
@@ -61,14 +61,51 @@ describe("util/schedule", () => {
           {
             id: 285,
             scheduleId: 24,
-            date: "2023-12-01",
+            date: "2023-12-08",
           },
         ],
       },
     ]);
 
     const ret = await schedulesOnDate(
-      DateTime.fromISO("2023-12-01T12:00:00", { zone: LA }),
+      DateTime.fromISO("2023-12-08T12:00:00", { zone: LA }),
+      dbMock as any,
+    );
+    expect(ret.schedules.length).toBe(0);
+    expect(ret.sessions.length).toBe(0);
+  });
+
+  test("no schedules when existing session", async () => {
+    const dbMock = getDbMock();
+    dbMock.trainingSession.findMany.mockImplementation(() => [
+      {
+        id: 502,
+        scheduleId: 24,
+        trainer: 1000000,
+        student: 2000000,
+        dateTime: null,
+        status: "ACCEPTED",
+        notes: "",
+      },
+    ]);
+    dbMock.trainingSchedule.findMany.mockImplementation(() => [
+      {
+        id: 24,
+        trainer: 1000000,
+        dayOfWeek: 5,
+        timeOfDay: "20:00",
+        trainingScheduleExceptions: [
+          {
+            id: 285,
+            scheduleId: 24,
+            date: "2023-12-08",
+          },
+        ],
+      },
+    ]);
+
+    const ret = await schedulesOnDate(
+      DateTime.fromISO("2023-12-08T12:00:00", { zone: LA }),
       dbMock as any,
     );
     expect(ret.schedules.length).toBe(0);

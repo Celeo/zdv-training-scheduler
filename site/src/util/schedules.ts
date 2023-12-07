@@ -27,6 +27,7 @@ export async function schedulesOnDate(
   const dayEnd = date.endOf("day").toUTC();
   const nowUtc = DateTime.utc();
 
+  // FIXME I don't think this is working
   const sessionsOnDate = await _DB.trainingSession.findMany({
     where: {
       dateTime: {

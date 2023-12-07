@@ -7,10 +7,7 @@ import {
   canBeTrainer,
   checkAuth,
 } from "../../../util/auth.ts";
-import {
-  SCHEDULE_WEEK_OUTLOOK,
-  SESSION_STATUS,
-} from "../../../util/constants.ts";
+import { SESSION_STATUS } from "../../../util/constants.ts";
 import { LOGGER } from "../../../util/log.ts";
 import { infoToName } from "../../../util/print.ts";
 import { schedulesOnDate } from "../../../util/schedules.ts";
