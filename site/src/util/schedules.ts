@@ -10,14 +10,14 @@ export type GeneratedSchedules = {
 };
 
 /**
- * Given a user-local `DateTime`, find all schedules that are available then.
+ * Given a **user-local** `DateTime`, find all schedules that are available then.
  *
  * This function first finds all sessions that are on the given day,
  * uses that to mark-off schedules from a list of all schedules, then
  * finds which schedules would "tick" on this day, rejects those that
  * have exclusions from the trainer, and rejects anything that'd be
  * in the past. Unpersisted sessions are created from these matching
- * sessions. Both the schedules and sessions are returned.
+ * sessions. The available schedules and sessions are returned.
  */
 export async function schedulesOnDate(
   date: DateTime,
@@ -27,7 +27,6 @@ export async function schedulesOnDate(
   const dayEnd = date.endOf("day").toUTC();
   const nowUtc = DateTime.utc();
 
-  // FIXME I don't think this is working
   const sessionsOnDate = await _DB.trainingSession.findMany({
     where: {
       dateTime: {
@@ -37,12 +36,12 @@ export async function schedulesOnDate(
     },
   });
 
-  let schedules = await _DB.trainingSchedule.findMany({
+  const schedules = await _DB.trainingSchedule.findMany({
     include: { trainingScheduleExceptions: true },
   });
 
   // filter out those that have a session on this date already
-  schedules = schedules.filter(
+  const availableSchedules = schedules.filter(
     (schedule) =>
       sessionsOnDate.find((session) => session.scheduleId === schedule.id) ===
       undefined,
@@ -50,7 +49,7 @@ export async function schedulesOnDate(
 
   // filter to schedules that would tick on the date
   let scheduleDatePairs: Array<[TrainingScheduleWithExceptions, DateTime]> =
-    schedules
+    availableSchedules
       .map((s) => {
         let d = DateTime.fromISO(
           `${DateTime.utc().minus({ day: 1 }).toISODate()}T${s.timeOfDay}`,
@@ -68,7 +67,7 @@ export async function schedulesOnDate(
         }
         return [s, null];
       })
-      .filter(([_sch, dateOrNull]) => dateOrNull !== null)
+      .filter(([_, dateOrNull]) => dateOrNull !== null)
       .map((pair) => pair as [TrainingScheduleWithExceptions, DateTime]);
 
   // filter out exclusions
@@ -99,6 +98,13 @@ export async function schedulesOnDate(
     createdAt: nowUtc.toJSDate(),
     updatedAt: nowUtc.toJSDate(),
   }));
+
+  // sort by time of day for better UX
+  sessions.sort(
+    (a, b) =>
+      DateTime.fromJSDate(a.dateTime).hour -
+      DateTime.fromJSDate(b.dateTime).hour,
+  );
 
   return { schedules: scheduleDatePairs.map(([sch, _]) => sch), sessions };
 }

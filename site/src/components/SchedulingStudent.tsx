@@ -55,11 +55,14 @@ export function SchedulingStudent(props: { currentUserCid: number }) {
               session={session}
               positions={positions}
               cidMap={cidMap}
-              updateTrigger={() =>
-                callEndpoint("/api/sessions/mine?pending=true", {
-                  setHook: setMySessions,
-                })
-              }
+              updateTrigger={() => {
+                Promise.all([
+                  selectDay(selectedDate),
+                  callEndpoint("/api/sessions/mine?pending=true", {
+                    setHook: setMySessions,
+                  }),
+                ]);
+              }}
             />
           ))}
         </div>

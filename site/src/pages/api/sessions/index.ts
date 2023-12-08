@@ -59,13 +59,6 @@ export async function GET(
       .forEach((session) => returnSessions.push(session));
   }
 
-  // sort by time of day for better UX
-  returnSessions.sort(
-    (a, b) =>
-      DateTime.fromJSDate(a.dateTime).hour -
-      DateTime.fromJSDate(b.dateTime).hour,
-  );
-
   return new Response(JSON.stringify(returnSessions));
 }
 
