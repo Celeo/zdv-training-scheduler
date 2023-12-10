@@ -24,13 +24,20 @@ export async function GET(
 
   const now = DateTime.utc();
   for (const schedule of data) {
-    schedule.trainingScheduleExceptions =
-      schedule.trainingScheduleExceptions.filter(
-        (excl) =>
-          DateTime.fromISO(`${excl.date}T${schedule.timeOfDay}`, {
-            zone: "utc",
-          }) >= now,
-      );
+    schedule.trainingScheduleExceptions = schedule.trainingScheduleExceptions
+      .map((excl) => ({
+        ...excl,
+        dateTime: DateTime.fromISO(`${excl.date}T${schedule.timeOfDay}`, {
+          zone: "utc",
+        }),
+      }))
+      .filter(({ dateTime }) => dateTime >= now)
+      .map((excl) => ({
+        id: excl.id,
+        scheduleId: excl.scheduleId,
+        date:
+          excl.dateTime.setZone(context.locals.timezone).toISODate() ?? "ERROR",
+      }));
   }
 
   return new Response(JSON.stringify(data));
