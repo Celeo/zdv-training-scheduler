@@ -35,13 +35,6 @@ async function main(): Promise<void> {
 }
 
 /**
- * Wait for the specified milliseconds, as a `Promise`.
- */
-function sleep(milliseconds: number): Promise<() => Promise<void>> {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-
-/**
  * Query the ZDV roster to get the user's Discord user ID.
  */
 async function getDiscordUserIdFromCid(
