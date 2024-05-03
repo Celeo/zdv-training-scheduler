@@ -170,7 +170,7 @@ These steps will create a Docker image, push it to your server, push a [systemd]
 1. Create & fill out a ".config.toml" file
 1. Change the name of the Docker image in "site/package.json" scripts
 1. `npm run docker:build && npm run docker:push`
-1. `ssh <your_ssh_target`
+1. `ssh <your_ssh_target>`
 1. `docker pull <you>/zdv-training-scheduler`
 1. Update the "systemd.service" file with your image name
 1. Push the "systemd.service" file to your server at `/etc/systemd/system/zdv-training-scheduler.service`
@@ -179,7 +179,7 @@ These steps will create a Docker image, push it to your server, push a [systemd]
 #### Bot
 
 1. `bun run docker:build && bun run docker:push`
-1. `ssh <your_ssh_target`
+1. `ssh <your_ssh_target>`
 1. `docker pull <you>/zdv-training-scheduler-bot`
 1. Update the "systemd.service" file with your image name
 1. Push the "systemd.service" file to your server at `/etc/systemd/system/zdv-training-scheduler-bot.service`
@@ -188,7 +188,7 @@ These steps will create a Docker image, push it to your server, push a [systemd]
 
 ## Contribution
 
-Please feel free to contribute. Do note that this project is running for several VATSIM ARTCCs, and anything that those Senior Staff don't want will be up for discussion rather than certain merge. Please open an issue first (or comment on an existing one) so that I know that you want to add/change something.
+Please feel free to contribute. Do note that this project could be running for several VATSIM ARTCCs, and anything that those Senior Staff don't want will be up for discussion rather than certain merge. Please open an issue first (or comment on an existing one) so that I know that you want to add/change something.
 
 ## License
 
